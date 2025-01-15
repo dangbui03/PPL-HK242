@@ -1,4 +1,4 @@
-# Generated from d:/HCMUT/PPL/2/BTL1/Ass1/ZCode.g4 by ANTLR 4.13.1
+# Generated from d:/HCMUT/PPL/2/BTL1/TimeBefore/ZCode.g4 by ANTLR 4.13.1
 from antlr4 import *
 from io import StringIO
 import sys
