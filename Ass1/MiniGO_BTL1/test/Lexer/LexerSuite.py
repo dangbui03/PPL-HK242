@@ -46,13 +46,11 @@ class LexerSuite(unittest.TestCase):
     
     def test_008(self):
         """Literals String"""
-        self.assertTrue(TestLexer.test("""
-                    "VOTIEN \\r"   
-            ""","VOTIEN \\r,<EOF>", inspect.stack()[0].function))
+        self.assertTrue(TestLexer.test(""" "VOTIEN \\r" ""","VOTIEN \\r,<EOF>", inspect.stack()[0].function))
         
     def test_009(self):
         """COMEMENTS"""
-        self.assertTrue(TestLexer.test("// VOTIEN\n","<EOF>", inspect.stack()[0].function))
+        self.assertTrue(TestLexer.test("// VOTIEN","<EOF>", inspect.stack()[0].function))
 
     def test_010(self):
         """COMEMENTS"""
@@ -64,17 +62,15 @@ class LexerSuite(unittest.TestCase):
 
     def test_012(self):
         """UNCLOSE_STRING"""
-        self.assertTrue(TestLexer.test("""
-                    "VOTIEN\n"   
-            ""","Unclosed string: VOTIEN", inspect.stack()[0].function))
+        self.assertTrue(TestLexer.test(""" "VOTIEN\n" ""","Unclosed string: VOTIEN", inspect.stack()[0].function))
     
     def test_013(self):
         """ILLEGAL_ESCAPE"""
-        self.assertTrue(TestLexer.test("""
-                    "VOTIEN\\f"   
-            ""","Illegal escape in string: VOTIEN\\f", inspect.stack()[0].function))
-        
-    #!!! 87 test yêu cầu code chấm sau
+        self.assertTrue(TestLexer.test(""" "VOTIEN\\f" ""","Illegal escape in string: VOTIEN\\f", inspect.stack()[0].function))
 
-
-
+    
+    def test_014(self):
+        """ILLEGAL_ESCAPE"""
+        self.assertTrue(TestLexer.test(""" 
+            const a = 2;
+""","\n,const,a,=,2,;,\n,<EOF>", inspect.stack()[0].function))

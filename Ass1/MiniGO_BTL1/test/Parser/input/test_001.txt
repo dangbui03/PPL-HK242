@@ -1,1 +1,1 @@
-if
+const Votien = 1

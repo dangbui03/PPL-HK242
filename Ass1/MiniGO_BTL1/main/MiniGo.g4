@@ -24,15 +24,65 @@ options{
 	language = Python3;
 }
 
-program:  EOF;
+program: newline* decllist EOF;
+
+decllist: decl (SEMI decl)*;
+decl: variable_decl newline | func_decl | struct_decl | const_decl | interface_decl;
+
+// Variable declarations
+variable_decl: VAR ID (ASSIGN expr)?;
+
+// Constant declarations
+const_decl: CONST ID ASSIGN expr SEMI;
+
+interface_decl: ;
+
+func_decl: ;
+
+list_expr: expr COMMA list_expr | expr;
+
+// Expressions
+expr: or_expr;
+
+or_expr : and_expr OR and_expr 
+        | and_expr;
+
+and_expr: rela_expr AND rela_expr
+        | rela_expr;
+
+rela_expr: add_expr REL add_expr 
+        | add_expr;
+
+add_expr: mul_expr (ADD | MINUS) mul_expr 
+        | mul_expr;
+
+mul_expr: unary_expr (MUL | DIV | MOD) unary_expr;
+
+unary_expr: (NOT | MINUS) unary_expr | primary_expr;
+
+primary_expr: literals 
+            | ID 
+            | LPAREN expr RPAREN 
+            // | func_call 
+            // | arr_lit
+            // | struct_lit
+            ;
+
+
+REL: LT | GT | LE | GE | EQUAL | DIFF;
 
 struct_decl: TYPE ID STRUCT LBRACE list_field RBRACE;
 list_field: field newline? | field list_field newline?;
-field: ID type SEMI;
+field: ID types SEMI;
 
-// ! ---------------- LEXER DEADLINE PASS 13 TEST CASE 23:59 16/1 ----------------------- */
+// array literal
+arr_lit: arr_type LBRACE list_expr RBRACE;
 
-type: INT | FLOAT | STRING | BOOLEAN;
+types : INT | FLOAT | STRING | BOOLEAN | arr_type | ID;
+arr_type: arr_dim types | arr_dim;
+arr_dim: LBRACK INT_LIT RBRACK;
+
+literals: INT_LIT | FLOAT_LIT | STR_LIT | BOOL_LIT | NIL_LIT; //| ARR_LIT | STRUCT_LIT;
 newline: '\r'? '\n';
 
 //TODO Keywords 3.3.2 pdf
@@ -58,11 +108,12 @@ TRUE: 'true';
 FALSE: 'false';
 
 //TODO Operators 3.3.3 pdf
+NOT: '!';
 ADD: '+';
 MINUS: '-';
-MULT: '*';
+MUL: '*';
 DIV: '/';
-REM: '%';
+MOD: '%';
 EQUAL: '==';
 DIFF: '!=';
 LT: '<';
@@ -70,7 +121,6 @@ GT: '>';
 LE: '<=';
 GE: '>=';
 OR: '||';
-FACT: '!';
 AND: '&&';
 ASSIGN: '=';
 ADD_ASSIGN: '+=';
@@ -96,6 +146,7 @@ ID: [a-zA-Z_][a-zA-Z0-9_]*;
 //TODO Literals 3.3.5 pdf
 fragment DIGIT : [0-9] ;
 fragment EXP : [eE] [+-]? DIGIT+ ;
+
 // Floating-point Literals
 FLOAT_LIT
     :   DIGIT+ '.' DIGIT* EXP?
@@ -137,10 +188,6 @@ INT_LIT
     |   HEX_LIT
     ;
 
-// STRING_LIT: '"' STR_CHAR* '"' {self.text = self.text[1:-1]};
-// fragment STR_CHAR: ~[\r\n\\"] | ESC_SEQ;
-// fragment ESC_SEQ: '\\' [brnt"\\];
-// fragment ESC_ILLEGAL: [\r] | '\\' ~[brnt'\\];
 STR_LIT	: '"' ( ESCAPE_SEQ | ~['"\r\n\f\\])* '"'  {self.text = self.text[1:-1]};
 
 BOOL_LIT: TRUE | FALSE;
@@ -156,19 +203,6 @@ BLOCK_COMMENT
     ;
 
 //TODO ERROR pdf BTL1 + lexererr.py
-// ERROR_CHAR: . {raise ErrorToken(self.text)};
-// UNCLOSE_STRING: '"' STR_CHAR* ('\r\n' | '\n' | EOF) {
-//     if(len(self.text) >= 2 and self.text[-1] == '\n' and self.text[-2] == '\r'):
-//         raise UncloseString(self.text[1:-2])
-//     elif (self.text[-1] == '\n'):
-//         raise UncloseString(self.text[1:-1])
-//     else:
-//         raise UncloseString(self.text[1:])
-// };
-// ILLEGAL_ESCAPE:
-//     '"' STR_CHAR* ESC_ILLEGAL {
-//     raise IllegalEscape(self.text[1:])
-// };
 ERROR_CHAR: . {raise ErrorToken(self.text)};
 
 UNCLOSE_STRING: '"' ( ~[\f\r\n'"\\] | ESCAPE_SEQ )* ( EOF | '\n' | '\r\n') {

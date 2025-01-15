@@ -14,5 +14,125 @@ class MiniGoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by MiniGoParser#decllist.
+    def visitDecllist(self, ctx:MiniGoParser.DecllistContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#decl.
+    def visitDecl(self, ctx:MiniGoParser.DeclContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#variable_decl.
+    def visitVariable_decl(self, ctx:MiniGoParser.Variable_declContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#const_decl.
+    def visitConst_decl(self, ctx:MiniGoParser.Const_declContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#interface_decl.
+    def visitInterface_decl(self, ctx:MiniGoParser.Interface_declContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#func_decl.
+    def visitFunc_decl(self, ctx:MiniGoParser.Func_declContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#list_expr.
+    def visitList_expr(self, ctx:MiniGoParser.List_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#expr.
+    def visitExpr(self, ctx:MiniGoParser.ExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#or_expr.
+    def visitOr_expr(self, ctx:MiniGoParser.Or_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#and_expr.
+    def visitAnd_expr(self, ctx:MiniGoParser.And_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#rela_expr.
+    def visitRela_expr(self, ctx:MiniGoParser.Rela_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#add_expr.
+    def visitAdd_expr(self, ctx:MiniGoParser.Add_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#mul_expr.
+    def visitMul_expr(self, ctx:MiniGoParser.Mul_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#unary_expr.
+    def visitUnary_expr(self, ctx:MiniGoParser.Unary_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#primary_expr.
+    def visitPrimary_expr(self, ctx:MiniGoParser.Primary_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#struct_decl.
+    def visitStruct_decl(self, ctx:MiniGoParser.Struct_declContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#list_field.
+    def visitList_field(self, ctx:MiniGoParser.List_fieldContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#field.
+    def visitField(self, ctx:MiniGoParser.FieldContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#arr_lit.
+    def visitArr_lit(self, ctx:MiniGoParser.Arr_litContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#types.
+    def visitTypes(self, ctx:MiniGoParser.TypesContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#arr_type.
+    def visitArr_type(self, ctx:MiniGoParser.Arr_typeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#arr_dim.
+    def visitArr_dim(self, ctx:MiniGoParser.Arr_dimContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#literals.
+    def visitLiterals(self, ctx:MiniGoParser.LiteralsContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#newline.
+    def visitNewline(self, ctx:MiniGoParser.NewlineContext):
+        return self.visitChildren(ctx)
+
+
 
 del MiniGoParser
