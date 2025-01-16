@@ -24,11 +24,9 @@ options{
 	language = Python3;
 }
 
-program: decllist EOF;
+program: newline* decl (decl | newline)* EOF;
 
-decllist: decl (SEMI decl)*;
-
-decl: variable_decl | func_decl | struct_decl | const_decl | interface_decl;
+decl: variable_decl | func_decl | struct_decl | const_decl | interface_decl | method_decl;
 
 // Variable declarations
 variable_decl: VAR ID (ASSIGN expr)? SEMI?;
@@ -41,9 +39,26 @@ struct_decl: TYPE ID STRUCT LBRACE struct_fields  RBRACE;
 struct_fields: struct_field (SEMI struct_field)*;
 struct_field: ID types;
 
-interface_decl: TYPE ID INTERFACE LBRACE decllist RBRACE;
+// method declarations
+method_decl: func_decl;
+
+interface_decl: TYPE ID INTERFACE LBRACE decl RBRACE;
 
 func_decl: ;
+
+// Statements
+list_statement: statement list_statement | statement;
+statement:;
+	// (
+	// 	declared_statement
+	// 	| assign_statement
+	// 	| if_statement
+	// 	| for_statement
+	// 	| break_statement
+	// 	| continue_statement
+	// 	| call_statement
+	// 	| return_statement
+	// );
 
 list_expr: expr COMMA list_expr | expr;
 
@@ -67,7 +82,7 @@ unary_expr  : (NOT | MINUS) unary_expr
             | primary_expr;
 
 primary_expr: exprd
-            | func_expr index_operator
+            | arr_element
             | func_call 
             | method_call
             | arr_lit
@@ -81,11 +96,13 @@ func_expr: func_call | exprd;
 index_operator: LBRACK list_expr RBRACK | LBRACK list_expr RBRACK index_operator;
 args: literal_list | ;
 
+arr_element: func_expr index_operator;
+
 // function call
 func_call: ID LPAREN args RPAREN;
 
 // method call
-method_call: func_expr DOT list_expr LPAREN? args RPAREN? method_call | ID DOT list_expr LPAREN? args RPAREN? |;
+method_call: (func_expr | arr_element) DOT list_expr LPAREN? args RPAREN? method_call | (func_expr | arr_element) DOT list_expr LPAREN? args RPAREN? ;
 
 // relation
 REL: LT | GT | LE | GE | EQUAL | DIFF;

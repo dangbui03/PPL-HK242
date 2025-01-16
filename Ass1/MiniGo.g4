@@ -24,27 +24,36 @@ options{
 	language = Python3;
 }
 
-// ! ---------------- PASER DEADLINE PASS 13 TEST CASE 23:59 16/1 ----------------------- */
-program: ((CONST ID ASSIGN expression) | NEWLINE)+ EOF;
-
 //TODO Literal 6.6 pdf
-literal:
-	INT_LIT
-	| FLOAT_LIT
-	| STRING_LIT
-	| TRUE
-	| FALSE
-	| array_literal
-	| struct_literal;
 
-// TODO 5.2 Expressions 6 pdf
-list_expression: expression COMMA list_expression | expression;
-expression: expression OR expression1 | expression1;
+// TODO Expressions 6 pdf
 
-//! ---------------- PASER ----------------------- */
+//TODO declared
+program: NEWLINE* declared (declared | NEWLINE)* EOF;
+declared:
+	variables_declared
+	| constants_declared
+	| function_declared
+	| method_declared
+	| struct_declared
+	| interface_declared;
 
-// ! ---------------- LEXER DEADLINE PASS 13 TEST CASE 23:59 16/1 ----------------------- */
+//TODO Statement 5 and 4 pdf
+list_statement: statement list_statement | statement;
+statement:
+	(
+		declared_statement
+		| assign_statement
+		| if_statement
+		| for_statement
+		| break_statement
+		| continue_statement
+		| call_statement
+		| return_statement
+	);
 
-//TODO LEXER
+// ! ---------------- LEXER DEADLINE PASS 13 TEST CASE 23:59 16/1 ----------------------- */ 
 
-//! ---------------- LEXER ----------------------- */
+//TODO LEXER TASK 1 
+
+// ! ---------------- LEXER ----------------------- */

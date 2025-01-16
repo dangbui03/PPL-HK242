@@ -38,7 +38,7 @@ class ParserSuite(unittest.TestCase):
 
     def test_007(self):
         """expression"""
-        self.assertTrue(TestParser.test("const Votien = 1[2] + foo()[2] + ID[2].b.b","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const Votien = 1[2] + x[2] + ID[2].b.b","successful", inspect.stack()[0].function))
 
     def test_008(self):
         """expression"""

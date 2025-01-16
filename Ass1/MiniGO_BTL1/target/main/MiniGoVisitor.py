@@ -119,6 +119,11 @@ class MiniGoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by MiniGoParser#arr_element.
+    def visitArr_element(self, ctx:MiniGoParser.Arr_elementContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by MiniGoParser#func_call.
     def visitFunc_call(self, ctx:MiniGoParser.Func_callContext):
         return self.visitChildren(ctx)
