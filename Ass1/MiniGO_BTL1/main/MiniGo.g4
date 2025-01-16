@@ -24,65 +24,99 @@ options{
 	language = Python3;
 }
 
-program: newline* decllist EOF;
+program: decllist EOF;
 
 decllist: decl (SEMI decl)*;
-decl: variable_decl newline | func_decl | struct_decl | const_decl | interface_decl;
+
+decl: variable_decl | func_decl | struct_decl | const_decl | interface_decl;
 
 // Variable declarations
-variable_decl: VAR ID (ASSIGN expr)?;
+variable_decl: VAR ID (ASSIGN expr)? SEMI?;
 
 // Constant declarations
-const_decl: CONST ID ASSIGN expr SEMI;
+const_decl: CONST ID ASSIGN expr SEMI?;
 
-interface_decl: ;
+// Struct declarations
+struct_decl: TYPE ID STRUCT LBRACE struct_fields  RBRACE;
+struct_fields: struct_field (SEMI struct_field)*;
+struct_field: ID types;
+
+interface_decl: TYPE ID INTERFACE LBRACE decllist RBRACE;
 
 func_decl: ;
 
 list_expr: expr COMMA list_expr | expr;
 
 // Expressions
-expr: or_expr;
-
-or_expr : and_expr OR and_expr 
+expr    : expr OR and_expr 
         | and_expr;
 
-and_expr: rela_expr AND rela_expr
+and_expr: and_expr AND rela_expr
         | rela_expr;
 
-rela_expr: add_expr REL add_expr 
-        | add_expr;
+rela_expr: rela_expr REL add_expr 
+         | add_expr;
 
-add_expr: mul_expr (ADD | MINUS) mul_expr 
+add_expr: add_expr (ADD | MINUS) mul_expr 
         | mul_expr;
 
-mul_expr: unary_expr (MUL | DIV | MOD) unary_expr;
+mul_expr: mul_expr (MUL | DIV | MOD) unary_expr 
+        | unary_expr;
 
-unary_expr: (NOT | MINUS) unary_expr | primary_expr;
+unary_expr  : (NOT | MINUS) unary_expr 
+            | primary_expr;
 
-primary_expr: literals 
-            | ID 
-            | LPAREN expr RPAREN 
-            // | func_call 
-            // | arr_lit
-            // | struct_lit
+primary_expr: exprd
+            | func_expr index_operator
+            | func_call 
+            | method_call
+            | arr_lit
+            | struct_lit
+            | LBRACK ID RBRACK
             ;
 
+exprd: literals | ID | LPAREN expr RPAREN;
+func_expr: func_call | exprd;
 
+index_operator: LBRACK list_expr RBRACK | LBRACK list_expr RBRACK index_operator;
+args: literal_list | ;
+
+// function call
+func_call: ID LPAREN args RPAREN;
+
+// method call
+method_call: func_expr DOT list_expr LPAREN? args RPAREN? method_call | ID DOT list_expr LPAREN? args RPAREN? |;
+
+// relation
 REL: LT | GT | LE | GE | EQUAL | DIFF;
 
-struct_decl: TYPE ID STRUCT LBRACE list_field RBRACE;
-list_field: field newline? | field list_field newline?;
-field: ID types SEMI;
+// struct literal
+struct_lit: ID LBRACE list_field? RBRACE;
+list_field: field newline? | field COMMA list_field newline?;
+field: ID COLON expr;
 
 // array literal
 arr_lit: arr_type LBRACE list_expr RBRACE;
-
 types : INT | FLOAT | STRING | BOOLEAN | arr_type | ID;
-arr_type: arr_dim types | arr_dim;
-arr_dim: LBRACK INT_LIT RBRACK;
 
-literals: INT_LIT | FLOAT_LIT | STR_LIT | BOOL_LIT | NIL_LIT; //| ARR_LIT | STRUCT_LIT;
+// interface type
+
+// array type
+arr_type: arr_dim arr_type | arr_dim types;
+arr_dim: LBRACK (int_lit | const_decl)? RBRACK;
+
+literal_list: literals COMMA literal_list | literals;
+literals: int_lit | float_lit | str_lit | bool_lit | nil_lit; //| ARR_LIT | STRUCT_LIT;
+int_lit     
+        :   DEC_LIT
+        |   BIN_LIT
+        |   OCT_LIT
+        |   HEX_LIT
+        ;
+float_lit: FLOAT_LIT;
+bool_lit: TRUE | FALSE;
+str_lit: STR_LIT;
+
 newline: '\r'? '\n';
 
 //TODO Keywords 3.3.2 pdf
@@ -129,6 +163,7 @@ MULT_ASSIGN: '*=';
 DIV_ASSIGN: '/=';
 REM_ASSIGN: '%=';
 DOT: '.';  
+COLON: ':';
 
 //TODO Separators 3.3.4 pdf
 LPAREN: '(';
@@ -181,22 +216,15 @@ HEX_LIT
         }
     ;
 
-INT_LIT
-    :   DEC_LIT
-    |   BIN_LIT
-    |   OCT_LIT
-    |   HEX_LIT
-    ;
-
 STR_LIT	: '"' ( ESCAPE_SEQ | ~['"\r\n\f\\])* '"'  {self.text = self.text[1:-1]};
 
 BOOL_LIT: TRUE | FALSE;
-NIL_LIT: NIL;
+nil_lit: NIL;
 
 //TODO skip 3.1 and 3.2 pdf
-WS: [ \t\f\r\n]+ -> skip; // skip spaces, tabs 
+WS: [ \t\f\r]+ -> skip; // skip spaces, tabs 
 LINE_COMMENT
-    :   '//' ~[\r\n]* -> skip
+    :   '//' ~[\r]* -> skip
     ;
 BLOCK_COMMENT
     :   '/*' (BLOCK_COMMENT | .)*? '*/' -> skip

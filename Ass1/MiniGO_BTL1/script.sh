@@ -11,3 +11,8 @@ apt install python3.12-venv
 python3 -m venv myenv
 source myenv/bin/activate
 pip install -r requirements.txt
+
+python3 run.py gen
+python3 run.py test LexerSuite
+python3 run.py test ParserSuite
+python3 run.py test ASTGenSuite
