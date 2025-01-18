@@ -67,10 +67,31 @@ class LexerSuite(unittest.TestCase):
     def test_013(self):
         """ILLEGAL_ESCAPE"""
         self.assertTrue(TestLexer.test(""" "VOTIEN\\f" ""","Illegal escape in string: VOTIEN\\f", inspect.stack()[0].function))
-
-    
+        
     def test_014(self):
         """ILLEGAL_ESCAPE"""
         self.assertTrue(TestLexer.test(""" 
             const a = 2;
 ""","\n,const,a,=,2,;,\n,<EOF>", inspect.stack()[0].function))
+    def test_015(self):
+        """skip"""
+        self.assertTrue(TestLexer.test(""" /*
+        /* a */ /* b */ 
+        // 321231
+        */ if /* */ /* */""", "if,<EOF>", inspect.stack()[0].function))
+    def test_030(self):
+        """INT_LIT"""
+        self.assertTrue(TestLexer.test("0452.", "0,452.,<EOF>", inspect.stack()[0].function))
+
+    def test_050(self):
+        """FLOAT_LIT"""
+        self.assertTrue(TestLexer.test("010.010e-20", "0,10.010e-20,<EOF>", inspect.stack()[0].function))
+
+    def test_053(self):
+        """FLOAT_LIT"""
+        self.assertTrue(TestLexer.test("09.e-002", "0,9.e-0,0,2,<EOF>", inspect.stack()[0].function))
+    def test_073(self):
+        """Keywords"""
+        self.assertTrue(TestLexer.test(""" // /*
+                                       */""", "\n,*,/,<EOF>", inspect.stack()[0].function))
+    #!!! 87 test yêu cầu code chấm sau

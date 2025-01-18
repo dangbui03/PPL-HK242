@@ -24,7 +24,9 @@ options{
 	language = Python3;
 }
 
-program: newline* decl (decl | newline)* EOF;
+program: newline* decllist  EOF;
+
+decllist: decl (decl | newline)*;
 
 decl: variable_decl | func_decl | struct_decl | const_decl | interface_decl | method_decl;
 
@@ -35,20 +37,20 @@ variable_decl: VAR ID (ASSIGN expr)? SEMI?;
 const_decl: CONST ID ASSIGN expr SEMI?;
 
 // Struct declarations
-struct_decl: TYPE ID STRUCT LBRACE struct_fields  RBRACE;
+struct_decl: TYPE ID STRUCT LBRACE struct_fields RBRACE;
 struct_fields: struct_field (SEMI struct_field)*;
 struct_field: ID types;
 
 // method declarations
-method_decl: func_decl;
+method_decl: FUNC;
 
-interface_decl: TYPE ID INTERFACE LBRACE decl RBRACE;
+interface_decl: TYPE ID INTERFACE LBRACE  RBRACE;
 
-func_decl: ;
+func_decl: FUNC;
 
 // Statements
-list_statement: statement list_statement | statement;
-statement:;
+// list_statement: statement list_statement | statement;
+// statement: ;
 	// (
 	// 	declared_statement
 	// 	| assign_statement
@@ -60,6 +62,7 @@ statement:;
 	// 	| return_statement
 	// );
 
+// list_expr
 list_expr: expr COMMA list_expr | expr;
 
 // Expressions
@@ -90,7 +93,7 @@ primary_expr: exprd
             | LBRACK ID RBRACK
             ;
 
-exprd: literals | ID | LPAREN expr RPAREN;
+exprd: literals | ID | ID? LPAREN list_expr? RPAREN;
 func_expr: func_call | exprd;
 
 index_operator: LBRACK list_expr RBRACK | LBRACK list_expr RBRACK index_operator;
@@ -107,6 +110,16 @@ method_call: (func_expr | arr_element) DOT list_expr LPAREN? args RPAREN? method
 // relation
 REL: LT | GT | LE | GE | EQUAL | DIFF;
 
+// interface type
+
+// array type
+arr_type: arr_dim arr_type | arr_dim types;
+arr_dim: LBRACK (int_lit | const_decl)? RBRACK;
+
+// literal list
+literal_list: literals COMMA literal_list | literals;
+literals: int_lit | float_lit | str_lit | bool_lit | nil_lit; //| ARR_LIT | STRUCT_LIT;
+
 // struct literal
 struct_lit: ID LBRACE list_field? RBRACE;
 list_field: field newline? | field COMMA list_field newline?;
@@ -115,15 +128,6 @@ field: ID COLON expr;
 // array literal
 arr_lit: arr_type LBRACE list_expr RBRACE;
 types : INT | FLOAT | STRING | BOOLEAN | arr_type | ID;
-
-// interface type
-
-// array type
-arr_type: arr_dim arr_type | arr_dim types;
-arr_dim: LBRACK (int_lit | const_decl)? RBRACK;
-
-literal_list: literals COMMA literal_list | literals;
-literals: int_lit | float_lit | str_lit | bool_lit | nil_lit; //| ARR_LIT | STRUCT_LIT;
 int_lit     
         :   DEC_LIT
         |   BIN_LIT
@@ -197,14 +201,12 @@ ID: [a-zA-Z_][a-zA-Z0-9_]*;
 
 //TODO Literals 3.3.5 pdf
 fragment DIGIT : [0-9] ;
-fragment EXP : [eE] [+-]? DIGIT+ ;
+fragment EXP : [eE] [+-]? DEC_LIT ;
 
 // Floating-point Literals
 FLOAT_LIT
-    :   DIGIT+ '.' DIGIT* EXP?
-    |   '.' DIGIT+ EXP?
-    |   DIGIT+ EXP
-    ;
+    :  DEC_LIT ('.' DIGIT*)? EXP?;
+
 
 // Integer Literals
 DEC_LIT
@@ -215,21 +217,21 @@ DEC_LIT
 BIN_LIT
     :   ('0b' | '0B') [01]+
         {
-            self.text = str(int(self.text, 2))
+            self.text = str(int(self.text[2:], 2))
         }
     ;
 
 OCT_LIT
     :   ('0o' | '0O') [0-7]+
         {   
-            self.text = str(int(self.text, 8))
+            self.text = str(int(self.text[2:], 8))
         }
     ;
 
 HEX_LIT
     :   ('0x' | '0X') [0-9a-fA-F]+
         {
-            self.text = str(int(self.text, 16))
+            self.text = str(int(self.text[2:], 16))
         }
     ;
 
@@ -241,7 +243,7 @@ nil_lit: NIL;
 //TODO skip 3.1 and 3.2 pdf
 WS: [ \t\f\r]+ -> skip; // skip spaces, tabs 
 LINE_COMMENT
-    :   '//' ~[\r]* -> skip
+    :   '//' ~[\n\r]* -> skip
     ;
 BLOCK_COMMENT
     :   '/*' (BLOCK_COMMENT | .)*? '*/' -> skip

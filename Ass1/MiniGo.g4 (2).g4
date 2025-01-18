@@ -211,7 +211,7 @@ HEX_LIT: ('0x' | '0X') [0-9a-fA-F]+
 {
     self.text = str(int(self.text[2:], 16))
 };
-FLOAT_LIT: [0-9]+ ('.' [0-9]*)? ([eE] [+-]? [0-9]+)?;
+FLOAT_LIT: DEC_LIT('.' [0-9]*)?( [eE][+-]? DEC_LIT)?;
 
 // String Literals
 STRING_LIT: '"' (~[\r\n\\"] | '\\' [brnt"\\])* '"' {self.text = self.text[1:-1]};
