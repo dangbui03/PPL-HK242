@@ -139,23 +139,8 @@ class MiniGoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by MiniGoParser#arr_type.
-    def visitArr_type(self, ctx:MiniGoParser.Arr_typeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by MiniGoParser#arr_dim.
-    def visitArr_dim(self, ctx:MiniGoParser.Arr_dimContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by MiniGoParser#literal_list.
-    def visitLiteral_list(self, ctx:MiniGoParser.Literal_listContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by MiniGoParser#literals.
-    def visitLiterals(self, ctx:MiniGoParser.LiteralsContext):
+    # Visit a parse tree produced by MiniGoParser#arr_lit.
+    def visitArr_lit(self, ctx:MiniGoParser.Arr_litContext):
         return self.visitChildren(ctx)
 
 
@@ -174,13 +159,48 @@ class MiniGoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by MiniGoParser#arr_lit.
-    def visitArr_lit(self, ctx:MiniGoParser.Arr_litContext):
+    # Visit a parse tree produced by MiniGoParser#types.
+    def visitTypes(self, ctx:MiniGoParser.TypesContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by MiniGoParser#types.
-    def visitTypes(self, ctx:MiniGoParser.TypesContext):
+    # Visit a parse tree produced by MiniGoParser#primitive_types.
+    def visitPrimitive_types(self, ctx:MiniGoParser.Primitive_typesContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#composite_types.
+    def visitComposite_types(self, ctx:MiniGoParser.Composite_typesContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#struct_type.
+    def visitStruct_type(self, ctx:MiniGoParser.Struct_typeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#interface_type.
+    def visitInterface_type(self, ctx:MiniGoParser.Interface_typeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#arr_type.
+    def visitArr_type(self, ctx:MiniGoParser.Arr_typeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#arr_dim.
+    def visitArr_dim(self, ctx:MiniGoParser.Arr_dimContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#literal_list.
+    def visitLiteral_list(self, ctx:MiniGoParser.Literal_listContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#literals.
+    def visitLiterals(self, ctx:MiniGoParser.LiteralsContext):
         return self.visitChildren(ctx)
 
 

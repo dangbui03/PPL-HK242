@@ -120,3 +120,33 @@ class ParserSuite(unittest.TestCase):
                     c Cal a int;         
                 }
     ""","Error on line 4 col 22: a", inspect.stack()[0].function))
+    def test_084(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""    
+                type Calculator interface {
+                    Add(x int,c,d ID); Add()
+            }
+    ""","successful", inspect.stack()[0].function))
+    def test_086(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""    
+                type Calculator interface {}
+                type Person struct{};
+    ""","successful", inspect.stack()[0].function))
+    def test_087(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""    
+                type Calculator interface {};
+    ""","successful", inspect.stack()[0].function))
+    def test_091(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""
+                func (c c) Add(x, c int) {}
+    ""","Error on line 2 col 28: ,", inspect.stack()[0].function))
+    def test_105(self):
+        """Statement"""
+        self.assertTrue(TestParser.test("""
+                                        func Add(){
+                                            const a = a[2].b
+                                            var a = a[2].b; var a = "s";
+                                        }""","successful", inspect.stack()[0].function))

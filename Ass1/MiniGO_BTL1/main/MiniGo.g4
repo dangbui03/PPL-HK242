@@ -31,14 +31,14 @@ decllist: decl (decl | newline)*;
 decl: variable_decl | func_decl | struct_decl | const_decl | interface_decl | method_decl;
 
 // Variable declarations
-variable_decl: VAR ID (ASSIGN expr)? SEMI?;
+variable_decl: VAR ID (ASSIGN expr)? types? SEMI?;
 
 // Constant declarations
-const_decl: CONST ID ASSIGN expr SEMI?;
+const_decl: CONST ID ASSIGN expr types? SEMI?;
 
 // Struct declarations
 struct_decl: TYPE ID STRUCT LBRACE struct_fields RBRACE;
-struct_fields: struct_field (SEMI struct_field)*;
+struct_fields: struct_field SEMI ( newline* struct_field)*;
 struct_field: ID types;
 
 // method declarations
@@ -110,15 +110,9 @@ method_call: (func_expr | arr_element) DOT list_expr LPAREN? args RPAREN? method
 // relation
 REL: LT | GT | LE | GE | EQUAL | DIFF;
 
-// interface type
 
-// array type
-arr_type: arr_dim arr_type | arr_dim types;
-arr_dim: LBRACK (int_lit | const_decl)? RBRACK;
 
-// literal list
-literal_list: literals COMMA literal_list | literals;
-literals: int_lit | float_lit | str_lit | bool_lit | nil_lit; //| ARR_LIT | STRUCT_LIT;
+arr_lit: arr_type LBRACE list_expr RBRACE;
 
 // struct literal
 struct_lit: ID LBRACE list_field? RBRACE;
@@ -126,8 +120,26 @@ list_field: field newline? | field COMMA list_field newline?;
 field: ID COLON expr;
 
 // array literal
-arr_lit: arr_type LBRACE list_expr RBRACE;
-types : INT | FLOAT | STRING | BOOLEAN | arr_type | ID;
+
+
+// types
+types : primitive_types | composite_types;
+primitive_types: INT | FLOAT | STRING | BOOLEAN ;
+composite_types: struct_type | interface_type;
+
+// struct type
+struct_type: ID;
+
+// interface type
+interface_type: ID;
+
+// array type
+arr_type: arr_dim arr_type | arr_dim types;
+arr_dim: LBRACK (DEC_LIT)? RBRACK; // const_decl
+
+// literal list
+literal_list: literals COMMA literal_list | literals;
+literals: int_lit | float_lit | str_lit | bool_lit | nil_lit;
 int_lit     
         :   DEC_LIT
         |   BIN_LIT
