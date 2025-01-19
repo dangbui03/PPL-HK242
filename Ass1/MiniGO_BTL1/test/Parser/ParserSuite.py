@@ -47,3 +47,76 @@ class ParserSuite(unittest.TestCase):
     def test_009(self):
         """expression"""
         self.assertTrue(TestParser.test("const Votien = a.a.foo()","successful", inspect.stack()[0].function))
+    def test_022(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""    
+            const a = 0b11;                         
+        ""","successful", inspect.stack()[0].function))
+    def test_023(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""    
+            var z VOTIEN 1;                         
+        ""","Error on line 2 col 25: 1", inspect.stack()[0].function))
+    def test_024(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""    
+            var z VOTIEN = int{1};                         
+        ""","Error on line 2 col 27: int", inspect.stack()[0].function))
+    def test_037(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""    
+            var z VOTIEN = a >= 2 <= "string" > a[2][3] < ID{A: 2} >= [2]S{2};                         
+        ""","successful", inspect.stack()[0].function))
+    def test_046(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""    
+            var z VOTIEN = a.a.a[2].c[2].foo(1, a.b);                         
+        ""","successful", inspect.stack()[0].function))
+    def test_048(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""    
+            var z VOTIEN = foo() + foo(2) + foo(2, 3, 4) + a;                         
+        ""","successful", inspect.stack()[0].function))
+    def test_056(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""    
+            const k =  (1, 2);                         
+        ""","Error on line 2 col 25: ,", inspect.stack()[0].function))
+    def test_064(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            var c [2][3]ID
+        ""","Error on line 2 col 26: \n", inspect.stack()[0].function))
+    def test_058(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""    
+            var a [2][3]int = 2 + 3 / 4;
+        ""","successful", inspect.stack()[0].function))
+    def test_069(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""    
+                func Add(x int, y [2]int) [2]id {}
+    ""","successful", inspect.stack()[0].function))
+    def test_071(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""    
+                func Add(a) [2]id {}
+    ""","Error on line 2 col 22: )", inspect.stack()[0].function))
+    def test_077(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""    
+                type Calculator struct {
+                                            
+                    value int;
+                    a [2]int; a [2]ID;
+                    c Calculator                    
+                }
+    ""","successful", inspect.stack()[0].function))
+    def test_078(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""    
+                type Calculator struct {
+                    c Calculator
+                    c Cal a int;         
+                }
+    ""","Error on line 4 col 22: a", inspect.stack()[0].function))
