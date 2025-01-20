@@ -36,36 +36,44 @@ decl: variable_decl
     | method_decl;
 
 // Variable declarations
-variable_decl: VAR ID (ASSIGN expr)? types? SEMI?;
+variable_decl: VAR ID types? (ASSIGN)? list_expr SEMI? newline*;
 
 // Constant declarations
-const_decl: CONST ID ASSIGN expr types? SEMI?;
+const_decl: CONST ID types? ASSIGN list_expr SEMI? newline*;
 
 // Struct declarations
-struct_decl: TYPE ID STRUCT LBRACE struct_fields RBRACE;
+struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields RBRACE SEMI newline*;
 struct_fields: struct_field SEMI ( newline* struct_field)*;
 struct_field: ID types;
 
 // method declarations
 method_decl: FUNC;
 
-interface_decl: TYPE ID INTERFACE LBRACE  RBRACE;
+interface_decl: TYPE ID INTERFACE newline* LBRACE  RBRACE SEMI newline*;
 
 func_decl: FUNC;
 
 // Statements
-// list_statement: statement list_statement | statement;
-// statement: ;
-	// (
-	// 	declared_statement
-	// 	| assign_statement
+list_statement: statement list_statement | statement;
+statement: 
+	(
+		declared_statement
+		| assign_statement
 	// 	| if_statement
 	// 	| for_statement
 	// 	| break_statement
 	// 	| continue_statement
 	// 	| call_statement
-	// 	| return_statement
-	// );
+		| return_statement
+	);
+
+declared_statement: variable_decl newline;
+
+assign_statement: lhs ass_operator expr;
+lhs: arr_type | ID;
+ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
+
+return_statement: RETURN expr SEMI newline*;
 
 // list_expr
 list_expr: expr COMMA list_expr | expr;
@@ -79,6 +87,8 @@ and_expr: and_expr AND rela_expr
 
 rela_expr: rela_expr REL add_expr 
          | add_expr;
+// relation
+REL: LT | GT | LE | GE | EQUAL | DIFF;
 
 add_expr: add_expr (ADD | MINUS) mul_expr 
         | mul_expr;
@@ -89,35 +99,35 @@ mul_expr: mul_expr (MUL | DIV | MOD) unary_expr
 unary_expr  : (NOT | MINUS) unary_expr 
             | primary_expr;
 
-primary_expr: exprd
-            | arr_element
-            | func_call 
+primary_expr: primary_expr LBRACK expr RBRACK 
+            // | primary_expr DOT ID LPAREN? list_expr? RPAREN?
             | method_call
-            | arr_lit
-            | struct_lit
-            | LBRACK ID RBRACK
-            ;
+            | exprd 
+            | func_call;
+            // | primary_expr LBRACK ID RBRACK | arr_element
 
-exprd: literals | ID | ID? LPAREN list_expr? RPAREN;
-func_expr: func_call | exprd;
+exprd: literals | ID | LPAREN expr RPAREN;
 
-index_operator: LBRACK list_expr RBRACK | LBRACK list_expr RBRACK index_operator;
-args: literal_list | ;
+// [] [] ...
+index_operator: LBRACK DEC_LIT RBRACK index_operator | LBRACK DEC_LIT RBRACK;
 
-arr_element: func_expr index_operator;
+// function call & method call
+func_call: ID LPAREN list_expr? RPAREN newline?; 
+method_call: expr DOT ID LPAREN? list_expr? RPAREN?;
 
-// function call
-func_call: ID LPAREN args RPAREN;
+// types
+types : primitive_types | composite_types;
+primitive_types: INT | FLOAT | STRING | BOOLEAN | NIL;
+composite_types: struct_type | interface_type;
 
-// method call
-method_call: (func_expr | arr_element) DOT list_expr LPAREN? args RPAREN? method_call | (func_expr | arr_element) DOT list_expr LPAREN? args RPAREN? ;
+// struct type & interface type & array type
+struct_type: ID;
+interface_type: ID;
+arr_type: index_operator types;
 
-// relation
-REL: LT | GT | LE | GE | EQUAL | DIFF;
-
-
-
-arr_lit: arr_type LBRACE list_expr RBRACE;
+// literal list
+literal_list: literals COMMA literal_list | literals;
+literals: int_lit | float_lit | str_lit | bool_lit | arr_lit | struct_lit;
 
 // struct literal
 struct_lit: ID LBRACE list_field? RBRACE;
@@ -125,26 +135,9 @@ list_field: field newline? | field COMMA list_field newline?;
 field: ID COLON expr;
 
 // array literal
+arr_lit: arr_type LBRACE list_expr RBRACE;
+arr_list: LBRACE arr_list? RBRACE | LBRACE expr COMMA arr_list? RBRACE;
 
-
-// types
-types : primitive_types | composite_types;
-primitive_types: INT | FLOAT | STRING | BOOLEAN ;
-composite_types: struct_type | interface_type;
-
-// struct type
-struct_type: ID;
-
-// interface type
-interface_type: ID;
-
-// array type
-arr_type: arr_dim arr_type | arr_dim types;
-arr_dim: LBRACK (DEC_LIT)? RBRACK; // const_decl
-
-// literal list
-literal_list: literals COMMA literal_list | literals;
-literals: int_lit | float_lit | str_lit | bool_lit | nil_lit;
 int_lit     
         :   DEC_LIT
         |   BIN_LIT
@@ -217,13 +210,13 @@ COMMA: ',';
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 
 //TODO Literals 3.3.5 pdf
-fragment DIGIT : [0-9] ;
+fragment DIGIT : [0-9];
 fragment EXP : [eE] [+-]? DEC_LIT ;
 
 // Floating-point Literals
+
 FLOAT_LIT
     :  DEC_LIT ('.' DIGIT*)? EXP?;
-
 
 // Integer Literals
 DEC_LIT
@@ -255,7 +248,6 @@ HEX_LIT
 STR_LIT	: '"' ( ESCAPE_SEQ | ~['"\r\n\f\\])* '"'  {self.text = self.text[1:-1]};
 
 BOOL_LIT: TRUE | FALSE;
-nil_lit: NIL;
 
 //TODO skip 3.1 and 3.2 pdf
 WS: [ \t\f\r]+ -> skip; // skip spaces, tabs 

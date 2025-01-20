@@ -1,5 +1,5 @@
     
-                type Calculator interface {
-                    Add(x int,c,d ID); Add()
-            }
-    
+            type Calculator interface {
+                Add(x int,c,d ID); Add()
+        }
+        

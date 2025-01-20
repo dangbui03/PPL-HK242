@@ -1,4 +1,4 @@
     
-                type Calculator interface {}
-                type Person struct{};
-    
+            type Calculator interface {}
+            type Person struct{};
+        

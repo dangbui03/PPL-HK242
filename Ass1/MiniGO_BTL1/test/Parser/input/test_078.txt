@@ -1,6 +1,6 @@
     
-                type Calculator struct {
-                    c Calculator
-                    c Cal a int;         
-                }
-    
+            type Calculator struct {
+                c Calculator
+                c Cal a int;         
+            }
+        
