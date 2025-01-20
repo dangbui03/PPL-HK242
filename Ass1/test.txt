@@ -1,0 +1,123 @@
+program: newline* decllist  EOF;
+
+decllist: decl (decl | newline)*;
+
+decl: variable_decl 
+    | const_decl 
+    | func_decl 
+    | struct_decl 
+    | interface_decl 
+    | method_decl;
+
+// Variable declarations
+variable_decl: VAR ID types? (ASSIGN)? list_expr SEMI? newline*;
+
+// Constant declarations
+const_decl: CONST ID types? ASSIGN list_expr SEMI? newline*;
+
+// Struct declarations
+struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields RBRACE SEMI newline*;
+struct_fields: struct_field SEMI ( newline* struct_field)*;
+struct_field: ID types;
+
+// method declarations
+method_decl: FUNC;
+
+interface_decl: TYPE ID INTERFACE newline* LBRACE  RBRACE SEMI newline*;
+
+func_decl: FUNC;
+
+// Statements
+list_statement: statement list_statement | statement;
+statement: 
+	(
+		declared_statement
+		| assign_statement
+	// 	| if_statement
+	// 	| for_statement
+	// 	| break_statement
+	// 	| continue_statement
+	// 	| call_statement
+		| return_statement
+	);
+
+declared_statement: variable_decl newline;
+
+assign_statement: lhs ass_operator expr;
+lhs: arr_type | ID;
+ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
+
+return_statement: RETURN expr SEMI newline*;
+
+// list_expr
+list_expr: expr COMMA list_expr | expr;
+
+// Expressions
+expr    : expr OR and_expr 
+        | and_expr;
+
+and_expr: and_expr AND rela_expr
+        | rela_expr;
+
+rela_expr: rela_expr REL add_expr 
+         | add_expr;
+// relation
+REL: LT | GT | LE | GE | EQUAL | DIFF;
+
+add_expr: add_expr (ADD | MINUS) mul_expr 
+        | mul_expr;
+
+mul_expr: mul_expr (MUL | DIV | MOD) unary_expr 
+        | unary_expr;
+
+unary_expr  : (NOT | MINUS) unary_expr 
+            | primary_expr;
+
+primary_expr: primary_expr LBRACK expr RBRACK 
+            | primary_expr DOT ID LPAREN? list_expr? RPAREN?
+            // | method_call
+            | exprd 
+            | func_call;
+            // | primary_expr LBRACK ID RBRACK | arr_element
+
+exprd: literals | ID | LPAREN expr RPAREN;
+
+// [] [] ...
+index_operator: LBRACK DEC_LIT RBRACK index_operator | LBRACK DEC_LIT RBRACK;
+
+// function call & method call
+func_call: ID LPAREN list_expr? RPAREN newline?; 
+method_call: expr DOT ID LPAREN? list_expr? RPAREN?;
+
+// types
+types : primitive_types | composite_types;
+primitive_types: INT | FLOAT | STRING | BOOLEAN | NIL;
+composite_types: struct_type | interface_type;
+
+// struct type & interface type & array type
+struct_type: ID;
+interface_type: ID;
+arr_type: index_operator types;
+
+// literal list
+literal_list: literals COMMA literal_list | literals;
+literals: int_lit | FLOAT_LIT | STR_LIT | bool_lit | arr_lit | struct_lit;
+
+// struct literal
+struct_lit: ID LBRACE list_field? RBRACE;
+list_field: field newline? | field COMMA list_field newline?;
+field: ID COLON expr;
+
+// array literal
+arr_lit: arr_type LBRACE list_expr RBRACE;
+arr_list: LBRACE arr_list? RBRACE | LBRACE expr COMMA arr_list? RBRACE;
+
+int_lit     
+        :   DEC_LIT
+        |   BIN_LIT
+        |   OCT_LIT
+        |   HEX_LIT
+        ;
+float_lit: FLOAT_LIT;
+bool_lit: TRUE | FALSE;
+str_lit: STR_LIT;

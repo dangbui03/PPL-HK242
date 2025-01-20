@@ -24,7 +24,7 @@ options{
 	language = Python3;
 }
 
-program: newline* decllist  EOF;
+program: newline* decllist EOF;
 
 decllist: decl (decl | newline)*;
 
@@ -36,7 +36,7 @@ decl: variable_decl
     | method_decl;
 
 // Variable declarations
-variable_decl: VAR ID types? (ASSIGN)? list_expr SEMI? newline*;
+variable_decl: VAR ID types? ASSIGN? list_expr SEMI? newline*;
 
 // Constant declarations
 const_decl: CONST ID types? ASSIGN list_expr SEMI? newline*;
@@ -47,11 +47,15 @@ struct_fields: struct_field SEMI ( newline* struct_field)*;
 struct_field: ID types;
 
 // method declarations
-method_decl: FUNC;
+method_decl: FUNC FUNC ID LPAREN list_para RPAREN types? block_statement newline*;
 
-interface_decl: TYPE ID INTERFACE newline* LBRACE  RBRACE SEMI newline*;
+interface_decl: TYPE ID INTERFACE newline* LBRACE RBRACE SEMI newline*;
 
-func_decl: FUNC;
+func_decl: FUNC ID LPAREN list_para RPAREN types? block_statement newline*;
+list_para: para COMMA list_para | para;
+para: ID types | ;
+
+block_statement: LBRACE newline* list_statement? RBRACE newline*;
 
 // Statements
 list_statement: statement list_statement | statement;
@@ -100,23 +104,20 @@ unary_expr  : (NOT | MINUS) unary_expr
             | primary_expr;
 
 primary_expr: primary_expr LBRACK expr RBRACK 
-            // | primary_expr DOT ID LPAREN? list_expr? RPAREN?
-            | method_call
-            | exprd 
-            | func_call;
+            | primary_expr DOT ID (LPAREN list_expr? RPAREN)?
+            | func_call
+            | exprd;
+            // | 
             // | primary_expr LBRACK ID RBRACK | arr_element
 
-exprd: literals | ID | LPAREN expr RPAREN;
-
-// [] [] ...
-index_operator: LBRACK DEC_LIT RBRACK index_operator | LBRACK DEC_LIT RBRACK;
+exprd: literals | ID | LPAREN expr RPAREN | RANGE;
 
 // function call & method call
 func_call: ID LPAREN list_expr? RPAREN newline?; 
 method_call: expr DOT ID LPAREN? list_expr? RPAREN?;
 
 // types
-types : primitive_types | composite_types;
+types : primitive_types | composite_types | arr_type;
 primitive_types: INT | FLOAT | STRING | BOOLEAN | NIL;
 composite_types: struct_type | interface_type;
 
@@ -124,10 +125,10 @@ composite_types: struct_type | interface_type;
 struct_type: ID;
 interface_type: ID;
 arr_type: index_operator types;
+index_operator: LBRACK int_lit RBRACK index_operator | LBRACK int_lit RBRACK;
 
 // literal list
-literal_list: literals COMMA literal_list | literals;
-literals: int_lit | float_lit | str_lit | bool_lit | arr_lit | struct_lit;
+literals: int_lit | FLOAT_LIT | STR_LIT | bool_lit | arr_lit | struct_lit;
 
 // struct literal
 struct_lit: ID LBRACE list_field? RBRACE;
@@ -135,8 +136,8 @@ list_field: field newline? | field COMMA list_field newline?;
 field: ID COLON expr;
 
 // array literal
-arr_lit: arr_type LBRACE list_expr RBRACE;
-arr_list: LBRACE arr_list? RBRACE | LBRACE expr COMMA arr_list? RBRACE;
+arr_lit: arr_type LBRACE arr_list? RBRACE;
+arr_list: LBRACE arr_list | list_expr RBRACE? (COMMA arr_list)?;
 
 int_lit     
         :   DEC_LIT
@@ -211,17 +212,12 @@ ID: [a-zA-Z_][a-zA-Z0-9_]*;
 
 //TODO Literals 3.3.5 pdf
 fragment DIGIT : [0-9];
-fragment EXP : [eE] [+-]? DEC_LIT ;
-
-// Floating-point Literals
-
-FLOAT_LIT
-    :  DEC_LIT ('.' DIGIT*)? EXP?;
+fragment EXP : [eE][+-]? DEC_LIT ;
 
 // Integer Literals
 DEC_LIT
     :   '0'
-    |   [1-9] DIGIT*
+    |   [1-9] [0-9]*
     ;
 
 BIN_LIT
@@ -245,12 +241,16 @@ HEX_LIT
         }
     ;
 
+// Floating-point Literals
+FLOAT_LIT
+    :  DEC_LIT ('.' [0-9]*)? EXP?;
+
 STR_LIT	: '"' ( ESCAPE_SEQ | ~['"\r\n\f\\])* '"'  {self.text = self.text[1:-1]};
 
 BOOL_LIT: TRUE | FALSE;
 
 //TODO skip 3.1 and 3.2 pdf
-WS: [ \t\f\r]+ -> skip; // skip spaces, tabs 
+WS: [ \t\f\b\r]+ -> skip; // skip spaces, tabs 
 LINE_COMMENT
     :   '//' ~[\n\r]* -> skip
     ;
