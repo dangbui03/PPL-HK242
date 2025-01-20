@@ -150,3 +150,13 @@ class ParserSuite(unittest.TestCase):
                                             const a = a[2].b
                                             var a = a[2].b; var a = "s";
                                         }""","successful", inspect.stack()[0].function))
+    def test_095(self):
+            """Declared"""
+            self.assertTrue(TestParser.test("""
+                                            
+                func (c c) Add(x int) {}
+                                            
+                func Add(x int) {} var c int;
+                                            
+                var c int; type Calculator struct{} type Calculator struct{} var c int;
+    ""","Error on line 7 col 48: type", inspect.stack()[0].function))

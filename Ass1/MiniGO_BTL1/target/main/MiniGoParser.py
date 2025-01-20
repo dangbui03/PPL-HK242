@@ -69,8 +69,8 @@ def serializedATN():
         buf.write("\2^a\3\2\2\2_]\3\2\2\2_`\3\2\2\2`b\3\2\2\2a_\3\2\2\2b")
         buf.write("c\5\4\3\2cd\7\2\2\3d\3\3\2\2\2ej\5\6\4\2fi\5\6\4\2gi\5")
         buf.write("X-\2hf\3\2\2\2hg\3\2\2\2il\3\2\2\2jh\3\2\2\2jk\3\2\2\2")
-        buf.write("k\5\3\2\2\2lj\3\2\2\2mt\5\b\5\2nt\5\26\f\2ot\5\f\7\2p")
-        buf.write("t\5\n\6\2qt\5\24\13\2rt\5\22\n\2sm\3\2\2\2sn\3\2\2\2s")
+        buf.write("k\5\3\2\2\2lj\3\2\2\2mt\5\b\5\2nt\5\n\6\2ot\5\26\f\2p")
+        buf.write("t\5\f\7\2qt\5\24\13\2rt\5\22\n\2sm\3\2\2\2sn\3\2\2\2s")
         buf.write("o\3\2\2\2sp\3\2\2\2sq\3\2\2\2sr\3\2\2\2t\7\3\2\2\2uv\7")
         buf.write("\23\2\2vy\78\2\2wx\7(\2\2xz\5\32\16\2yw\3\2\2\2yz\3\2")
         buf.write("\2\2z|\3\2\2\2{}\5> \2|{\3\2\2\2|}\3\2\2\2}\177\3\2\2")
@@ -513,16 +513,16 @@ class MiniGoParser ( Parser ):
             return self.getTypedRuleContext(MiniGoParser.Variable_declContext,0)
 
 
+        def const_decl(self):
+            return self.getTypedRuleContext(MiniGoParser.Const_declContext,0)
+
+
         def func_decl(self):
             return self.getTypedRuleContext(MiniGoParser.Func_declContext,0)
 
 
         def struct_decl(self):
             return self.getTypedRuleContext(MiniGoParser.Struct_declContext,0)
-
-
-        def const_decl(self):
-            return self.getTypedRuleContext(MiniGoParser.Const_declContext,0)
 
 
         def interface_decl(self):
@@ -562,19 +562,19 @@ class MiniGoParser ( Parser ):
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 108
-                self.func_decl()
+                self.const_decl()
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 109
-                self.struct_decl()
+                self.func_decl()
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 110
-                self.const_decl()
+                self.struct_decl()
                 pass
 
             elif la_ == 5:

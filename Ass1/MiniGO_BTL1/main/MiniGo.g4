@@ -28,7 +28,12 @@ program: newline* decllist  EOF;
 
 decllist: decl (decl | newline)*;
 
-decl: variable_decl | func_decl | struct_decl | const_decl | interface_decl | method_decl;
+decl: variable_decl 
+    | const_decl 
+    | func_decl 
+    | struct_decl 
+    | interface_decl 
+    | method_decl;
 
 // Variable declarations
 variable_decl: VAR ID (ASSIGN expr)? types? SEMI?;
