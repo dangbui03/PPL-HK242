@@ -16,3 +16,5 @@ python3 run.py gen
 python3 run.py test LexerSuite
 python3 run.py test ParserSuite
 python3 run.py test ASTGenSuite
+
+docker exec -it loving_dhawan /bin/bash

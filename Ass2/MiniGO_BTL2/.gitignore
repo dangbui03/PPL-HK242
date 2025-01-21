@@ -4,3 +4,4 @@ target/main
 # test/*/input/
 # test/*/output/
 test/*/__pycache__
+myenv

@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  dev_environment:
+    image: ubuntu:latest
+    container_name: dev_container
+    stdin_open: true
+    tty: true
+    volumes:
+      - D:/HCMUT/PPL/2/BTL1/Ass1/MiniGO_BTL1:/usr/src/PPL
+    environment:
+      ANTLR_JAR: "/usr/src/PPL/antlr-4.9.2-complete.jar"
+    working_dir: /usr/src/PPL
+    entrypoint: ["bash", "-c", "./script.sh 5 30 && /bin/bash"]
