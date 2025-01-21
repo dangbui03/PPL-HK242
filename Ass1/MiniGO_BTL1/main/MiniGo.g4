@@ -31,25 +31,32 @@ decllist: decl (decl | newline)*;
 decl: variable_decl 
     | const_decl 
     | func_decl 
+    | method_decl
     | struct_decl 
     | interface_decl 
-    | method_decl;
+    ;
 
 // Variable declarations
-variable_decl: VAR ID types? ASSIGN? list_expr SEMI? newline*;
+variable_decl: VAR ID types? (ASSIGN list_expr)? SEMI newline*;
 
 // Constant declarations
 const_decl: CONST ID types? ASSIGN list_expr SEMI? newline*;
 
 // Struct declarations
-struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields RBRACE SEMI newline*;
-struct_fields: struct_field SEMI ( newline* struct_field)*;
-struct_field: ID types;
+struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields? RBRACE SEMI? newline*;
+struct_fields: struct_field struct_fields | struct_field;
+struct_field: ID (primitive_types | arr_type) SEMI newline* | ID composite_types SEMI? newline;
 
 // method declarations
-method_decl: FUNC FUNC ID LPAREN list_para RPAREN types? block_statement newline*;
+method_decl: FUNC LPAREN method_para RPAREN ID LPAREN list_para RPAREN types? block_statement newline*;
+method_para: ID composite_types method_para | ID composite_types;
 
-interface_decl: TYPE ID INTERFACE newline* LBRACE RBRACE SEMI newline*;
+// interface declarations
+interface_decl: TYPE ID INTERFACE newline* LBRACE newline* interface_method_list? RBRACE SEMI? newline*;
+interface_method_list: interface_method interface_method_list | interface_method;
+interface_method: ID LPAREN interface_para_list RPAREN types? SEMI? newline*; 
+interface_para_list: interface_para COMMA interface_para_list | interface_para;
+interface_para: ID types? |;
 
 func_decl: FUNC ID LPAREN list_para RPAREN types? block_statement newline*;
 list_para: para COMMA list_para | para;
@@ -63,21 +70,42 @@ statement:
 	(
 		declared_statement
 		| assign_statement
-	// 	| if_statement
-	// 	| for_statement
-	// 	| break_statement
-	// 	| continue_statement
-	// 	| call_statement
+		| if_statement
+		| for_statement
+		| break_statement
+		| continue_statement
+		| call_statement
 		| return_statement
 	);
 
-declared_statement: variable_decl newline;
+// declared statement
+declared_statement: variable_decl newline* | const_decl newline*;
 
-assign_statement: lhs ass_operator expr;
-lhs: arr_type | ID;
+// assign statement
+assign_statement: lhs ass_operator expr SEMI? newline*;
+lhs: arr_type | ID | list_expr;
 ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
 
-return_statement: RETURN expr SEMI newline*;
+// if statement
+if_statement: IF LPAREN expr RPAREN block_statement (else_if_statement)? else_statement? newline*;
+else_if_statement: ELSE IF LPAREN expr RPAREN block_statement;
+else_statement: ELSE block_statement;
+
+// for statement
+for_statement   : FOR list_expr block_statement newline*
+                | FOR assign_statement expr SEMI statement block_statement newline*
+                | FOR ID COMMA assign_statement expr block_statement newline*
+                ;
+
+// break statement
+break_statement: BREAK SEMI newline*;
+
+call_statement: (func_call | method_call) SEMI newline*;
+
+continue_statement: CONTINUE SEMI newline*;
+
+// return statement
+return_statement: RETURN expr? SEMI? newline*;
 
 // list_expr
 list_expr: expr COMMA list_expr | expr;
