@@ -164,6 +164,16 @@ class MiniGoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by MiniGoParser#init_for_statement.
+    def visitInit_for_statement(self, ctx:MiniGoParser.Init_for_statementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#value_assign.
+    def visitValue_assign(self, ctx:MiniGoParser.Value_assignContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by MiniGoParser#break_statement.
     def visitBreak_statement(self, ctx:MiniGoParser.Break_statementContext):
         return self.visitChildren(ctx)

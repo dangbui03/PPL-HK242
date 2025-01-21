@@ -43,9 +43,9 @@ variable_decl: VAR ID types? (ASSIGN list_expr)? SEMI newline*;
 const_decl: CONST ID types? ASSIGN list_expr SEMI? newline*;
 
 // Struct declarations
-struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields? RBRACE (SEMI | newline);
+struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields? RBRACE (SEMI | newline) newline*;
 struct_fields: struct_field struct_fields | struct_field;
-struct_field: ID (primitive_types | arr_type) SEMI newline* | ID composite_types SEMI? newline;
+struct_field: ID (primitive_types | arr_type) SEMI newline* | ID composite_types (SEMI | newline) newline*;
 
 // method declarations
 method_decl: FUNC LPAREN method_para RPAREN ID LPAREN list_para RPAREN types? block_statement newline*;
@@ -94,20 +94,26 @@ else_if_statement: ELSE IF LPAREN expr RPAREN newline* block_statement;
 else_statement: ELSE newline* block_statement;
 
 // for statement
-for_statement   : FOR list_expr newline* block_statement newline*
-                | FOR assign_statement expr SEMI statement newline* block_statement newline*
-                | FOR ID COMMA assign_statement expr newline* block_statement newline*
+for_statement   : FOR expr newline* block_statement newline*
+                | FOR init_for_statement SEMI expr SEMI statement newline* block_statement newline*
+                | FOR ID COMMA value_assign expr newline* block_statement newline*
                 ;
 
+init_for_statement  : VAR ID types? (ASSIGN expr)?
+                    | ID (':=' | ASSIGN) expr 
+                    ;
+
+value_assign: ID ':=' RANGE;
+
 // break statement
-break_statement: BREAK SEMI newline*;
+break_statement: BREAK (SEMI | newline) newline*;
 
-call_statement: lhs LPAREN list_expr? RPAREN SEMI newline*;
+call_statement: lhs LPAREN list_expr? RPAREN (SEMI | newline) newline*;
 
-continue_statement: CONTINUE SEMI newline*;
+continue_statement: CONTINUE (SEMI | newline) newline*;
 
 // return statement
-return_statement: RETURN expr? SEMI? newline*;
+return_statement: RETURN expr? (SEMI | newline) newline*;
 
 // list_expr
 list_expr: expr COMMA list_expr | expr;
