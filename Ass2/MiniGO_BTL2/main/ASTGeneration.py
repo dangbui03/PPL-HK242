@@ -14,4 +14,5 @@ from functools import reduce
 ##! continue update
 class ASTGeneration(MiniGoVisitor):
     #copy function target/main/MiniGoVisitor.py
-    pass
+    def visitProgram(self, ctx:MiniGoParser.ProgramContext):
+        return Program(self.visit(ctx.mainFunc()), self.visit(ctx.funcs()))
