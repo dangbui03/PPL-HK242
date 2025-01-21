@@ -124,6 +124,11 @@ class MiniGoVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by MiniGoParser#lhs_list.
+    def visitLhs_list(self, ctx:MiniGoParser.Lhs_listContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by MiniGoParser#lhs.
     def visitLhs(self, ctx:MiniGoParser.LhsContext):
         return self.visitChildren(ctx)
@@ -136,6 +141,11 @@ class MiniGoVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by MiniGoParser#if_statement.
     def visitIf_statement(self, ctx:MiniGoParser.If_statementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by MiniGoParser#list_else_if_statement.
+    def visitList_else_if_statement(self, ctx:MiniGoParser.List_else_if_statementContext):
         return self.visitChildren(ctx)
 
 

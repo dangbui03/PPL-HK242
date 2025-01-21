@@ -43,7 +43,7 @@ variable_decl: VAR ID types? (ASSIGN list_expr)? SEMI newline*;
 const_decl: CONST ID types? ASSIGN list_expr SEMI? newline*;
 
 // Struct declarations
-struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields? RBRACE SEMI? newline*;
+struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields? RBRACE (SEMI | newline);
 struct_fields: struct_field struct_fields | struct_field;
 struct_field: ID (primitive_types | arr_type) SEMI newline* | ID composite_types SEMI? newline;
 
@@ -82,25 +82,27 @@ statement:
 declared_statement: variable_decl newline* | const_decl newline*;
 
 // assign statement
-assign_statement: lhs ass_operator expr SEMI? newline*;
-lhs: arr_type | ID | list_expr;
+assign_statement: lhs_list ass_operator expr SEMI? newline*;
+lhs_list: lhs lhs_list | lhs;
+lhs: arr_type | ID | ID DOT ID;
 ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
 
 // if statement
-if_statement: IF LPAREN expr RPAREN block_statement (else_if_statement)? else_statement? newline*;
-else_if_statement: ELSE IF LPAREN expr RPAREN block_statement;
-else_statement: ELSE block_statement;
+if_statement: IF LPAREN expr RPAREN newline* block_statement list_else_if_statement? else_statement? newline*;
+list_else_if_statement: else_if_statement list_else_if_statement | else_if_statement;
+else_if_statement: ELSE IF LPAREN expr RPAREN newline* block_statement;
+else_statement: ELSE newline* block_statement;
 
 // for statement
-for_statement   : FOR list_expr block_statement newline*
-                | FOR assign_statement expr SEMI statement block_statement newline*
-                | FOR ID COMMA assign_statement expr block_statement newline*
+for_statement   : FOR list_expr newline* block_statement newline*
+                | FOR assign_statement expr SEMI statement newline* block_statement newline*
+                | FOR ID COMMA assign_statement expr newline* block_statement newline*
                 ;
 
 // break statement
 break_statement: BREAK SEMI newline*;
 
-call_statement: (func_call | method_call) SEMI newline*;
+call_statement: lhs LPAREN list_expr? RPAREN SEMI newline*;
 
 continue_statement: CONTINUE SEMI newline*;
 
@@ -152,7 +154,7 @@ composite_types: struct_type | interface_type;
 // struct type & interface type & array type
 struct_type: ID;
 interface_type: ID;
-arr_type: index_operator types;
+arr_type: index_operator types?;
 index_operator: LBRACK int_lit RBRACK index_operator | LBRACK int_lit RBRACK;
 
 // literal list
