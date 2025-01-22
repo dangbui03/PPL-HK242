@@ -45,11 +45,18 @@ class StringType(Type):
 class BooleanType(Type):
     def __str__(self):
         return "BooleanType()" 
-    
-class StructType(Type):
+
+# struct Type and interface Type
+
+@dataclass
+class ClassType(Type): 
     name: Id
     def __str__(self):
-        return f"StructType({str(name)})" 
+        return f"ClassType({str(self.name)})" 
+    
+class VoidType(Type):
+    def __str__(self):
+        return "VoidType()" 
 
 # used for binary expression
 @dataclass
@@ -139,10 +146,128 @@ class NilLiteral(Literal):
     def __str__(self):
         return "NilLiteral()"
 
+class Stmt(AST):
+    __metaclass__ = ABCMeta
+    pass
+
+@dataclass
+class AssignStmt(Stmt):
+    lhs:LHS
+    assign: str
+    exp:Expr
+    def __str__(self):
+        return "AssignStmt(" + str(self.lhs) + ",\"" +  (self.assign) + "\"," +  str(self.exp) + ")"
+
+@dataclass
+class If(Stmt):
+    expr:Expr
+    thenStmt:[Stmt]
+    elifStmt:[(Expr, [Stmt])] = None
+    elseStmt:[Stmt] = None
+    def __str__(self):
+        if self.elifStmt:
+            elif_str = "[" + ", ".join(
+                f"({str(e)},{'[' + ', '.join(str(s) for s in stmts) + ']'})"
+                for (e, stmts) in self.elifStmt
+            ) + "]"
+        else:
+            elif_str = "None"
+
+        return f"If({str(self.expr)}, [{", ".join(str(s) for s in self.thenStmt)}], {elif_str}, {"[" + ", ".join(str(s) for s in self.elseStmt) + "]" if self.elseStmt else None})"
+@dataclass
+class For(Stmt):
+    initStmt:AssignStmt or VariablesDecl
+    expr:Expr
+    postStmt:AssignStmt
+    loop:[Stmt]  
+    def __str__(self):
+        return "For(" + str(self.initStmt) + "," + str(self.expr) + "," + str(self.postStmt) + ",[" + ", ".join(str(s) for s in self.loop) + "])"
+
+@dataclass
+class ForArray(Stmt):
+    index: Id
+    value: Id
+    array: Expr
+    loop:[Stmt]  
+    def __str__(self):
+        return "For(" + str(self.index) + "," + str(self.value) + "," + str(self.array) + ",[" + ", ".join(str(s) for s in self.loop) + "])"
+
+
+class Break(Stmt):
+    def __str__(self):
+        return "Break()"
+
+class Continue(Stmt):
+    def __str__(self):
+        return "Continue()"
+
+@dataclass
+class Return(Stmt):
+    expr:Expr
+    def __str__(self):
+        return "Return(" + (str(self.expr)  if  self.expr else "None") + ")"
+
+@dataclass
+class CallStmt(Stmt):
+    obj: Expr  # None if there is no obj 
+    method:Id
+    param:List[Expr]
+    def __str__(self):
+        return "CallStmt(" + ((str(self.obj) + ",") if self.obj else "None,") + str(self.method) + ",[" +  ','.join(str(i) for i in self.param) + "])"
+
+class Declared(AST):
+    __metaclass__ = ABCMeta
+    pass
+
+class StoreDecl(Stmt or Declared):
+    __metaclass__ = ABCMeta
+    pass
+
+@dataclass
+class VariablesDecl(StoreDecl):
+    variable : Id
+    varType : Type = None 
+    varInit : Expr = None
+    def __str__(self):
+        return "VariablesDecl(" + str(self.variable) + ", " + ( str(self.varType) if self.varType else "None") + ", " + (str(self.varInit) if self.varInit else "None") + ")"
+    def toParam(self):
+        return "Param(" + str(self.variable) + "," + str(self.varType) + ")"
+
+@dataclass
+class ConstDecl(StoreDecl):
+    constant : Id
+    value : Expr
+    def __str__(self):
+        return "ConstDecl(" + str(self.constant) + "," + str(self.value) + ")"
+
+@dataclass
+class FunctionDecl(Declared):
+    name: Id
+    returnType: Type
+    methodReceiver: VariablesDecl # function if methodReceiver  else method
+    param: List[VariablesDecl]
+    stmts: [Stmt] 
+    def __str__(self):
+        return f"FunctionDecl({str(self.name)}, {str(self.returnType)}, {str(self.methodReceiver)},[{','.join(str(i) for i in self.param)}],[\n\t\t\t\t{',\n\t\t\t\t'.join(str(i) for i in self.stmts)}])"
+
+@dataclass
+class InterfaceDecl(Declared):
+    name: Id
+    fields: List[FunctionDecl]
+    def __str__(self):
+        return "InterfaceDecl(" + str(self.name) +  ",[" +  ','.join(str(i) for i in self.fields) + "])"
+
+@dataclass
+class StructDecl(Declared):
+    name: Id
+    fields: List[VariablesDecl]
+    def __str__(self):
+        return "StructDecl(" + str(self.name) +  ",[" +  ','.join(str(i) for i in self.fields) + "])"
+
+
 # used for whole program
 @dataclass
 class Program(AST):
-    decl : List[Expr]
+    decl : List[Declared]
     def __str__(self):
-        print("line" + str(self.decl[0]))
-        return "Program([" + ','.join(str(i) for i in self.decl) + "])"
+        return "Program([\n\t\t\t" + ',\n\t\t\t'.join(str(i) for i in self.decl) + "\n\t\t])"

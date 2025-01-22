@@ -26,7 +26,7 @@ options{
 
 program: newline* decllist EOF;
 
-decllist: decl (decl | newline)*;
+decllist: decl (decl | newline)* newline*;
 
 decl: variable_decl 
     | const_decl 
@@ -84,7 +84,7 @@ declared_statement: variable_decl newline* | const_decl newline*;
 // assign statement
 assign_statement: lhs_list ass_operator expr SEMI? newline*;
 lhs_list: lhs lhs_list | lhs;
-lhs: arr_type | ID | ID DOT ID;
+lhs: arr_type | ID | ID DOT ID | DOT;
 ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
 
 // if statement
@@ -108,7 +108,7 @@ value_assign: ID ':=' RANGE;
 // break statement
 break_statement: BREAK (SEMI | newline) newline*;
 
-call_statement: lhs LPAREN list_expr? RPAREN (SEMI | newline) newline*;
+call_statement: lhs_list LPAREN list_expr? RPAREN (SEMI | newline) newline*;
 
 continue_statement: CONTINUE (SEMI | newline) newline*;
 
@@ -141,12 +141,12 @@ unary_expr  : (NOT | MINUS) unary_expr
 
 primary_expr: primary_expr LBRACK expr RBRACK 
             | primary_expr DOT ID (LPAREN list_expr? RPAREN)?
+            // | (func_call | exprd) index_operator?
             | func_call
-            | exprd;
-            // | 
-            // | primary_expr LBRACK ID RBRACK | arr_element
+            | exprd 
+            ;
 
-exprd: literals | ID | LPAREN expr RPAREN | RANGE;
+exprd: literals | ID | LPAREN expr RPAREN;
 
 // function call & method call
 func_call: ID LPAREN list_expr? RPAREN newline?; 

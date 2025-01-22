@@ -17,4 +17,6 @@ python3 run.py test LexerSuite
 python3 run.py test ParserSuite
 python3 run.py test ASTGenSuite
 
-docker exec -it suspicious_banzai /bin/bash
+docker exec -it suspicious_banzai /bin/bash 
+
+docker exec -it relaxed_sanderson /bin/bash # Company computer
