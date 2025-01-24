@@ -140,8 +140,7 @@ unary_expr  : (NOT | MINUS) unary_expr
             | primary_expr;
 
 primary_expr: primary_expr LBRACK expr RBRACK 
-            | primary_expr DOT ID (LPAREN list_expr? RPAREN)?
-            // | (func_call | exprd) index_operator?
+            | primary_expr DOT expr (LPAREN list_expr? RPAREN)?
             | func_call
             | exprd 
             ;
