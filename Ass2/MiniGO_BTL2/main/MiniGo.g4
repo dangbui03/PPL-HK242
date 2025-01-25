@@ -84,7 +84,7 @@ declared_statement: variable_decl newline* | const_decl newline*;
 // assign statement
 assign_statement: lhs_list ass_operator expr SEMI? newline*;
 lhs_list: lhs lhs_list | lhs;
-lhs: arr_type | ID | ID DOT ID | DOT;
+lhs: arr_type | ID | DOT; //ID DOT ID | DOT;
 ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
 
 // if statement
@@ -95,20 +95,21 @@ else_statement: ELSE newline* block_statement;
 
 // for statement
 for_statement   : FOR expr newline* block_statement newline*
-                | FOR init_for_statement SEMI expr SEMI statement newline* block_statement newline*
+                | FOR init_for_statement expr SEMI assign_statement newline* block_statement newline*
                 | FOR ID COMMA value_assign expr newline* block_statement newline*
                 ;
 
-init_for_statement  : VAR ID types? (ASSIGN expr)?
-                    | ID (':=' | ASSIGN) expr 
-                    ;
+// init_for_statement  : VAR ID types? (ASSIGN expr)?
+//                     | ID (':=' | ASSIGN) expr 
+//                     ;
+init_for_statement  : assign_statement | variable_decl;
 
 value_assign: ID ':=' RANGE;
 
 // break statement
 break_statement: BREAK (SEMI | newline) newline*;
 
-call_statement: lhs_list LPAREN list_expr? RPAREN (SEMI | newline) newline*;
+call_statement: lhs_list? ID LPAREN list_expr? RPAREN (SEMI | newline) newline*;
 
 continue_statement: CONTINUE (SEMI | newline) newline*;
 
@@ -140,7 +141,7 @@ unary_expr  : (NOT | MINUS) unary_expr
             | primary_expr;
 
 primary_expr: primary_expr LBRACK expr RBRACK 
-            | primary_expr DOT expr (LPAREN list_expr? RPAREN)?
+            | primary_expr DOT expr? (LPAREN list_expr? RPAREN)?
             | func_call
             | exprd 
             ;
