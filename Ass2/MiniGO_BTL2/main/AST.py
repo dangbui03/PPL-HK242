@@ -46,6 +46,15 @@ class BooleanType(Type):
     def __str__(self):
         return "BooleanType()" 
 
+@dataclass
+class ArrayType(Type):
+    typ : Type
+    dimensions : list[int]
+    def __str__(self):
+        return (f"ArrayType({self.typ}, "
+                f"{self.dimensions})")
+   
+
 # struct Type and interface Type
 
 @dataclass

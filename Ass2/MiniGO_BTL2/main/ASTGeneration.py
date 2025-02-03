@@ -15,13 +15,16 @@ from functools import reduce
 class ASTGeneration(MiniGoVisitor):
 # Visit a parse tree produced by MiniGoParser#program.
     def visitProgram(self, ctx:MiniGoParser.ProgramContext):
-        return Program(self.visit(ctx.decllist()))
+        return Program([self.visit(ctx.decllist())])
+    
 
 
     # Visit a parse tree produced by MiniGoParser#decllist.
     def visitDecllist(self, ctx:MiniGoParser.DecllistContext):
-        declared = [self.visit(decl) for decl in ctx.decl()]
-        return self.visit(declared)
+        # if ctx.decllist():
+        #     return self.visit(ctx.decl()) + self.visit(ctx.decllist())
+        # else: return self.visit(ctx.decl())
+        return 1
 
 
     # Visit a parse tree produced by MiniGoParser#decl.
@@ -480,7 +483,10 @@ class ASTGeneration(MiniGoVisitor):
 
     # Visit a parse tree produced by MiniGoParser#arr_type.
     def visitArr_type(self, ctx:MiniGoParser.Arr_typeContext):
-        return self.visit(ctx.index_operator()) + (self.visit(ctx.types()) if ctx.types() else None)
+        type = self.get_type(ctx.types().getText()) if ctx.types() else None
+        dimensions = [self.visit(ctx.index_operator())]
+        
+        return ArrayType(type, dimensions)
 
 
     # Visit a parse tree produced by MiniGoParser#index_operator.
@@ -550,7 +556,7 @@ class ASTGeneration(MiniGoVisitor):
 
     # Visit a parse tree produced by MiniGoParser#int_lit.
     def visitInt_lit(self, ctx:MiniGoParser.Int_litContext):
-        return IntLiteral(int(ctx.getChild(0).getText()))
+        return IntLiteral(int(ctx.DEC_LIT().getText()))
 
 
     # Visit a parse tree produced by MiniGoParser#float_lit.
@@ -574,3 +580,4 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#newline.
     def visitNewline(self, ctx:MiniGoParser.NewlineContext):
         return self.visitChildren(ctx)
+    

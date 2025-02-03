@@ -26,7 +26,7 @@ options{
 
 program: newline* decllist EOF;
 
-decllist: decl (decl | newline)* newline*;
+decllist: decl decllist newline* | decl newline*;
 
 decl: variable_decl 
     | const_decl 
