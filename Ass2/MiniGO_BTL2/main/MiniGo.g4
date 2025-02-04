@@ -49,18 +49,19 @@ struct_field: ID (primitive_types | arr_type) SEMI newline* | ID composite_types
 
 // method declarations
 method_decl: FUNC LPAREN method_para RPAREN ID LPAREN list_para RPAREN types? block_statement newline*;
-method_para: ID composite_types method_para | ID composite_types;
+method_para_list: method_para method_para_list | method_para;
+method_para: ID composite_types;
 
 // interface declarations
 interface_decl: TYPE ID INTERFACE newline* LBRACE newline* interface_method_list? RBRACE SEMI? newline*;
 interface_method_list: interface_method interface_method_list | interface_method;
 interface_method: ID LPAREN interface_para_list RPAREN types? SEMI? newline*; 
-interface_para_list: interface_para COMMA interface_para_list | interface_para;
-interface_para: ID types? |;
+interface_para_list: interface_para COMMA interface_para_list | interface_para | ;
+interface_para: ID types?;
 
 func_decl: FUNC ID LPAREN list_para RPAREN types? block_statement newline*;
-list_para: para COMMA list_para | para;
-para: ID types | ;
+list_para: para COMMA list_para | para | ;
+para: ID types;
 
 block_statement: LBRACE newline* list_statement? RBRACE newline*;
 
@@ -155,14 +156,14 @@ method_call: DOT ID (LPAREN list_expr? RPAREN)?;
 
 // types
 types : primitive_types | composite_types | arr_type;
-primitive_types: INT | FLOAT | STRING | BOOLEAN | NIL;
+primitive_types: INT | FLOAT | STRING | BOOLEAN;
 composite_types: struct_type | interface_type;
 
 // struct type & interface type & array type
 struct_type: ID;
 interface_type: ID;
 arr_type: index_operator types?;
-index_operator: LBRACK int_lit RBRACK index_operator | LBRACK int_lit RBRACK;
+index_operator: LBRACK DEC_LIT RBRACK index_operator | LBRACK DEC_LIT RBRACK;
 
 // literal list
 literals: int_lit | float_lit | str_lit | bool_lit | arr_lit | struct_lit | nil_lit;
