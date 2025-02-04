@@ -79,9 +79,17 @@ class LexerSuite(unittest.TestCase):
         /* a */ /* b */ 
         // 321231
         */ if /* */ /* */""", "if,<EOF>", inspect.stack()[0].function))
+    def test_017(self):
+        """skip"""
+        self.assertTrue(TestLexer.test("\t\f\r ", "<EOF>", inspect.stack()[0].function))
+
     def test_030(self):
         """INT_LIT"""
         self.assertTrue(TestLexer.test("0452.", "0,452.,<EOF>", inspect.stack()[0].function))
+    
+    def test_036(self):
+        """INT_LIT"""
+        self.assertTrue(TestLexer.test("0b000", "0,<EOF>", inspect.stack()[0].function))
 
     def test_050(self):
         """FLOAT_LIT"""
@@ -90,6 +98,12 @@ class LexerSuite(unittest.TestCase):
     def test_053(self):
         """FLOAT_LIT"""
         self.assertTrue(TestLexer.test("09.e-002", "0,9.e-0,0,2,<EOF>", inspect.stack()[0].function))
+    def test_071(self):
+        """Keywords"""
+        self.assertTrue(TestLexer.test(""" 
+        /* a * */
+ """, "\n,\n,<EOF>", inspect.stack()[0].function))
+        
     def test_073(self):
         """Keywords"""
         self.assertTrue(TestLexer.test(""" // /*

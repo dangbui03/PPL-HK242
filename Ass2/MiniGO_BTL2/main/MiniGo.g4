@@ -141,7 +141,8 @@ unary_expr  : (NOT | MINUS) unary_expr
             | primary_expr;
 
 primary_expr: primary_expr LBRACK expr RBRACK 
-            | primary_expr DOT expr? (LPAREN list_expr? RPAREN)?
+            // | primary_expr DOT expr? (LPAREN list_expr? RPAREN)?
+            | primary_expr DOT ID (LPAREN list_expr? RPAREN)?
             | func_call
             | exprd 
             ;
@@ -150,7 +151,7 @@ exprd: literals | ID | LPAREN expr RPAREN;
 
 // function call & method call
 func_call: ID LPAREN list_expr? RPAREN newline?; 
-method_call: expr DOT ID LPAREN? list_expr? RPAREN?;
+method_call: DOT ID (LPAREN list_expr? RPAREN)?;
 
 // types
 types : primitive_types | composite_types | arr_type;

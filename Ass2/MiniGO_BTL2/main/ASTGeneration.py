@@ -60,7 +60,7 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#struct_decl.
     def visitStruct_decl(self, ctx:MiniGoParser.Struct_declContext):
         name = Id(ctx.ID().getText()) 
-        fields = [self.visit(field) for field in ctx.struct_fields()] if ctx.struct_fields() else []
+        fields = self.visit(ctx.struct_fields()) if ctx.struct_fields() else []
         
         return StructDecl(name, fields)
 
@@ -68,8 +68,8 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#struct_fields.
     def visitStruct_fields(self, ctx:MiniGoParser.Struct_fieldsContext):
         if ctx.struct_fields():
-            return self.visit(ctx.struct_field()) + self.visit(ctx.struct_fields())
-        else: return self.visit(ctx.struct_field())
+            return [self.visit(ctx.struct_field())] + self.visit(ctx.struct_fields())
+        else: return [self.visit(ctx.struct_field())]
 
 
     # Visit a parse tree produced by MiniGoParser#struct_field.
@@ -78,7 +78,7 @@ class ASTGeneration(MiniGoVisitor):
         fieldName = Id(ctx.ID().getText())
         
         if ctx.primitive_types():
-            obj = self.get_type(ctx.primitive_types().getText())
+            obj = self.get_type(ctx.primitive_types())
         elif ctx.composite_types():
             obj = self.get_type(ctx.composite_types())
         else: obj = self.get_type(ctx.arr_type())
@@ -91,8 +91,8 @@ class ASTGeneration(MiniGoVisitor):
         name = Id(ctx.ID().getText())
         returnType = self.get_type(ctx.types().getText()) if ctx.types() else None
         methodReceiver = self.visit(ctx.method_para())
-        param = [self.visit(para) for para in ctx.list_para()] if ctx.list_para() else []
-        stmts = [self.visit(stmt) for stmt in ctx.block_statement()] if ctx.block_statement() else []
+        param = self.visit(ctx.list_para()) if ctx.list_para() else []
+        stmts = self.visit(ctx.block_statement()) if ctx.block_statement() else []
         
         return FunctionDecl(name, returnType, methodReceiver, param, stmts)
 
@@ -109,7 +109,7 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#interface_decl.
     def visitInterface_decl(self, ctx:MiniGoParser.Interface_declContext):
         name = Id(ctx.ID().getText())
-        fields = [self.visit(field) for field in ctx.interface_method_list()] if ctx.interface_method_list() else []
+        fields = self.visit(ctx.interface_method_list()) if ctx.interface_method_list() else []
         
         return InterfaceDecl(name, fields)
 
@@ -117,8 +117,8 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#interface_method_list.
     def visitInterface_method_list(self, ctx:MiniGoParser.Interface_method_listContext):
         if ctx.interface_method_list():
-            return self.visit(ctx.interface_method()) + self.visit(ctx.interface_method_list())
-        else: return self.visit(ctx.interface_method())
+            return [self.visit(ctx.interface_method())] + self.visit(ctx.interface_method_list())
+        else: return [self.visit(ctx.interface_method())]
 
 
     # Visit a parse tree produced by MiniGoParser#interface_method.
@@ -126,7 +126,7 @@ class ASTGeneration(MiniGoVisitor):
         name = Id(ctx.ID().getText())
         returnType = self.get_type(ctx.types().getText()) if ctx.types() else None
         methodReceiver = None
-        param = [self.visit(para) for para in ctx.interface_para_list()] if ctx.interface_para_list() else []
+        param = self.visit(ctx.interface_para_list()) if ctx.interface_para_list() else []
         stmts = []
         
         return FunctionDecl(name, returnType, methodReceiver, param, stmts)
@@ -135,8 +135,8 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#interface_para_list.
     def visitInterface_para_list(self, ctx:MiniGoParser.Interface_para_listContext):
         if ctx.interface_para_list():
-            return self.visit(ctx.interface_para()) + self.visit(ctx.interface_para_list())
-        else: return self.visit(ctx.interface_para())
+            return [self.visit(ctx.interface_para())] + self.visit(ctx.interface_para_list())
+        else: return [self.visit(ctx.interface_para())]
 
 
     # Visit a parse tree produced by MiniGoParser#interface_para.
@@ -155,8 +155,8 @@ class ASTGeneration(MiniGoVisitor):
         name = Id(ctx.ID().getText())
         returnType = self.get_type(ctx.types().getText()) if ctx.types() else None
         methodReceiver = None
-        param = [self.visit(para) for para in ctx.list_para()] if ctx.list_para() else []
-        stmts = [self.visit(stmt) for stmt in ctx.block_statement()] if ctx.block_statement() else []
+        param = self.visit(ctx.list_para()) if ctx.list_para() else []
+        stmts = self.visit(ctx.block_statement()) if ctx.block_statement() else []
         
         return FunctionDecl(name, returnType, methodReceiver, param, stmts)
 
@@ -164,8 +164,8 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#list_para.
     def visitList_para(self, ctx:MiniGoParser.List_paraContext):
         if ctx.list_para():
-            return self.visit(ctx.para()) + self.visit(ctx.list_para())
-        else: return self.visit(ctx.para())
+            return [self.visit(ctx.para())] + self.visit(ctx.list_para())
+        else: return [self.visit(ctx.para())]
 
 
     # Visit a parse tree produced by MiniGoParser#para.
@@ -187,8 +187,8 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#list_statement.
     def visitList_statement(self, ctx:MiniGoParser.List_statementContext):
         if ctx.list_statement():
-            return self.visit(ctx.statement()) + self.visit(ctx.list_statement())
-        else: return self.visit(ctx.statement())
+            return [self.visit(ctx.statement())] + self.visit(ctx.list_statement())
+        else: return [self.visit(ctx.statement())]
 
 
     # Visit a parse tree produced by MiniGoParser#statement.
@@ -230,8 +230,8 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#lhs_list.
     def visitLhs_list(self, ctx:MiniGoParser.Lhs_listContext):
         if (ctx.lhs_list()):
-            return self.visit(ctx.lhs()) + self.visit(ctx.lhs_list())
-        else: return self.visit(ctx.lhs())
+            return [self.visit(ctx.lhs())] + self.visit(ctx.lhs_list())
+        else: return [self.visit(ctx.lhs())]
 
 
     # Visit a parse tree produced by MiniGoParser#lhs.
