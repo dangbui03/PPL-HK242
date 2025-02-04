@@ -37,10 +37,10 @@ decl: variable_decl
     ;
 
 // Variable declarations
-variable_decl: VAR ID types? (ASSIGN list_expr)? SEMI newline*;
+variable_decl: VAR ID types? (ASSIGN expr)? SEMI newline*;
 
 // Constant declarations
-const_decl: CONST ID types? ASSIGN list_expr SEMI? newline*;
+const_decl: CONST ID types? ASSIGN expr SEMI? newline*;
 
 // Struct declarations
 struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields? RBRACE (SEMI | newline) newline*;
@@ -164,7 +164,7 @@ arr_type: index_operator types?;
 index_operator: LBRACK int_lit RBRACK index_operator | LBRACK int_lit RBRACK;
 
 // literal list
-literals: int_lit | FLOAT_LIT | STR_LIT | bool_lit | arr_lit | struct_lit;
+literals: int_lit | float_lit | str_lit | bool_lit | arr_lit | struct_lit | nil_lit;
 
 // struct literal
 struct_lit: ID LBRACE list_field? RBRACE;
@@ -184,6 +184,7 @@ int_lit
 float_lit: FLOAT_LIT;
 bool_lit: TRUE | FALSE;
 str_lit: STR_LIT;
+nil_lit: NIL;
 
 newline: '\r'? '\n';
 

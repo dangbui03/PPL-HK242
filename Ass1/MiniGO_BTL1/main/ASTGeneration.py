@@ -15,14 +15,16 @@ from functools import reduce
 class ASTGeneration(MiniGoVisitor):
 # Visit a parse tree produced by MiniGoParser#program.
     def visitProgram(self, ctx:MiniGoParser.ProgramContext):
-        return Program(self.visit(ctx.decllist()))
+        return Program([self.visit(ctx.decllist())])
     
+
 
     # Visit a parse tree produced by MiniGoParser#decllist.
     def visitDecllist(self, ctx:MiniGoParser.DecllistContext):
-        if ctx.decllist():
-            return [self.visit(ctx.decl())] + self.visit(ctx.decllist())
-        else: return [self.visit(ctx.decl())]
+        # if ctx.decllist():
+        #     return self.visit(ctx.decl()) + self.visit(ctx.decllist())
+        # else: return self.visit(ctx.decl())
+        return 1
 
 
     # Visit a parse tree produced by MiniGoParser#decl.
@@ -44,7 +46,7 @@ class ASTGeneration(MiniGoVisitor):
     def visitVariable_decl(self, ctx:MiniGoParser.Variable_declContext):
         name = Id(ctx.ID().getText()) 
         type = self.get_type(ctx.types().getText()) if ctx.types() else None
-        varInit = self.visit(ctx.expr()) if ctx.expr() else None
+        varInit = self.visit(ctx.list_expr()) if ctx.list_expr() else None
         
         return VariablesDecl(name, type, varInit)
 
@@ -52,7 +54,7 @@ class ASTGeneration(MiniGoVisitor):
     def visitConst_decl(self, ctx:MiniGoParser.Const_declContext):
         name = Id(ctx.ID().getText()) 
         # type = self.get_type(ctx.types().getText()) if ctx.types() else None
-        varInit = self.visit(ctx.expr())
+        varInit = self.visit(ctx.list_expr()) # if ctx.list_expr() else None
         
         return ConstDecl(name, varInit)
 
@@ -342,8 +344,8 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#list_expr.
     def visitList_expr(self, ctx:MiniGoParser.List_exprContext):
         if ctx.list_expr():
-            return [self.visit(ctx.expr())] + self.visit(ctx.list_expr())
-        else: return [self.visit(ctx.expr())]
+            return self.visit(ctx.expr()) + self.visit(ctx.list_expr())
+        else: return self.visit(ctx.expr())
 
 
     # Visit a parse tree produced by MiniGoParser#expr.
@@ -406,7 +408,7 @@ class ASTGeneration(MiniGoVisitor):
 
     # Visit a parse tree produced by MiniGoParser#primary_expr.
     def visitPrimary_expr(self, ctx:MiniGoParser.Primary_exprContext):
-        if ctx.func_call():
+        if ctx.func_call:
             return self.visit(ctx.func_call())
         elif ctx.exprd():
             return self.visit(ctx.exprd())
@@ -436,7 +438,7 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#func_call.
     def visitFunc_call(self, ctx:MiniGoParser.Func_callContext):
         method = Id(ctx.ID().getText())
-        param = self.visit(ctx.list_expr()) if ctx.list_expr() else []
+        param = [self.visit(ctx.list_expr())] if ctx.list_expr() else []
         
         return CallExpr(None, method, param)
 
@@ -572,12 +574,8 @@ class ASTGeneration(MiniGoVisitor):
 
     # Visit a parse tree produced by MiniGoParser#str_lit.
     def visitStr_lit(self, ctx:MiniGoParser.Str_litContext):
-        return StringLiteral(ctx.STR_LIT().getText())
+        return StringLiteral(ctx.getChild(0).getText())
 
-
-    # Visit a parse tree produced by MiniGoParser#nil_lit.
-    def visitNil_lit(self, ctx:MiniGoParser.Nil_litContext):
-        return NilLiteral()
 
     # Visit a parse tree produced by MiniGoParser#newline.
     def visitNewline(self, ctx:MiniGoParser.NewlineContext):
