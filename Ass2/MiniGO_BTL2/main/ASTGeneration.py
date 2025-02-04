@@ -410,17 +410,18 @@ class ASTGeneration(MiniGoVisitor):
             return self.visit(ctx.func_call())
         elif ctx.exprd():
             return self.visit(ctx.exprd())
-        elif ctx.LBRACK() and ctx.RBRACK():  # Handle array indexing
-            base_expr = self.visit(ctx.primary_expr())
-            index_expr = self.visit(ctx.expr())
-            return base_expr + index_expr
-        elif ctx.DOT() and ctx.expr():
-            base_expr = self.visit(ctx.primary_expr())
-            expr = self.visit(ctx.expr()) if ctx.expr() else None
-            if ctx.LPAREN() and ctx.RPAREN():  
-                param = self.visit(ctx.list_expr()) if ctx.list_expr() else []
-                return base_expr + expr + param
-            return base_expr + expr
+        # elif ctx.LBRACK() and ctx.RBRACK():  # Handle array indexing
+        #     base_expr = self.visit(ctx.primary_expr())
+        #     index_expr = self.visit(ctx.expr())
+        #     return base_expr + index_expr
+        # elif ctx.DOT() and ctx.expr():
+        #     base_expr = self.visit(ctx.primary_expr())
+        #     expr = self.visit(ctx.expr()) if ctx.expr() else None
+        #     if ctx.LPAREN() and ctx.RPAREN():  
+        #         param = self.visit(ctx.list_expr()) if ctx.list_expr() else []
+        #         return base_expr + expr + param
+        #     return base_expr + expr
+        else: return 1
 
 
     # Visit a parse tree produced by MiniGoParser#exprd.

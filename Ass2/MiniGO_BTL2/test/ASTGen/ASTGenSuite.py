@@ -21,7 +21,6 @@ class ASTGenSuite(unittest.TestCase):
     def test_002(self):
         input = """const VoTien = foo( 1.0,true,false,nil,\"votien\" ); """
         expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[FloatLiteral(1.0),BooleanLiteral(True),BooleanLiteral(False),NilLiteral(),StringLiteral("votien")]))])
-        print(expect)
         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
     def test_003(self):
@@ -44,30 +43,30 @@ class ASTGenSuite(unittest.TestCase):
         expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[ArrayCell(ArrayCell(Id("a"),IntLiteral(2)),IntLiteral(3))]))])
         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-#     def test_007(self):
-#         input = """const VoTien = foo( a.b.c ); """
-#         expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[FieldAccess(FieldAccess(Id("a"),Id("b")),Id("c"))]))])
-#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+    def test_007(self):
+        input = """const VoTien = foo( a.b.c ); """
+        expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[FieldAccess(FieldAccess(Id("a"),Id("b")),Id("c"))]))])
+        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-#     def test_008(self):
-#         input = """const VoTien = foo( a(),b.a(2, 3) ); """
-#         expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[CallExpr(None,Id("a"),[]),CallExpr(Id("b"),Id("a"),[IntLiteral(2),IntLiteral(3)])]))])
-#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+    def test_008(self):
+        input = """const VoTien = foo( a(),b.a(2, 3) ); """
+        expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[CallExpr(None,Id("a"),[]),CallExpr(Id("b"),Id("a"),[IntLiteral(2),IntLiteral(3)])]))])
+        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-#     def test_009(self):
-#         input = """const VoTien = foo( a * (1+2) ); """
-#         expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[BinaryOp("*",Id("a"),BinaryOp("+",IntLiteral(1),IntLiteral(2)))]))])
-#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+    def test_009(self):
+        input = """const VoTien = foo( a * (1+2) ); """
+        expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[BinaryOp("*",Id("a"),BinaryOp("+",IntLiteral(1),IntLiteral(2)))]))])
+        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-#     def test_010(self):
-#         input = """const VoTien = foo( Votien {}, Votien {a: 1} ); """
-#         expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[StructLiteral(Id("Votien"), []),StructLiteral(Id("Votien"), [(Id("a"),IntLiteral(1))])]))])
-#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+    def test_010(self):
+        input = """const VoTien = foo( Votien {}, Votien {a: 1} ); """
+        expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[StructLiteral(Id("Votien"), []),StructLiteral(Id("Votien"), [(Id("a"),IntLiteral(1))])]))])
+        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-#     def test_011(self):
-#         input = """const VoTien = foo( [1]int{1}, [1][1]int{2} ); """
-#         expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[ArrayLiteral(IntType(), [], value=[IntLiteral(1)]),ArrayLiteral(IntType(), [1], value=[IntLiteral(2)])]))])
-#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+    def test_011(self):
+        input = """const VoTien = foo( [1]int{1}, [1][1]int{2} ); """
+        expect = Program([ConstDecl(Id("VoTien"),CallExpr(None,Id("foo"),[ArrayLiteral(IntType(), [], value=[IntLiteral(1)]),ArrayLiteral(IntType(), [1], value=[IntLiteral(2)])]))])
+        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
 #     def test_012(self):
 #         input = """
