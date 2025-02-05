@@ -1,4 +1,5 @@
 
-            type Votien interface {
-                Add(x, y int) int;
+            func votien() {
+                var a int;
+                const a = nil;
             }

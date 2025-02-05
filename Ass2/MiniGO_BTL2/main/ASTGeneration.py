@@ -159,7 +159,7 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#func_decl.
     def visitFunc_decl(self, ctx:MiniGoParser.Func_declContext):
         name = Id(ctx.ID().getText())
-        returnType = self.visit(ctx.types()) if ctx.types() else None
+        returnType = self.visit(ctx.types()) if ctx.types() else VoidType()
         methodReceiver = None
         param = self.visit(ctx.list_para()) if ctx.list_para() else []
         stmts = self.visit(ctx.block_statement())
@@ -235,23 +235,26 @@ class ASTGeneration(MiniGoVisitor):
 
     # Visit a parse tree produced by MiniGoParser#lhs_list.
     def visitLhs_list(self, ctx:MiniGoParser.Lhs_listContext):
-        if (ctx.lhs_list()):
-            return [self.visit(ctx.lhs())] + self.visit(ctx.lhs_list())
-        else: return [self.visit(ctx.lhs())]
+        # if (ctx.lhs_list()):
+        #     return [self.visit(ctx.lhs())] + self.visit(ctx.lhs_list())
+        # else: return [self.visit(ctx.lhs())]
+        if ctx.getChildCount() > 1:
+            return Id(ctx.ID().getText()) + self.visit(ctx.lhs())
+        return Id(ctx.ID().getText())
 
 
     # Visit a parse tree produced by MiniGoParser#lhs.
     def visitLhs(self, ctx:MiniGoParser.LhsContext):
-        if (ctx.arr_type()):
-            return self.visit(ctx.arr_type())
+        if (ctx.index_operator()):
+            return ArrayCell(self.visit(ctx.list_expr())), self.visit(ctx.lhs())
         if (ctx.ID()):
             return Id(ctx.ID().getText())
-        else: return self.visit(ctx.getChild(0).getText())
+        else: return 
 
 
     # Visit a parse tree produced by MiniGoParser#ass_operator.
     def visitAss_operator(self, ctx:MiniGoParser.Ass_operatorContext):
-        return self.visit(ctx.getChild(0).getText())
+        return ctx.getChild(0).getText()
 
 
     # Visit a parse tree produced by MiniGoParser#if_statement.

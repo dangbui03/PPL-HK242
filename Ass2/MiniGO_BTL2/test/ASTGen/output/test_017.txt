@@ -1,4 +1,5 @@
 Program([
-			InterfaceDecl(Id("Votien"),[FunctionDecl(Id("Add"), IntType(), None,[VariablesDecl(Id("x"), None, None),VariablesDecl(Id("y"), IntType(), None)],[
-				])])
+			FunctionDecl(Id("votien"), VoidType(), None,[],[
+				VariablesDecl(Id("a"), IntType(), None),
+				ConstDecl(Id("a"),NilLiteral())])
 		])

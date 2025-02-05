@@ -84,8 +84,10 @@ declared_statement: variable_decl newline* | const_decl newline*;
 
 // assign statement
 assign_statement: lhs_list ass_operator expr SEMI? newline*;
-lhs_list: lhs lhs_list | lhs;
-lhs: arr_type | ID | DOT; //ID DOT ID | DOT;
+lhs_list: ID lhs | ID;
+lhs: (LBRACK list_expr RBRACK | DOT ID) lhs | (LBRACK list_expr RBRACK | DOT ID);
+// lhs_list: lhs lhs_list | lhs;
+// lhs: index_operator | ID | DOT;
 ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
 
 // if statement
@@ -110,7 +112,7 @@ value_assign: ID ':=' RANGE;
 // break statement
 break_statement: BREAK (SEMI | newline) newline*;
 
-call_statement: lhs_list? ID LPAREN list_expr? RPAREN (SEMI | newline) newline*;
+call_statement: lhs_list? LPAREN list_expr? RPAREN (SEMI | newline) newline*;
 
 continue_statement: CONTINUE (SEMI | newline) newline*;
 

@@ -1,0 +1,4 @@
+Program([
+			FunctionDecl(Id("votien"), VoidType(), None,[],[
+				If(IntLiteral(1), [[AssignStmt(lhs=Id(name='a'), assign=':=', exp=IntLiteral(value=1))]], None, [[AssignStmt(lhs=Id(name='a'), assign=':=', exp=IntLiteral(value=1))]])])
+		])

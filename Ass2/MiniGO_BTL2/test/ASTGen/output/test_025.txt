@@ -1,0 +1,4 @@
+Program([
+			FunctionDecl(Id("votien"), VoidType(), None,[],[
+				For(Id("value"),Id("value"),ArrayCell(Id("array"),IntLiteral(2)),[[]])])
+		])
