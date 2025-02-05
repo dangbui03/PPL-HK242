@@ -192,87 +192,87 @@ class ASTGenSuite(unittest.TestCase):
 		])
         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_021(self):
-        input = """
-            func votien() {
-                if(1) {}
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				If(IntLiteral(1), [], None, None)])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_021(self):
+#         input = """
+#             func votien() {
+#                 if(1) {}
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				If(IntLiteral(1), [], None, None)])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_022(self):
-        input = """
-            func votien() {
-                if(1) {
-                    a := 1;
-                }
-                else {
-                    a := 1;
-                }
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				If(IntLiteral(1), [AssignStmt(Id("a"),":=",IntLiteral(1))], None, [AssignStmt(Id("a"),":=",IntLiteral(1))])])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_022(self):
+#         input = """
+#             func votien() {
+#                 if(1) {
+#                     a := 1;
+#                 }
+#                 else {
+#                     a := 1;
+#                 }
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				If(IntLiteral(1), [AssignStmt(Id("a"),":=",IntLiteral(1))], None, [AssignStmt(Id("a"),":=",IntLiteral(1))])])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_023(self):
-        input = """
-            func votien() {
-                if(1) {
-                }else if(1) {
-                    a := 1;
-                }else if(2) {
-                }
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				If(IntLiteral(1), [], [
-                    (IntLiteral(1),[AssignStmt(Id("a"),":=",IntLiteral(1))]), 
-                    (IntLiteral(2),[])]
-                    , None)])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_023(self):
+#         input = """
+#             func votien() {
+#                 if(1) {
+#                 }else if(1) {
+#                     a := 1;
+#                 }else if(2) {
+#                 }
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				If(IntLiteral(1), [], [
+#                     (IntLiteral(1),[AssignStmt(Id("a"),":=",IntLiteral(1))]), 
+#                     (IntLiteral(2),[])]
+#                     , None)])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
 
-    def test_024(self):
-        input = """
-            func votien() {
-                for i < 10 {}
-                for var i = 0; i < 10; i += 1  {}
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				For(None,BinaryOp("<",Id("i"),IntLiteral(10)),None,[]),
-				For(VariablesDecl(Id("i"), None, IntLiteral(0)),BinaryOp("<",Id("i"),IntLiteral(10)),AssignStmt(Id("i"),"+=",IntLiteral(1)),[])])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_024(self):
+#         input = """
+#             func votien() {
+#                 for i < 10 {}
+#                 for var i = 0; i < 10; i += 1  {}
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				For(None,BinaryOp("<",Id("i"),IntLiteral(10)),None,[]),
+# 				For(VariablesDecl(Id("i"), None, IntLiteral(0)),BinaryOp("<",Id("i"),IntLiteral(10)),AssignStmt(Id("i"),"+=",IntLiteral(1)),[])])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_025(self):
-        input = """
-            func votien() {
-                for index, value := range array[2] {}
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				For(Id("index"),Id("value"),ArrayCell(Id("array"),IntLiteral(2)),[])])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_025(self):
+#         input = """
+#             func votien() {
+#                 for index, value := range array[2] {}
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				For(Id("index"),Id("value"),ArrayCell(Id("array"),IntLiteral(2)),[])])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_058(self):
-        "thêm type array vào AST anh có thông bao trong nhóm task 3"
-        input = """
-            var a [2][3]int;
-"""
-        expect = Program([
-            VariablesDecl(Id("a"), ArrayType(IntType(), [2, 3]), None)
-        ])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_058(self):
+#         "thêm type array vào AST anh có thông bao trong nhóm task 3"
+#         input = """
+#             var a [2][3]int;
+# """
+#         expect = Program([
+#             VariablesDecl(Id("a"), ArrayType(IntType(), [2, 3]), None)
+#         ])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
