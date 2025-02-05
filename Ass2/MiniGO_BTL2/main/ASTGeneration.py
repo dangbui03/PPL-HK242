@@ -247,9 +247,9 @@ class ASTGeneration(MiniGoVisitor):
     def visitLhs(self, ctx:MiniGoParser.LhsContext):
         if (ctx.index_operator()):
             return ArrayCell(self.visit(ctx.list_expr())), self.visit(ctx.lhs())
-        if (ctx.ID()):
-            return Id(ctx.ID().getText())
-        else: return 
+        # if (ctx.ID()):
+        #     return Id(ctx.ID().getText())
+        # else: return 
 
 
     # Visit a parse tree produced by MiniGoParser#ass_operator.
@@ -329,12 +329,11 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#call_statement.
     def visitCall_statement(self, ctx:MiniGoParser.Call_statementContext):
         obj = self.visit(ctx.lhs_list()) if ctx.lhs_list() else None
-        method = Id(ctx.ID().getText())
-        if ctx.lhs_list().lhs().ID():
-            obj = self.visit(ctx.lhs_list())
-        param = [self.visit(ctx.list_expr())] if ctx.list_expr() else []
+        # method = Id(ctx.ID().getText())
+        # if ctx.
+        param = self.visit(ctx.list_expr()) if ctx.list_expr() else []
         
-        return CallStmt(obj, method, param)
+        return CallStmt(obj, None, param)
 
 
     # Visit a parse tree produced by MiniGoParser#continue_statement.
