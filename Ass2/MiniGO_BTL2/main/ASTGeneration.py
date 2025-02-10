@@ -109,7 +109,7 @@ class ASTGeneration(MiniGoVisitor):
         type = ClassType(self.visit(ctx.composite_types()))
         varInit = None
         
-        return VariablesDecl(name, type, varInit)        
+        return VariablesDecl(name, type, varInit)
 
 
     # Visit a parse tree produced by MiniGoParser#interface_decl.

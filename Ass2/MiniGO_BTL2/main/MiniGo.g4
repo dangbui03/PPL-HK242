@@ -48,7 +48,7 @@ struct_fields: struct_field struct_fields | struct_field;
 struct_field: ID (primitive_types | arr_type) SEMI newline* | ID composite_types (SEMI | newline) newline*;
 
 // method declarations
-method_decl: FUNC LPAREN method_para RPAREN ID LPAREN list_para RPAREN types? block_statement newline*;
+method_decl: FUNC LPAREN method_para_list RPAREN ID LPAREN list_para RPAREN types? block_statement newline*;
 method_para_list: method_para method_para_list | method_para;
 method_para: ID composite_types;
 
@@ -83,9 +83,10 @@ statement:
 declared_statement: variable_decl newline* | const_decl newline*;
 
 // assign statement
-assign_statement: lhs ass_operator expr SEMI? newline*;
+assign_statement: lhs2 ass_operator expr SEMI? newline*;
 // lhs: ID lhs_list;
 // lhs_list: (DOT | index_operator | ID) lhs_list | ;
+lhs2: ID index_operator? (DOT ID)?;
 lhs: ID | lhs DOT ID | lhs LBRACK expr RBRACK;
 lhs_list: lhs lhs_list | lhs;
 ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
