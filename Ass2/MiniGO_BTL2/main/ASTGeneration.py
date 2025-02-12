@@ -463,7 +463,7 @@ class ASTGeneration(MiniGoVisitor):
     def visitMethod_call(self, ctx:MiniGoParser.Method_callContext):
         obj = self.visit(ctx.expr())
         method = Id(ctx.ID().getText())
-        param = [self.visit(ctx.list_expr())] if ctx.list_expr() else []
+        param = self.visit(ctx.list_expr()) if ctx.list_expr() else []
         
         return CallExpr(obj, method, param)
 

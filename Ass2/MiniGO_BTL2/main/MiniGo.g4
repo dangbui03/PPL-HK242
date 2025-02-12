@@ -26,7 +26,8 @@ options{
 
 program: newline* decllist EOF;
 
-decllist: decl decllist newline* | decl newline*;
+decllist: decl decllist newline* 
+        | decl newline*;
 
 decl: variable_decl 
     | const_decl 
@@ -37,29 +38,29 @@ decl: variable_decl
     ;
 
 // Variable declarations
-variable_decl: VAR ID types? (ASSIGN expr)? SEMI newline*;
+variable_decl: VAR ID types? (ASSIGN expr)? (SEMI | newline) newline*;
 
 // Constant declarations
-const_decl: CONST ID types? ASSIGN expr SEMI? newline*;
+const_decl: CONST ID types? ASSIGN expr (SEMI | newline) newline*;
 
 // Struct declarations
 struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields? RBRACE (SEMI | newline) newline*;
 struct_fields: struct_field struct_fields | struct_field;
-struct_field: ID (primitive_types | arr_type) SEMI newline* | ID composite_types (SEMI | newline) newline*;
+struct_field: ID types (SEMI | newline) newline*; //ID (primitive_types | arr_type) SEMI newline* | ID composite_types (SEMI | newline) newline*;
 
 // method declarations
-method_decl: FUNC LPAREN method_para_list RPAREN ID LPAREN list_para RPAREN types? block_statement newline*;
+method_decl: FUNC LPAREN method_para_list RPAREN ID LPAREN list_para RPAREN types? block_statement (SEMI | newline)? newline*;
 method_para_list: method_para method_para_list | method_para;
 method_para: ID composite_types;
 
 // interface declarations
-interface_decl: TYPE ID INTERFACE newline* LBRACE newline* interface_method_list? RBRACE SEMI? newline*;
+interface_decl: TYPE ID INTERFACE newline* LBRACE newline* interface_method_list? RBRACE (SEMI | newline)? newline*;
 interface_method_list: interface_method interface_method_list | interface_method;
 interface_method: ID LPAREN interface_para_list RPAREN types? SEMI? newline*; 
 interface_para_list: interface_para COMMA interface_para_list | interface_para | ;
 interface_para: ID types?;
 
-func_decl: FUNC ID LPAREN list_para RPAREN types? block_statement newline*;
+func_decl: FUNC ID LPAREN list_para RPAREN types? block_statement (SEMI | newline)? newline*;
 list_para: para COMMA list_para | para | ;
 para: ID types;
 
@@ -80,14 +81,14 @@ statement:
 	);
 
 // declared statement
-declared_statement: variable_decl newline* | const_decl newline*;
+declared_statement: decl newline*;//variable_decl newline* | const_decl newline*;
 
 // assign statement
-assign_statement: lhs2 ass_operator expr SEMI? newline*;
+assign_statement: lhs ass_operator expr SEMI? newline*;
 // lhs: ID lhs_list;
 // lhs_list: (DOT | index_operator | ID) lhs_list | ;
-lhs2: ID index_operator? (DOT ID)?;
-lhs: ID | lhs DOT ID | lhs LBRACK expr RBRACK;
+lhs2: ID (DOT ID)? index_operator? ;
+lhs: ID | lhs DOT ID | lhs index_operator;
 lhs_list: lhs lhs_list | lhs;
 ass_operator: ':=' | '-='| '+=' | '*=' | '/=' | '%=';
 
@@ -145,7 +146,6 @@ unary_expr  : (NOT | MINUS) unary_expr
             | primary_expr;
 
 primary_expr: primary_expr LBRACK expr RBRACK 
-            // | primary_expr DOT expr? (LPAREN list_expr? RPAREN)?
             | primary_expr DOT ID (LPAREN list_expr? RPAREN)?
             | func_call
             | exprd 
@@ -166,7 +166,7 @@ composite_types: struct_type | interface_type;
 struct_type: ID;
 interface_type: ID;
 arr_type: index_operator types?;
-index_operator: LBRACK DEC_LIT RBRACK index_operator | LBRACK DEC_LIT RBRACK;
+index_operator: LBRACK (DEC_LIT | struct_lit) RBRACK index_operator | LBRACK int_lit RBRACK;
 
 // literal list
 literals: int_lit | float_lit | str_lit | bool_lit | arr_lit | struct_lit | nil_lit;

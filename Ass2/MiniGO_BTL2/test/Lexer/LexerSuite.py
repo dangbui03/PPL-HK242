@@ -94,7 +94,10 @@ class LexerSuite(unittest.TestCase):
     def test_050(self):
         """FLOAT_LIT"""
         self.assertTrue(TestLexer.test("010.010e-20", "0,10.010e-20,<EOF>", inspect.stack()[0].function))
-
+    def test_051(self):
+        """FLOAT_LIT"""
+        self.assertTrue(TestLexer.test("1.2e+-2", "1.2,e,+,-,2,<EOF>", inspect.stack()[0].function))
+        
     def test_053(self):
         """FLOAT_LIT"""
         self.assertTrue(TestLexer.test("09.e-002", "0,9.e-0,0,2,<EOF>", inspect.stack()[0].function))
