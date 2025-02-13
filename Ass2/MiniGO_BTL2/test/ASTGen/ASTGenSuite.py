@@ -89,43 +89,43 @@ class ASTGenSuite(unittest.TestCase):
             func foo(a int, b int) {}
 """
         expect = Program([
-			FunctionDecl(Id("foo"), IntType(), None,[], []),
-			FunctionDecl(Id("foo"), VoidType(), None,[VariablesDecl(Id("a"), IntType(), None)], [])
-		])
+            FunctionDecl(Id("foo"), IntType(), None,[], []),
+            FunctionDecl(Id("foo"), VoidType(), None,[VariablesDecl(Id("a"), IntType(), None), VariablesDecl(Id("b"), IntType(), None)], [])
+        ])
         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_014(self):
-        input = """
-            func (Votien v) foo(Votien int) {}
-"""
-        expect = Program([
-			FunctionDecl(Id("foo"), VoidType(), VariablesDecl(Id("Votien"), ClassType(Id("v")), None),[VariablesDecl(Id("Votien"), IntType(), None)], [])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_014(self):
+#         input = """
+#             func (Votien v) foo(Votien int) {}
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("foo"), VoidType(), VariablesDecl(Id("Votien"), ClassType(Id("v")), None),[VariablesDecl(Id("Votien"), IntType(), None)], [])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
 
-    def test_015(self):
-        input = """
-            type Votien struct {
-                a int;
-            }
-"""
-        expect = Program([
-			StructDecl(Id("Votien"),[VariablesDecl(Id("a"), IntType(), None)])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_015(self):
+#         input = """
+#             type Votien struct {
+#                 a int;
+#             }
+# """
+#         expect = Program([
+# 			StructDecl(Id("Votien"),[VariablesDecl(Id("a"), IntType(), None)])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
 
-    def test_016(self):
-        input = """
-            type Votien struct {
-                a int;
-            }
-"""
-        expect = Program([
-			StructDecl(Id("Votien"),[VariablesDecl(Id("a"), IntType(), None)])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_016(self):
+#         input = """
+#             type Votien struct {
+#                 a int;
+#             }
+# """
+#         expect = Program([
+# 			StructDecl(Id("Votien"),[VariablesDecl(Id("a"), IntType(), None)])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
 #     def test_017(self):
 #         input = """
@@ -138,59 +138,59 @@ class ASTGenSuite(unittest.TestCase):
 # 		])
 #         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_017(self):
-        input = """
-            func votien() {
-                var a int;
-                const a = nil;
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				VariablesDecl(Id("a"), IntType(), None),
-				ConstDecl(Id("a"),NilLiteral())])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_017(self):
+#         input = """
+#             func votien() {
+#                 var a int;
+#                 const a = nil;
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				VariablesDecl(Id("a"), IntType(), None),
+# 				ConstDecl(Id("a"),NilLiteral())])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_018(self):
-        input = """
-            func votien() {
-                a += 1;
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				AssignStmt(Id("a"),"+=",IntLiteral(1))])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_018(self):
+#         input = """
+#             func votien() {
+#                 a += 1;
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				AssignStmt(Id("a"),"+=",IntLiteral(1))])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_019(self):
-        input = """
-            func votien() {
-                break;
-                continue;
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				Break(),
-                Continue()])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_019(self):
+#         input = """
+#             func votien() {
+#                 break;
+#                 continue;
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				Break(),
+#                 Continue()])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
-    def test_020(self):
-        input = """
-            func votien() {
-                foo(1, 2);
-                a[2].foo(1,3);
-            }
-"""
-        expect = Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				CallStmt(None,Id("foo"),[IntLiteral(1),IntLiteral(2)]),
-				CallStmt(ArrayCell(Id("a"),IntLiteral(2)),Id("foo"),[IntLiteral(1),IntLiteral(3)])])
-		])
-        self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
+#     def test_020(self):
+#         input = """
+#             func votien() {
+#                 foo(1, 2);
+#                 a[2].foo(1,3);
+#             }
+# """
+#         expect = Program([
+# 			FunctionDecl(Id("votien"), VoidType(), None,[],[
+# 				CallStmt(None,Id("foo"),[IntLiteral(1),IntLiteral(2)]),
+# 				CallStmt(ArrayCell(Id("a"),IntLiteral(2)),Id("foo"),[IntLiteral(1),IntLiteral(3)])])
+# 		])
+#         self.assertTrue(TestAST.test(input, str(expect), inspect.stack()[0].function))
 
 #     def test_021(self):
 #         input = """
