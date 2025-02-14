@@ -17,11 +17,7 @@ def emit(self):
     tk = self.type
     self.preType = tk;
 
-    if tk == self.NEWLINE:
-        if self.preType == self.NEWLINE:
-            return None
-        else:
-            return super().emit();
+
 
     if tk == self.UNCLOSE_STRING:       
         result = super().emit();
@@ -239,15 +235,9 @@ fragment ESC_SEQ: '\\' [rnt"\\];
 fragment ESC_ILLEGAL: [\r] | '\\' ~[rnt'\\];
 //TODO skip 3.1 and 3.2 pdf
 COMMENT: '/*' (COMMENT | .)*? '*/' -> skip;
-SEMICOLON_NEWLINE:
-    ';'
-    | '\r'? '\n' {
-    tk = self.preType;
-    if (tk):
-        self.emit();
-    else:
-        self.skip()
-};
+NEWLINE:
+    '\r'? '\n' 
+;
 // Whitespace
 WS: [ \f\b\t\r]+ -> skip;
 //TODO ERROR pdf BTL1 + lexererr.py
