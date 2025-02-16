@@ -1,6 +1,6 @@
 
-            type VoTien struct {
-                VoTien string ;
-                VoTien [1][3]VoTien ;                     
-            }                                                                     
+            type AltNameStruct struct {
+                field1 string;
+                field2 [1][3]AltNameStruct;
+            }
         

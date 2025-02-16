@@ -1,0 +1,7 @@
+
+            func Sum() {
+                break;
+                continue;
+                break; continue; break;
+            };
+        

@@ -1,0 +1,3 @@
+
+            const constA = 2 func (obj c) Sum(a1 int) {return ;}
+        

@@ -1,1 +1,1 @@
-ErrorToken ^
+0b110,<EOF>

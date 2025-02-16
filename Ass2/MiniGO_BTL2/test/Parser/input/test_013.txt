@@ -1,5 +1,5 @@
 
-            func (c Calculator) VoTien(x int) int {return;};  
-            func (c Calculator) VoTien() ID {return;}      
-            func (c Calculator) VoTien(x int, y [2]VoTien) {return;}                                                      
+            func (c Compute) AltName(a1 int) int {return;};  
+            func (c Compute) AltName() TypeID {return;}      
+            func (c Compute) AltName(a1 int, b1 [2]AltName) {return;}
         

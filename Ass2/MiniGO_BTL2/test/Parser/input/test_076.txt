@@ -1,0 +1,7 @@
+
+            func (p Individual) Welcome() string {
+                if (1) {return;}
+                else if (1)
+                {}
+            };
+        

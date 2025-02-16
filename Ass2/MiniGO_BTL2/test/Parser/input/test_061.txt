@@ -1,0 +1,7 @@
+
+            func Sum() {
+                for i[2] := 1; foo().a.b(); i := 1 {
+                    return;
+                }
+            };
+        

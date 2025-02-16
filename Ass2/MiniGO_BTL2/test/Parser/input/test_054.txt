@@ -1,0 +1,7 @@
+
+            func Sum() {
+                for i1 := 0; i1 < 10; i1 += 1 {
+                   return;
+                }
+            };
+        

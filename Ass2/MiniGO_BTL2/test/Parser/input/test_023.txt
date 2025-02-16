@@ -1,0 +1,3 @@
+
+            var var3 AltName = [true]int{1};
+        

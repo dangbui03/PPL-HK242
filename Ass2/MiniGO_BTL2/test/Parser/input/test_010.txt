@@ -1,5 +1,5 @@
 
-            var x int = foo() + 3 / 4;
-            var y = "Hello" / 4;   
-            var z str;
+            var var1 int = foo() + 3 / 4;
+            var var2 = "Hello" / 4;   
+            var var3 StrType;
         

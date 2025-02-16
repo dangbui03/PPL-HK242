@@ -1,3 +1,4 @@
+// 2153289
 grammar MiniGo;
 
 @lexer::header {
@@ -48,15 +49,17 @@ decl: variable_decl
     ;
 
 // Variable declarations
-variable_decl: VAR ID types? (ASSIGN expr)? (SEMI | newline) newline*;
+// variable_decl: VAR ID types? (types ASSIGN list_expr)? SEMI;//(SEMI | newline) newline*;
+variable_decl: VAR ID ( types (ASSIGN list_expr)? | ASSIGN list_expr ) (SEMI | newline) newline*;
+
 
 // Constant declarations
-const_decl: CONST ID types? ASSIGN expr (SEMI | newline) newline*;
+const_decl: CONST ID types? ASSIGN list_expr (SEMI | newline) newline*;
 
 // Struct declarations
-struct_decl: TYPE ID STRUCT LBRACE newline* struct_fields RBRACE (SEMI | newline) newline*;
+struct_decl: TYPE ID STRUCT newline? LBRACE SEMI* struct_fields RBRACE SEMI+;//(SEMI | newline) newline*;
 struct_fields: struct_field struct_fields | struct_field;
-struct_field: ID types (SEMI | newline) newline*; //ID (primitive_types | arr_type) SEMI newline* | ID composite_types (SEMI | newline) newline*;
+struct_field: ID types SEMI;//(SEMI | newline) newline*; ID (primitive_types | arr_type) SEMI newline* | ID composite_types (SEMI | newline) newline*;
 
 // method declarations
 method_decl: FUNC LPAREN method_para_list RPAREN ID LPAREN list_para RPAREN types? block_statement (SEMI | newline) newline*;
@@ -64,7 +67,7 @@ method_para_list: method_para method_para_list | method_para;
 method_para: ID composite_types;
 
 // interface declarations
-interface_decl: TYPE ID INTERFACE newline* LBRACE newline* interface_method_list RBRACE (SEMI | newline) newline*;
+interface_decl: TYPE ID INTERFACE newline? LBRACE SEMI* interface_method_list RBRACE SEMI;//(SEMI | newline) newline*;
 interface_method_list: interface_method interface_method_list | interface_method;
 interface_method: ID LPAREN interface_para_list RPAREN types? (SEMI | newline) newline*; 
 interface_para_list: interface_para COMMA interface_para_list | interface_para | ;
@@ -74,7 +77,7 @@ func_decl: FUNC ID LPAREN list_para RPAREN types? block_statement (SEMI | newlin
 list_para: para COMMA list_para | para | ;
 para: ID types?;
 
-block_statement: LBRACE newline* list_statement? RBRACE newline*;
+block_statement: LBRACE SEMI* list_statement? SEMI* RBRACE ;
 
 // Statements
 list_statement: statement list_statement | statement;
@@ -105,28 +108,29 @@ lhs_list: lhs lhs_list | lhs;
 ass_operator: COL_ASSIGN | ADD_ASSIGN | MINUS_ASSIGN | MULT_ASSIGN | DIV_ASSIGN | REM_ASSIGN;
 
 // if statement
-if_statement: IF LPAREN expr RPAREN newline* block_statement list_else_if_statement? else_statement? newline*;
+if_statement: IF LPAREN expr RPAREN SEMI* block_statement list_else_if_statement? else_statement? (SEMI | newline) newline*;
 list_else_if_statement: else_if_statement list_else_if_statement | else_if_statement;
-else_if_statement: ELSE IF LPAREN expr RPAREN newline* block_statement;
+else_if_statement: ELSE IF LPAREN expr RPAREN SEMI* block_statement SEMI*;
 else_statement: ELSE newline* block_statement;
 
 // for statement
-for_statement   : FOR expr newline* block_statement newline*
-                | FOR init_for_statement expr SEMI assign_statement newline* block_statement newline*
-                | FOR ID COMMA value_assign expr newline* block_statement newline*
+for_statement   : FOR expr newline* block_statement (SEMI | newline) newline*
+                | FOR init_for_statement SEMI expr SEMI update_stament newline* block_statement (SEMI | newline)* newline*
+                | FOR ID COMMA value_assign expr newline* block_statement (SEMI | newline)* newline*
                 ;
 
-// init_for_statement  : VAR ID types? (ASSIGN expr)?
-//                     | ID (':=' | ASSIGN) expr 
-//                     ;
-init_for_statement  : assign_statement | variable_decl;
+init_for_statement  : VAR ID types? ASSIGN expr
+                    | ID (':=' | ASSIGN) expr 
+                    ;
+// init_for_statement  : assign_statement | variable_decl;
+update_stament: ID ass_operator expr;
 
 value_assign: ID ':=' RANGE;
 
 // break statement
 break_statement: BREAK (SEMI | newline) newline*;
 
-call_statement: lhs? LPAREN list_expr? RPAREN (SEMI | newline) newline*;
+call_statement: lhs LPAREN list_expr? RPAREN (SEMI | newline)* newline*;
 
 continue_statement: CONTINUE (SEMI | newline) newline*;
 
@@ -178,7 +182,7 @@ composite_types: struct_type | interface_type;
 struct_type: ID;
 interface_type: ID;
 arr_type: index_operator types?;
-index_operator: LBRACK (DEC_LIT | ID) RBRACK index_operator | LBRACK (DEC_LIT | ID) RBRACK;
+index_operator: LBRACK (DEC_LIT | struct_type) RBRACK index_operator | LBRACK (DEC_LIT | struct_type) RBRACK;
 
 // literal list
 literals: int_lit | float_lit | str_lit | bool_lit | arr_lit | struct_lit | nil_lit;
@@ -192,7 +196,7 @@ field: ID COLON expr;
 arr_lit: arr_type LBRACE arr_list RBRACE;
 // arr_list: LBRACE arr_list | list_expr RBRACE? (COMMA arr_list)?;
 arr_list: LBRACE* arr_ele RBRACE* | LBRACE* arr_ele RBRACE* COMMA arr_list;
-arr_ele: literals COMMA arr_ele | literals;
+arr_ele: literals | struct_type;
 
 int_lit     
         :   DEC_LIT
@@ -205,7 +209,7 @@ bool_lit: TRUE | FALSE;
 str_lit: STR_LIT;
 nil_lit: NIL;
 
-
+newline: NEWLINE;
 
 //TODO Keywords 3.3.2 pdf
 IF: 'if';
@@ -265,7 +269,7 @@ SEMI:
     ';'
     | '\r'? '\n' {
         if self.preType in {self.ID, self.DEC_LIT, self.BIN_LIT, self.OCT_LIT, self.HEX_LIT, self.FLOAT_LIT,
-                         self.STRING_LIT, self.TRUE, self.FALSE, self.NIL, self.INT, self.FLOAT,
+                         self.STR_LIT, self.TRUE, self.FALSE, self.NIL, self.INT, self.FLOAT,
                          self.STRING, self.BOOLEAN, self.RETURN, self.CONTINUE, self.BREAK,
                          self.RPAREN, self.RBRACK, self.RBRACE, self.LBRACE, self.LBRACK}:
             self.type = self.SEMI;
@@ -274,8 +278,6 @@ SEMI:
         else:
             self.skip();
     };
-
-newline: '\r'? '\n';
 
 COMMA: ',';
 
@@ -313,6 +315,8 @@ HEX_LIT
         // }
     ;
 
+NEWLINE: '\r'? '\n' -> skip ; // Newlines
+
 // Floating-point Literals
 FLOAT_LIT
     :  DIGIT ('.' [0-9]*) EXP?;
@@ -340,10 +344,10 @@ UNCLOSE_STRING: '"' ( ~[\t\r\n'"\\] | ESCAPE_SEQ )* ( EOF | '\n' | '\r\n') {
         raise UncloseString(f"{self.text}")
 };
 
-ILLEGAL_ESCAPE: '"' ( ~[\r\n\\b'"] | ESCAPE_SEQ )* ([\r\\'] | IllegalEscape | [']~["]) {
+ILLEGAL_ESCAPE: '"' ( ~[\t\r\n\\'"] | ESCAPE_SEQ )* ([\r\\'] | IllegalEscape | [']~["]) {
 	raise IllegalEscape(self.text)
 };
-fragment IllegalEscape: '\\' ~[brnt'\\];
-fragment ESCAPE_SEQ: '\\' [btnr'\\] | [']["];
+fragment IllegalEscape: '\\' ~[rnt"\\];
+fragment ESCAPE_SEQ: '\\' [tnr"\\] ;
 
 //! ---------------- LEXER ----------------------- */

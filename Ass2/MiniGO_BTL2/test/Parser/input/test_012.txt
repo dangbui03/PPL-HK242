@@ -1,5 +1,5 @@
 
-            func VoTien(x int, y int) int {return;}
-            func VoTien1() [2][3] ID {return;};        
-            func VoTien2() {return;}                                       
+            func AltName(a1 int, b1 int) int {return;}
+            func AltName1() [2][3] TypeID {return;};        
+            func AltName2() {return;}
         

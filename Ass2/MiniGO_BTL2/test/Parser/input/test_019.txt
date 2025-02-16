@@ -1,12 +1,12 @@
-    
-            func VoTien() {
-                if (x > 10) {return; } 
+
+            func AltName() {
+                if (x > 10) {return; }
                 if (x > 10) {
-                  return; 
+                  return;
                 } else if (x == 10) {
-                    var z str;
+                    var var3 StrType;
                 } else {
-                    var z ID;
+                    var var3 TypeID;
                 }
             }
         

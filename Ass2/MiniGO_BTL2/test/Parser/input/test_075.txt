@@ -1,2 +1,6 @@
-    
-            type Calculator struct {value int}
+
+            func Sum() {
+                return (2 + 3).b;
+                return -1.c;
+            };
+        

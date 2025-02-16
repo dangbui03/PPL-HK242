@@ -1,0 +1,6 @@
+
+            func Sum() {
+                for idx, val := range 23 {return;
+                }
+            };
+        

@@ -1,3 +1,10 @@
-    
-            const a = 0b11;                         
+
+            func AltName() {
+                for i1 < 10 {break;}
+                break;
+                continue;
+                return 1;
+                return;
+                foo(2 + x, 4 / y); m.goo();
+             }
         

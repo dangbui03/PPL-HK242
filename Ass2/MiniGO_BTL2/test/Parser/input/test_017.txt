@@ -1,9 +1,9 @@
-    
-            func VoTien() {
-                var x int = foo() + 3 / 4;
-                var y = "Hello" / 4;   
-                var z str;
-                                        
-                const VoTien = a.b() + 2;
-            }                                       
+
+            func AltName() {
+                var var1 int = foo() + 3 / 4;
+                var var2 = "Hello" / 4;   
+                var var3 StrType;
+                
+                const AltName = a.b() + 2;
+            }
         

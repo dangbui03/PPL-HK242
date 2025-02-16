@@ -1,0 +1,3 @@
+
+            func (obj c) Sum(a1 int, a2 int) {return ;}
+        

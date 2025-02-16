@@ -1,3 +1,3 @@
-    
-            const a =;
+
+            type Compute interface {Reset();} type Individual struct{val int;}
         

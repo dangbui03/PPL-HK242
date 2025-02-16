@@ -1,12 +1,3 @@
-"""
- * Initial code for Assignment 1, 2
- * Programming Language Principles
- * Author: Võ Tiến
- * Link FB : https://www.facebook.com/Shiba.Vo.Tien
- * Link Group : https://www.facebook.com/groups/khmt.ktmt.cse.bku
- * Date: 07.01.2025
-"""
-
 import unittest
 from TestUtils import TestParser
 import inspect
@@ -14,565 +5,577 @@ import inspect
 class ParserSuite(unittest.TestCase):
     def test_001(self):
         """Literal"""
-        self.assertTrue(TestParser.test("const Votien = 1;","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = 1;","successful", inspect.stack()[0].function))
 
     def test_002(self):
         """Literal"""
-        self.assertTrue(TestParser.test("const Votien = true;","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = true;","successful", inspect.stack()[0].function))
 
     def test_003(self):
         """Literal"""
-        self.assertTrue(TestParser.test("const Votien = [5][0]string{1, \"string\"};","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = [5][0]string{1, \"string\"};","successful", inspect.stack()[0].function))
 
     def test_004(self):
         """Literal"""
-        self.assertTrue(TestParser.test("const Votien = [1.]ID{1, 3};","Error on line 1 col 16: 1.", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = [1.]TypeID{1, 3};","Error on line 1 col 17: 1.", inspect.stack()[0].function))
 
     def test_005(self):
         """Literal"""
-        self.assertTrue(TestParser.test("const Votien = Person{name: \"Alice\", age: 30};","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = Individual{name: \"Alice\", age: 30};","successful", inspect.stack()[0].function))
 
     def test_006(self):
         """expression"""
-        self.assertTrue(TestParser.test("const Votien = 1 || 2 && c + 3 / 2 - -1;","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = 1 || 2 && c + 3 / 2 - -1;","successful", inspect.stack()[0].function))
 
     def test_007(self):
         """expression"""
-        self.assertTrue(TestParser.test("const Votien = 1[2] + foo()[2] + ID[2].b.b;","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = 1[2] + foo()[2] + TypeID[2].b.b;","successful", inspect.stack()[0].function))
 
     def test_008(self):
         """expression"""
-        self.assertTrue(TestParser.test("const Votien = ca.foo(132) + b.c[2];","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = ca.foo(132) + b.c[2];","successful", inspect.stack()[0].function))
 
     def test_009(self):
         """expression"""
-        self.assertTrue(TestParser.test("const Votien = a.a.foo();","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = a.a.foo();","successful", inspect.stack()[0].function))
 
     def test_010(self):
         """declared variables"""
         self.assertTrue(TestParser.test("""
-            var x int = foo() + 3 / 4;
-            var y = "Hello" / 4;   
-            var z str;
+            var var1 int = foo() + 3 / 4;
+            var var2 = "Hello" / 4;   
+            var var3 StrType;
         ""","successful", inspect.stack()[0].function))
 
     def test_011(self):
         """declared constants"""
-        self.assertTrue(TestParser.test("""
-            const VoTien = a.b() + 2;
-        ""","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("const AltName = a.b() + 2;","successful", inspect.stack()[0].function))
 
     def test_012(self):
         """declared function"""
         self.assertTrue(TestParser.test("""
-            func VoTien(x int, y int) int {return;}
-            func VoTien1() [2][3] ID {return;};        
-            func VoTien2() {return;}                                       
+            func AltName(a1 int, b1 int) int {return;}
+            func AltName1() [2][3] TypeID {return;};        
+            func AltName2() {return;}
         ""","successful", inspect.stack()[0].function))
 
     def test_013(self):
         """declared method"""
         self.assertTrue(TestParser.test("""
-            func (c Calculator) VoTien(x int) int {return;};  
-            func (c Calculator) VoTien() ID {return;}      
-            func (c Calculator) VoTien(x int, y [2]VoTien) {return;}                                                      
+            func (c Compute) AltName(a1 int) int {return;};  
+            func (c Compute) AltName() TypeID {return;}      
+            func (c Compute) AltName(a1 int, b1 [2]AltName) {return;}
         ""","successful", inspect.stack()[0].function))
 
     def test_014(self):
         """declared struct"""
         self.assertTrue(TestParser.test("""
-            type VoTien struct {
-                VoTien string ;
-                VoTien [1][3]VoTien ;                     
-            }                                                                     
+            type AltNameStruct struct {
+                field1 string;
+                field2 [1][3]AltNameStruct;
+            }
         ""","successful", inspect.stack()[0].function))
 
     def test_015(self):
         """declared Interface"""
         self.assertTrue(TestParser.test("""
-            type VoTien struct {}                                                                       
-        ""","Error on line 2 col 32: }", inspect.stack()[0].function))
+            type AltNameStruct struct {}
+        ""","Error on line 2 col 39: }", inspect.stack()[0].function))
 
     def test_016(self):
         """declared Interface"""
         self.assertTrue(TestParser.test("""
-            type Calculator interface {
-                                        
+            type Compute interface {
+                
                 Add(x, y int) int;
-                Subtract(a, b float, c int) [3]ID;
+                Subtract(a, b float, c int) [3]TypeID;
                 Reset()
-                                        
-                SayHello(name string);
-                                        
+                
+                SayHey(name string);
+                
             }
-            type VoTien interface {}                                                                       
-        ""","Error on line 11 col 35: }", inspect.stack()[0].function))
+            type AltNameInterface interface {}
+        ""","Error on line 11 col 45: }", inspect.stack()[0].function))
                 
     def test_017(self):
         """declared_statement"""
-        self.assertTrue(TestParser.test("""    
-            func VoTien() {
-                var x int = foo() + 3 / 4;
-                var y = "Hello" / 4;   
-                var z str;
-                                        
-                const VoTien = a.b() + 2;
-            }                                       
+        self.assertTrue(TestParser.test("""
+            func AltName() {
+                var var1 int = foo() + 3 / 4;
+                var var2 = "Hello" / 4;   
+                var var3 StrType;
+                
+                const AltName = a.b() + 2;
+            }
         ""","successful", inspect.stack()[0].function))
-
 
     def test_018(self):
         """assign_statement"""
-        self.assertTrue(TestParser.test("""    
-            func VoTien() {
-                x  := foo() + 3 / 4;
-                x.c[2][4] := 1 + 2;                       
-            }                                       
+        self.assertTrue(TestParser.test("""
+            func AltName() {
+                v1 := foo() + 3 / 4;
+                v1.c[2][4] := 1 + 2;
+            }
         ""","successful", inspect.stack()[0].function))
 
     def test_019(self):
         """for_statement"""
-        self.assertTrue(TestParser.test("""    
-            func VoTien() {
-                if (x > 10) {return; } 
+        self.assertTrue(TestParser.test("""
+            func AltName() {
+                if (x > 10) {return; }
                 if (x > 10) {
-                  return; 
+                  return;
                 } else if (x == 10) {
-                    var z str;
+                    var var3 StrType;
                 } else {
-                    var z ID;
+                    var var3 TypeID;
                 }
             }
         ""","successful", inspect.stack()[0].function))
 
     def test_020(self):
         """if_statement"""
-        self.assertTrue(TestParser.test("""    
-            func VoTien() {
-                for i < 10 {return; }
-                for i := 0; i < 10; i += 1 {return; }
-                for index, value := range array {return; }
+        self.assertTrue(TestParser.test("""
+            func AltName() {
+                for i1 < 10 {return; }
+                for i1 := 0; i1 < 10; i1 += 1 {return; }
+                for idx, val := range array {return; }
             }
         ""","successful", inspect.stack()[0].function))
 
-
     def test_021(self):
         """break and continue, return, Call  statement"""
-        self.assertTrue(TestParser.test("""    
-            func VoTien() {                           
-                for i < 10 {break;}
+        self.assertTrue(TestParser.test("""
+            func AltName() {
+                for i1 < 10 {break;}
                 break;
                 continue;
                 return 1;
-                return
-                foo(2 + x, 4 / y); m.goo();                        
+                return;
+                foo(2 + x, 4 / y); m.goo();
              }
-                                        
         ""","successful", inspect.stack()[0].function))
        
-    def test_021(self):
+    def test_022(self):
         """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            const a = 0b11;                         
+        self.assertTrue(TestParser.test("""
+            const constA = 0b11;
         ""","successful", inspect.stack()[0].function))
+
+    def test_023(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = [true]int{1};
+        ""","Error on line 2 col 32: true", inspect.stack()[0].function))
+        
+    def test_024(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = [2]int{};
+        ""","Error on line 2 col 38: }", inspect.stack()[0].function))
 
     def test_025(self):
         """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = [true]int{1};                         
-        ""","Error on line 2 col 28: true", inspect.stack()[0].function))
-        
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = TypeID {};
+        ""","successful", inspect.stack()[0].function))
+
+    def test_026(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = TypeID {a: 2, b: 2 + 2 + TypeID {a: 1}};
+        ""","successful", inspect.stack()[0].function))
+
+    def test_027(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = 1 && 2 && 3 || 1 || 1;
+        ""","successful", inspect.stack()[0].function))
+    
+    def test_028(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = a >= 2 <= "string" > a[2][3] < TypeID{A: 2} >= [2]TypeS{2};
+        ""","successful", inspect.stack()[0].function))
+
+    def test_029(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = a.b.a.c.e.g;
+        ""","successful", inspect.stack()[0].function))
+
     def test_030(self):
         """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = [2]int{};                         
-        ""","Error on line 2 col 34: }", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = a[2][3][a + 2];
+        ""","successful", inspect.stack()[0].function))
 
     def test_031(self):
         """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = ID {};                         
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = a.a.a[2].foo(1);
         ""","successful", inspect.stack()[0].function))
 
     def test_032(self):
         """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = ID {a: 2, b: 2 + 2 + ID {a: 1}};                         
+        self.assertTrue(TestParser.test("""
+            var var3 AltName = foo().a[2].goo();
         ""","successful", inspect.stack()[0].function))
 
+    def test_033(self):
+        """Expressions"""
+        self.assertTrue(TestParser.test("""
+            const constK = -a + -!-!c - ---[2]int{2};
+        ""","successful", inspect.stack()[0].function))
+
+    def test_034(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            var varC [2][3]TypeID
+        ""","successful", inspect.stack()[0].function))
+
+    def test_035(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            const constA =;
+        ""","Error on line 2 col 26: ;", inspect.stack()[0].function))
+        
     def test_036(self):
-        """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = 1 && 2 && 3 || 1 || 1;                         
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            func Sum(a1 int, b1 [2]int) [2]TypeID {return ;}
         ""","successful", inspect.stack()[0].function))
-    
+        
     def test_037(self):
-        """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = a >= 2 <= "string" > a[2][3] < ID{A: 2} >= [2]S{2};                         
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            func Sum() {return ;}
         ""","successful", inspect.stack()[0].function))
-
+        
+    def test_038(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            type Compute struct {
+                val int;
+                fieldA [2]int;
+                fieldB [2]TypeID;
+                c Compute
+            }
+        ""","successful", inspect.stack()[0].function))
+        
+    def test_039(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            type Compute struct {
+                a int = 2;
+            }
+        ""","Error on line 3 col 22: =", inspect.stack()[0].function))
+        
     def test_040(self):
-        """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = a.b.a.c.e.g;                         
-        ""","successful", inspect.stack()[0].function))
-
-    def test_041(self):
-        """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = a[2][3][a + 2];                         
-        ""","successful", inspect.stack()[0].function))
-
-    def test_045(self):
-        """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = a.a.a[2].foo(1);                         
-        ""","successful", inspect.stack()[0].function))
-
-    def test_050(self):
-        """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            var z VOTIEN = foo().a[2].goo();                         
-        ""","successful", inspect.stack()[0].function))
-
-    def test_053(self):
-        """Expressions"""
-        self.assertTrue(TestParser.test("""    
-            const k = -a + -!-!c - ---[2]int{2};                         
-        ""","successful", inspect.stack()[0].function))
-
-    def test_064(self):
         """Declared"""
-        self.assertTrue(TestParser.test("""    
-            var c [2][3]ID
-        ""","successful", inspect.stack()[0].function))
-
-    def test_067(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            const a =;
-        ""","Error on line 2 col 21: ;", inspect.stack()[0].function))
-        
-    def test_069(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            func Add(x int, y [2]int) [2]id {return ;}
-""","successful", inspect.stack()[0].function))
-        
-    def test_073(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            func Add() {return ;}
-""","successful", inspect.stack()[0].function))
-        
-    def test_077(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            type Calculator struct {
-                                        
-                value int;
-                a [2]int; a [2]ID;
-                c Calculator                    
-            }
-""","successful", inspect.stack()[0].function))
-        
-    def test_079(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            type Calculator struct {
-                a int = 2;       
-            }
-""","Error on line 3 col 22: =", inspect.stack()[0].function))
-        
-    def test_080(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            type Calculator interface {
-                Add(x, y [2]ID) [2]int;
+        self.assertTrue(TestParser.test("""
+            type Compute interface {
+                Add(x, y [2]TypeID) [2]int;
                 Subtract(a, b float, c, e int);
                 Reset()
                 SayHello(name string)
             }
-""","successful", inspect.stack()[0].function))
+        ""","successful", inspect.stack()[0].function))
         
-    def test_081(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            type Calculator interface {Reset()}
-""","Error on line 2 col 46: }", inspect.stack()[0].function))
-        
-    def test_084(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            type Calculator interface {
-                Add(x int,c,d ID); Add()
-        }
-""","successful", inspect.stack()[0].function))
-        
-    def test_088(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            func Add(x int, y int) int  {return ;};
-""","successful", inspect.stack()[0].function))
-        
-    def test_089(self):
+    def test_041(self):
         """Declared"""
         self.assertTrue(TestParser.test("""
-            func (c int) Add(x int) int {return ;}
-""","Error on line 2 col 20: int", inspect.stack()[0].function))
+            type Compute interface {Reset()}
+        ""","Error on line 2 col 43: }", inspect.stack()[0].function))
         
-    def test_099(self):
+    def test_042(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            type Compute interface {
+                Add(x int, c, d TypeID); Add()
+            }
+        ""","successful", inspect.stack()[0].function))
+        
+    def test_043(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            func Sum(a1 int, b1 int) int {return ;};
+        ""","successful", inspect.stack()[0].function))
+        
+    def test_044(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            func (obj int) Sum(a1 int) int {return ;}
+        ""","Error on line 2 col 22: int", inspect.stack()[0].function))
+        
+    def test_045(self):
         """Declared"""
         self.assertTrue(TestParser.test("""
 
 ""","Error on line 3 col 0: <EOF>", inspect.stack()[0].function))
 
-    def test_102(self):
+    def test_046(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                         var a int;      
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                 var var1 int;
+            };
+        ""","successful", inspect.stack()[0].function))
         
-    def test_103(self):
+    def test_047(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                         var a = a[2].b;      
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                 var var1 = var1[2].b;
+            };
+        ""","successful", inspect.stack()[0].function))
 
-    def test_107(self):
+    def test_048(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        a += 2;
-                                        a -= a[2].b();
-                                        a /= 2
-                                        a *= 2
-                                        a %= 2;       
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                a += 2;
+                a -= a[2].b();
+                a /= 2;
+                a *= 2;
+                a %= 2;
+            };
+        ""","successful", inspect.stack()[0].function))
 
-    def test_109(self):
+    def test_049(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        a.c[2].e[3].k += 2;       
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                a.c[2].e[3].k += 2;
+            };
+        ""","successful", inspect.stack()[0].function))
 
-    def test_110(self):
+    def test_050(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        a.foo() += 2;       
-                                    };""","Error on line 3 col 48: +=", inspect.stack()[0].function))
+            func Sum() {
+                a.foo() += 2;
+            };
+        ""","Error on line 3 col 24: +=", inspect.stack()[0].function))
 
-    def test_113(self):
+    def test_051(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                       a[2+3&&2] += foo().b[2];       
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+               a[2+3&&2] += foo().b[2];
+            };
+        ""","successful", inspect.stack()[0].function))
         
-    def test_114(self):
+    def test_052(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        if (x.foo().b[2]) {
-                                            a := 2;
-                                        } else if (a && b) {
-                                            return; 
-                                        } else {
-                                            a := 2;
-                                        }   
-                                    };""","successful", inspect.stack()[0].function))
-
-    def test_120(self):
+            func Sum() {
+                if (x.foo().b[2]) {
+                    a := 2;
+                } else if (a && b) {
+                    return;
+                } else {
+                    a := 2;
+                }
+            };
+        ""","successful", inspect.stack()[0].function))
+        
+    def test_053(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        for true + 2 + foo().b {return; }
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                for true + 2 + foo().b {return; }
+            };
+        ""","successful", inspect.stack()[0].function))
    
-    def test_123(self):
+    def test_054(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        for i := 0; i < 10; i += 1 {
-                                           return; 
-                                        }
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                for i1 := 0; i1 < 10; i1 += 1 {
+                   return;
+                }
+            };
+        ""","successful", inspect.stack()[0].function))
     
-    def test_134(self):
+    def test_055(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        for index, value := range 23 {return; 
-                                        }
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                for idx, val := range 23 {return;
+                }
+            };
+        ""","successful", inspect.stack()[0].function))
         
-    def test_136(self):
+    def test_056(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        break;
-                                        continue
-                                        break; continue; break
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                break;
+                continue;
+                break; continue; break;
+            };
+        ""","successful", inspect.stack()[0].function))
         
-    def test_137(self):
+    def test_057(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        return
-                                        return 2 + a[2].b()
-                                        return; return a
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                return;
+                return 2 + a[2].b();
+                return; return a;
+            };
+        ""","successful", inspect.stack()[0].function))
         
-    def test_141(self):
+    def test_058(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        a.foo(2 + 3, a {a:2})
-                                        foo(2 + 3, a {a:2});
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                a.foo(2 + 3, a {a:2});
+                foo(2 + 3, a {a:2});
+            };
+        ""","successful", inspect.stack()[0].function))
         
-    def test_143(self):
+    def test_059(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        a[2][3].foo(2 + 3, a {a:2})
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                a[2][3].foo(2 + 3, a {a:2});
+            };
+        ""","successful", inspect.stack()[0].function))
         
-    def test_152(self):
+    def test_060(self):
         """array_literal"""
-        self.assertTrue(TestParser.test("""const a = [1]int{{1, 0x1}, ID{}, {{ID{}}}}                    
-""","successful", inspect.stack()[0].function))
+        self.assertTrue(TestParser.test("""
+            const constA = [1]int{{1, 0x1}, TypeID{}, {{TypeID{}}}}
+        ""","successful", inspect.stack()[0].function))
         
-    def test_173(self):
+    def test_061(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        for i[2] := 1; foo().a.b(); i := 1 {
-                                            return; 
-                                        }
-                                    };""","Error on line 3 col 49: :=", inspect.stack()[0].function))
+            func Sum() {
+                for i[2] := 1; foo().a.b(); i := 1 {
+                    return;
+                }
+            };
+        ""","Error on line 3 col 25: :=", inspect.stack()[0].function))
         
-    def test_179(self):
+    def test_062(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        for var b [2]ID = 1 + 2 / 4; foo().a.b(); i := 1 {
-                                            return; 
-                                        }
-                                    };""","successful", inspect.stack()[0].function))
+            func Sum() {
+                for var varB [2]TypeID = 1 + 2 / 4; foo().a.b(); i := 1 {
+                    return;
+                }
+            };
+        ""","successful", inspect.stack()[0].function))
 
-    def test_180(self):
+    def test_063(self):
         self.assertTrue(TestParser.test("""
-                                            const a = [ID][2][VT]int{{{1}}}                              
-                                        ""","successful", inspect.stack()[0].function))
+            const constA = [TypeID][2][TypeVT]int{{{1}}}
+        ""","successful", inspect.stack()[0].function))
 
-    def test_181(self):
+    def test_064(self):
         self.assertTrue(TestParser.test("""
-                                            var a;
-                                        ""","Error on line 2 col 49: ;", inspect.stack()[0].function))
-    def test_182(self):
+            var varA;
+        ""","Error on line 2 col 20: ;", inspect.stack()[0].function))
+    def test_065(self):
         self.assertTrue(TestParser.test("""
-                                            var a = {1, 2};
-                                        ""","Error on line 2 col 52: {", inspect.stack()[0].function))
+            var varA = {1, 2};
+        ""","Error on line 2 col 23: {", inspect.stack()[0].function))
+    def test_066(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            type Compute struct {val int}
+        ""","Error on line 2 col 40: }", inspect.stack()[0].function))
+    def test_067(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            type Compute interface {Reset();} type Individual struct{val int;}
+        ""","Error on line 2 col 46: type", inspect.stack()[0].function))
+    def test_068(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            func (obj c) Sum(a1 int, a2 int) {return ;}
+        ""","successful", inspect.stack()[0].function))
+    def test_069(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            func (obj c) Sum(a1 int) {return ;};
+
+            func Sum(a1 int) {return ;}; var varC int;
+
+            var varC int; type Compute struct{c int;}; type Compute struct{c int;} var varC int;
+        ""","Error on line 6 col 83: var", inspect.stack()[0].function))
+    def test_070(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            var varC int func (obj c) Sum(a1 int) {return ;}
+        ""","Error on line 2 col 25: func", inspect.stack()[0].function))
+    def test_071(self):
+        """Declared"""
+        self.assertTrue(TestParser.test("""
+            const constA = 2 func (obj c) Sum(a1 int) {return ;}
+        ""","Error on line 2 col 29: func", inspect.stack()[0].function))
+    def test_072(self):
+        """Statement"""
+        self.assertTrue(TestParser.test("""
+            func Sum() {
+                for var varI [2] int = 0; foo().a.b(); varI[3] := 1 {
+                    return;
+                }
+            };
+        ""","Error on line 3 col 59: [", inspect.stack()[0].function))
+    def test_073(self):
+        """Statement"""
+        self.assertTrue(TestParser.test("""
+            func Sum() {
+                return return 2 + a[2].b()
+            };
+        ""","Error on line 3 col 23: return", inspect.stack()[0].function))
+    def test_074(self):
+        """Statement"""
+        self.assertTrue(TestParser.test("""
+            func Sum() {
+                break continue
+            };
+        ""","Error on line 3 col 22: continue", inspect.stack()[0].function))
     def test_075(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            type Calculator struct {value int}
-""","Error on line 2 col 45: }", inspect.stack()[0].function))
-    def test_086(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""    
-            type Calculator interface {Reset();} type Person struct{value int;}
-""","Error on line 2 col 49: type", inspect.stack()[0].function))
-    def test_091(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""
-            func (c c) Add(x, c int) {return ;}
-""","successful", inspect.stack()[0].function))
-    def test_095(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""
-                                        
-            func (c c) Add(x int) {return ;}
-                                        
-            func Add(x int) {return ;}; var c int;
-                                        
-            var c int; type Calculator struct{c int;}; type Calculator struct{c int;} var c int;
-""","Error on line 7 col 86: var", inspect.stack()[0].function))
-    def test_096(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""
-                                        
-            var c int func (c c) Add(x int) {return ;}
-""","Error on line 3 col 22: func", inspect.stack()[0].function))
-    def test_097(self):
-        """Declared"""
-        self.assertTrue(TestParser.test("""
-                                        
-            const a = 2 func (c c) Add(x int) {return ;}
-""","Error on line 3 col 24: func", inspect.stack()[0].function))
-    def test_126(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        for var i [2] int = 0; foo().a.b(); i[3] := 1 {
-                                            return; 
-                                        }
-                                    };""","Error on line 3 col 77: [", inspect.stack()[0].function))
-    def test_138(self):
+            func Sum() {
+                return (2 + 3).b;
+                return -1.c;
+            };
+        ""","Error on line 4 col 26: c", inspect.stack()[0].function))
+    def test_076(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        return return 2 + a[2].b()
-                    
-                                    };""","Error on line 3 col 47: return", inspect.stack()[0].function))
-    def test_139(self):
-        """Statement"""
-        self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        break continue
-                    
-                                    };""","Error on line 3 col 46: continue", inspect.stack()[0].function))
-    def test_146(self):
-        """Statement"""
-        self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        return (2 + 3).b
-                                        return -1.c
-                                    };""","Error on line 4 col 50: c", inspect.stack()[0].function))
-    
-    def test_160(self):
-        self.assertTrue(TestParser.test("""
-            func (p Person) Greet() string {
+            func (p Individual) Welcome() string {
                 if (1) {return;}
                 else if (1)
                 {}
-            };  
-""","Error on line 4 col 16: else", inspect.stack()[0].function))
-    
-    def test_177(self):
+            };
+        ""","Error on line 4 col 16: else", inspect.stack()[0].function))
+    def test_077(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        for var b; foo().a.b(); i := 1 {
-                                            return; 
-                                        }
-                                    };""","Error on line 3 col 49: ;", inspect.stack()[0].function))
-    def test_178(self):
+            func Sum() {
+                for var varB; foo().a.b(); i := 1 {
+                    return;
+                }
+            };
+        ""","Error on line 3 col 28: ;", inspect.stack()[0].function))
+    def test_078(self):
         """Statement"""
         self.assertTrue(TestParser.test("""
-                                    func Add() {
-                                        for var b int; foo().a.b(); i := 1 {
-                                            return; 
-                                        }
-                                    };""","Error on line 3 col 53: ;", inspect.stack()[0].function))
-    def test_180(self):
+            func Sum() {
+                for var b int; foo().a.b(); i := 1 {
+                    return;
+                }
+            };
+        ""","Error on line 3 col 29: ;", inspect.stack()[0].function))
+    def test_079(self):
         self.assertTrue(TestParser.test("""
-                                            const a = [ID][2][VT]int{{{1}}, ID, a, {b}}                              
-                                        ""","successful", inspect.stack()[0].function))
+            const constA = [TypeID][2][TypeVT]int{{{1}}, TypeID, a, {b}}
+        ""","successful", inspect.stack()[0].function))

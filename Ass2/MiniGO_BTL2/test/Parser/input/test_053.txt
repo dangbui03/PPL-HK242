@@ -1,3 +1,5 @@
-    
-            const k = -a + -!-!c - ---[2]int{2};                         
+
+            func Sum() {
+                for true + 2 + foo().b {return; }
+            };
         

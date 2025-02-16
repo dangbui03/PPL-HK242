@@ -1,0 +1,3 @@
+
+            var varC int func (obj c) Sum(a1 int) {return ;}
+        

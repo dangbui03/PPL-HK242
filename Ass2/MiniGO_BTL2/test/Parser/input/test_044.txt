@@ -1,0 +1,3 @@
+
+            func (obj int) Sum(a1 int) int {return ;}
+        

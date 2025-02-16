@@ -1,3 +1,3 @@
-    
-            var z VOTIEN = 1 && 2 && 3 || 1 || 1;                         
+
+            func Sum(a1 int, b1 [2]int) [2]TypeID {return ;}
         

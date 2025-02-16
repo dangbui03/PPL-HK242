@@ -1,0 +1,7 @@
+
+            func Sum() {
+                return;
+                return 2 + a[2].b();
+                return; return a;
+            };
+        

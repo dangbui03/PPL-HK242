@@ -1,0 +1,5 @@
+
+            type Compute interface {
+                Add(x int, c, d TypeID); Add()
+            }
+        

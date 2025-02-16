@@ -1,0 +1,3 @@
+
+            const constA = [TypeID][2][TypeVT]int{{{1}}}
+        

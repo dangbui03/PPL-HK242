@@ -1,0 +1,8 @@
+
+            type Compute struct {
+                val int;
+                fieldA [2]int;
+                fieldB [2]TypeID;
+                c Compute
+            }
+        

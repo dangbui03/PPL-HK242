@@ -1,0 +1,7 @@
+
+            func Sum() {
+                for var varB [2]TypeID = 1 + 2 / 4; foo().a.b(); i := 1 {
+                    return;
+                }
+            };
+        

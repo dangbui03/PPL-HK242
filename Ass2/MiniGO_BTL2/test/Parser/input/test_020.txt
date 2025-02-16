@@ -1,7 +1,7 @@
-    
-            func VoTien() {
-                for i < 10 {return; }
-                for i := 0; i < 10; i += 1 {return; }
-                for index, value := range array {return; }
+
+            func AltName() {
+                for i1 < 10 {return; }
+                for i1 := 0; i1 < 10; i1 += 1 {return; }
+                for idx, val := range array {return; }
             }
         

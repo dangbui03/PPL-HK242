@@ -1,2 +1,7 @@
-    
-            func Add(x int, y [2]int) [2]id {return ;}
+
+            func (obj c) Sum(a1 int) {return ;};
+
+            func Sum(a1 int) {return ;}; var varC int;
+
+            var varC int; type Compute struct{c int;}; type Compute struct{c int;} var varC int;
+        

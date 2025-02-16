@@ -1,12 +1,12 @@
 
-            type Calculator interface {
-                                        
+            type Compute interface {
+                
                 Add(x, y int) int;
-                Subtract(a, b float, c int) [3]ID;
+                Subtract(a, b float, c int) [3]TypeID;
                 Reset()
-                                        
-                SayHello(name string);
-                                        
+                
+                SayHey(name string);
+                
             }
-            type VoTien interface {}                                                                       
+            type AltNameInterface interface {}
         
