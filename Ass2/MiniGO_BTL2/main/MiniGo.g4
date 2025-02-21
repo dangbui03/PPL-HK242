@@ -1,4 +1,4 @@
-// 2153289
+// 2153289 - Bùi Hồ Hải Đăng
 grammar MiniGo;
 
 @lexer::header {
@@ -100,11 +100,11 @@ declared_statement: decl newline*;//variable_decl newline* | const_decl newline*
 assign_statement: lhs ass_operator expr SEMI? newline*;
 // lhs: ID lhs_list;
 // lhs_list: (DOT | index_operator | ID) lhs_list | ;
-lhs2: ID (DOT ID)? index_operator? ;
+// lhs2: ID (DOT ID)? index_operator? ;
 lhs: ID 
     | lhs DOT ID 
     | lhs LBRACK expr RBRACK ;
-lhs_list: lhs lhs_list | lhs;
+// lhs_list: lhs lhs_list | lhs;
 ass_operator: COL_ASSIGN | ADD_ASSIGN | MINUS_ASSIGN | MULT_ASSIGN | DIV_ASSIGN | REM_ASSIGN;
 
 // if statement

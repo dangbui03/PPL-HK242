@@ -1,6 +1,1 @@
-Program([
-			FunctionDecl(Id("foo"), IntType(), None,[],[
-				]),
-			FunctionDecl(Id("foo"), VoidType(), None,[VariablesDecl(Id("a"), IntType(), None),VariablesDecl(Id("b"), IntType(), None)],[
-				])
-		])
+None
