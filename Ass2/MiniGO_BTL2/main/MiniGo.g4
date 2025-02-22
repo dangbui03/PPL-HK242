@@ -1,4 +1,4 @@
-// 2153289
+//2153289 - Bùi Hồ Hải Đăng
 grammar MiniGo;
 
 @lexer::header {
@@ -35,6 +35,7 @@ options{
 	language = Python3;
 }
 
+//! Parser rules
 program: newline* decllist EOF;
 
 decllist: decl decllist newline* 
@@ -211,7 +212,7 @@ nil_lit: NIL;
 
 newline: NEWLINE;
 
-//TODO Keywords 3.3.2 pdf
+//! Lexer rules
 IF: 'if';
 ELSE: 'else';
 FOR: 'for';
@@ -232,8 +233,6 @@ RANGE: 'range';
 NIL: 'nil';
 TRUE: 'true';
 FALSE: 'false';
-
-//TODO Operators 3.3.3 pdf
 NOT: '!';
 ADD: '+';
 MINUS: '-';
@@ -258,7 +257,6 @@ COL_ASSIGN: ':=';
 DOT: '.';  
 COLON: ':';
 
-//TODO Separators 3.3.4 pdf
 LPAREN: '(';
 RPAREN: ')';
 LBRACE: '{';
@@ -281,10 +279,8 @@ SEMI:
 
 COMMA: ',';
 
-//TODO Identifiers 3.3.1 pdf
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 
-//TODO Literals 3.3.5 pdf
 fragment DIGIT : [0-9][0-9]*;
 fragment EXP : [eE][+-]? DIGIT ;
 
@@ -325,7 +321,6 @@ STR_LIT	: '"' ( ESCAPE_SEQ | ~['"\r\t\n\\])* '"'  {self.text};
 
 BOOL_LIT: TRUE | FALSE;
 
-//TODO skip 3.1 and 3.2 pdf
 WS: [ \t\f\b\r]+ -> skip; // skip spaces, tabs 
 LINE_COMMENT
     :   '//' ~[\n\r]* -> skip
@@ -334,7 +329,6 @@ BLOCK_COMMENT
     :   '/*' (BLOCK_COMMENT | .)*? '*/' -> skip
     ;
 
-//TODO ERROR pdf BTL1 + lexererr.py
 ERROR_CHAR: . {raise ErrorToken(self.text)};
 
 UNCLOSE_STRING: '"' ( ~[\t\r\n'"\\] | ESCAPE_SEQ )* ( EOF | '\n' | '\r\n') {
@@ -349,5 +343,3 @@ ILLEGAL_ESCAPE: '"' ( ~[\t\r\n\\'"] | ESCAPE_SEQ )* ([\r\\'] | IllegalEscape | [
 };
 fragment IllegalEscape: '\\' ~[rnt"\\];
 fragment ESCAPE_SEQ: '\\' [tnr"\\] ;
-
-//! ---------------- LEXER ----------------------- */
