@@ -1,0 +1,2 @@
+Program([FuncDecl("foo",[],None,Block([Break(),Continue()]))
+		])

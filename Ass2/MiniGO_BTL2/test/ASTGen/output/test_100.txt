@@ -1,0 +1,2 @@
+Program([FuncDecl("votien",[],None,Block([Return([None]),Return(StringLiteral("THANKS YOU, PPL1 "))]))
+		])

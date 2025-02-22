@@ -1,2 +1,2 @@
 
-            func (Votien v) foo(Votien int) {}
+            func (Votien v) foo(Votien int) {return;}

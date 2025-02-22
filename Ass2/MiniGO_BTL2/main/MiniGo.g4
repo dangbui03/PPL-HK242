@@ -51,11 +51,11 @@ decl: variable_decl
 
 // Variable declarations
 // variable_decl: VAR ID types? (types ASSIGN list_expr)? SEMI;//(SEMI | newline) newline*;
-variable_decl: VAR ID ( types (ASSIGN list_expr)? | ASSIGN list_expr ) (SEMI | newline) newline*;
+variable_decl: VAR ID ( types (ASSIGN expr)? | ASSIGN expr ) (SEMI | newline) newline*;
 
 
 // Constant declarations
-const_decl: CONST ID types? ASSIGN list_expr (SEMI | newline) newline*;
+const_decl: CONST ID types? ASSIGN expr (SEMI | newline) newline*;
 
 // Struct declarations
 struct_decl: TYPE ID STRUCT newline? LBRACE SEMI* struct_fields RBRACE SEMI+;//(SEMI | newline) newline*;
@@ -63,9 +63,9 @@ struct_fields: struct_field struct_fields | struct_field;
 struct_field: ID types SEMI;//(SEMI | newline) newline*; ID (primitive_types | arr_type) SEMI newline* | ID composite_types (SEMI | newline) newline*;
 
 // method declarations
-method_decl: FUNC LPAREN method_para_list RPAREN ID LPAREN list_para RPAREN types? block_statement (SEMI | newline) newline*;
-method_para_list: method_para method_para_list | method_para;
-method_para: ID composite_types;
+method_decl: FUNC LPAREN ID composite_types RPAREN ID LPAREN list_para RPAREN types? block_statement (SEMI | newline) newline*;
+// method_para_list: method_para method_para_list | method_para;
+// method_para: ID composite_types;
 
 // interface declarations
 interface_decl: TYPE ID INTERFACE newline? LBRACE SEMI* interface_method_list RBRACE SEMI;//(SEMI | newline) newline*;
@@ -171,7 +171,7 @@ primary_expr: primary_expr LBRACK expr RBRACK
 exprd: literals | ID | LPAREN expr RPAREN;
 
 // function call & method call
-func_call: ID LPAREN list_expr? RPAREN newline?; 
+ func_call: ID LPAREN list_expr? RPAREN newline?; 
 method_call: DOT ID (LPAREN list_expr? RPAREN)?;
 
 // types

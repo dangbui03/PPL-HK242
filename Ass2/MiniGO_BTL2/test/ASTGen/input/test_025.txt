@@ -1,4 +1,4 @@
 
             func votien() {
-                for index, value := range array[2] {}
+                for index, value := range array[2] {return;}
             }

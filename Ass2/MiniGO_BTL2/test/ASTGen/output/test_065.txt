@@ -1,0 +1,2 @@
+Program([InterfaceType("Votien",[Prototype("Add",[('a', <AST.IntType object at 0x7fc1475e59d0>)],None)])
+		])

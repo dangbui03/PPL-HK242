@@ -1,0 +1,2 @@
+Program([ConstDecl("a",None,[FloatLiteral(value=1.0)])
+		])

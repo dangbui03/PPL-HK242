@@ -1,1 +1,2 @@
-None
+Program([ConstDecl("VoTien",None,FuncCall("foo",[FuncCall("a",[]),None]))
+		])

@@ -1,5 +1,2 @@
-Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				Break(),
-				Continue()])
+Program([FuncDecl("votien",[],None,Block([Break(),Continue()]))
 		])

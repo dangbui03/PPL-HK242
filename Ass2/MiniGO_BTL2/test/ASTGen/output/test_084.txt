@@ -1,0 +1,2 @@
+Program([FuncDecl("foo",[],None,Block([VarDecl("a",IntType(), None)]))
+		])

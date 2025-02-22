@@ -1,0 +1,2 @@
+Program([FuncDecl("foo",[('a', ArrayType(dimens=[2], eleType='ID'))],None,Block([Return(None)]))
+		])

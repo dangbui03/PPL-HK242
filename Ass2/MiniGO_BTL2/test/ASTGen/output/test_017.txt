@@ -1,0 +1,2 @@
+Program([FuncDecl("votien",[],None,Block([VarDecl("a",IntType(), None),ConstDecl("a",None,NilLiteral())]))
+		])

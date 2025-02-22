@@ -1,0 +1,2 @@
+Program([FuncDecl("votien",[],None,Block([ForEach(Id("value"),value,[IntLiteral(value=2)],Block([Return(None),Return(IntLiteral(1))]))]))
+		])

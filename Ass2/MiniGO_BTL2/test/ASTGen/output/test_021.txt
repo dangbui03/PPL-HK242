@@ -1,4 +1,2 @@
-Program([
-			FunctionDecl(Id("votien"), VoidType(), None,[],[
-				If(IntLiteral(1), [[]], None, None)])
+Program([FuncDecl("votien",[],None,Block([If(IntLiteral(1), [Block(member=[Return(expr=None)])], None, None)]))
 		])
