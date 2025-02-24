@@ -1,2 +1,1 @@
-Program([ConstDecl("a",None,BinaryOp("-", BinaryOp("+", BooleanLiteral(true), BooleanLiteral(false)), BooleanLiteral(true)))
-		])
+Program([ConstDecl(a,BinaryOp(BinaryOp(BooleanLiteral(true),+,BooleanLiteral(false)),-,BooleanLiteral(true)))])

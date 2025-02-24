@@ -1,0 +1,1 @@
+Program([MethodDecl(Cat,Id(c),FuncDecl(foo,[],ArrayType(IntType,[IntLiteral(2)]),Block([Return()])))])

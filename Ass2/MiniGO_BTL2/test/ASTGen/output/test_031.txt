@@ -1,2 +1,1 @@
-Program([ConstDecl("a",None,[StructLiteral(name='Votien', elements=[])])
-		])
+Program([ConstDecl(a,ArrayLiteral([IntLiteral(1)],Id(ID),[StructLiteral(Votien,[])]))])

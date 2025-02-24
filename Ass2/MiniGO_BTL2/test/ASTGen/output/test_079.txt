@@ -1,0 +1,1 @@
+Program([VarDecl(a,IntLiteral(1)),ConstDecl(b,IntLiteral(2)),StructType(a,[(a,FloatType)],[]),InterfaceType(b,[Prototype(foo,[],None)]),FuncDecl(foo,[],VoidType,Block([Return()])),MethodDecl(Cat,Id(c),FuncDecl(foo,[],ArrayType(IntType,[IntLiteral(2)]),Block([Return()])))])

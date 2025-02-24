@@ -1,0 +1,1 @@
+Program([FuncDecl(votien,[],VoidType,Block([If(IntLiteral(1),Block([Return()]),If(IntLiteral(1),Block([Assign(Id(a),IntLiteral(1))]),If(IntLiteral(2),Block([Assign(Id(a),IntLiteral(1))]))))]))])

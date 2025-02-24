@@ -1,2 +1,1 @@
-Program([FuncDecl("votien",[],None,Block([ForEach(Id("value"),value,None,Block([Return(None)]))]))
-		])
+Program([FuncDecl(votien,[],VoidType,Block([ForEach(Id(index),Id(value),ArrayCell(Id(array),[IntLiteral(2)]),Block([Return()]))]))])

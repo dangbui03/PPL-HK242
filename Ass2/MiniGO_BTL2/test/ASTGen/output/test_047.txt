@@ -1,2 +1,1 @@
-Program([ConstDecl("a",None,None)
-		])
+Program([ConstDecl(a,FieldAccess(FieldAccess(FieldAccess(FieldAccess(Id(a),b),c),d),e))])

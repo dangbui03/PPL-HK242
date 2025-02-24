@@ -1,2 +1,1 @@
-Program([ConstDecl("VoTien",None,FuncCall("foo",[BinaryOp("<=", BinaryOp(">", Id("a"), Id("b")), Id("c"))]))
-		])
+Program([ConstDecl(VoTien,FuncCall(foo,[BinaryOp(BinaryOp(Id(a),>,Id(b)),<=,Id(c))]))])

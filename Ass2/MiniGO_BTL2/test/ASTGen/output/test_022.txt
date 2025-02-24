@@ -1,2 +1,1 @@
-Program([FuncDecl("votien",[],None,Block([If(IntLiteral(1), [Block(member=[Assign(lhs='a', rhs=IntLiteral(value=1))])], None, [Block(member=[Assign(lhs='a', rhs=IntLiteral(value=1))])])]))
-		])
+Program([FuncDecl(votien,[],VoidType,Block([If(IntLiteral(1),Block([Assign(Id(a),IntLiteral(1))]),Block([Assign(Id(a),IntLiteral(1))]))]))])

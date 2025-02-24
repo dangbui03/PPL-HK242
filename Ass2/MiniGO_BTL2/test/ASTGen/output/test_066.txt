@@ -1,2 +1,1 @@
-Program([InterfaceType("Votien",[Prototype("Add",[('a', <AST.IntType object at 0x7fc1475e64e0>),('b', <AST.IntType object at 0x7fc1475e65d0>)],None)])
-		])
+Program([InterfaceType(Votien,[Prototype(Add,[ParDecl(a,IntType),ParDecl(b,IntType)],None)])])

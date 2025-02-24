@@ -1,0 +1,1 @@
+Program([MethodDecl(Votien,Id(v),FuncDecl(foo,[ParDecl(Votien,IntType)],VoidType,Block([Return()])))])

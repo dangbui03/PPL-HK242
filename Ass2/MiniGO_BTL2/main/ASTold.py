@@ -1,9 +1,10 @@
-from __future__ import annotations
-from abc import ABC, abstractmethod, ABCMeta
-from dataclasses import dataclass
-from typing import List
-from Visitor import Visitor
+# from __future__ import annotations
+# from abc import ABC, abstractmethod, ABCMeta
+# from dataclasses import dataclass
+# from typing import List
+# from Visitor import Visitor
 
+# from typing import Tuple
 
 class AST(ABC):
     def __eq__(self, other): 

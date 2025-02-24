@@ -171,7 +171,7 @@ primary_expr: primary_expr LBRACK expr RBRACK
 exprd: literals | ID | LPAREN expr RPAREN;
 
 // function call & method call
- func_call: ID LPAREN list_expr? RPAREN newline?; 
+func_call: ID LPAREN list_expr? RPAREN newline?; 
 method_call: DOT ID (LPAREN list_expr? RPAREN)?;
 
 // types
@@ -183,7 +183,7 @@ composite_types: struct_type | interface_type;
 struct_type: ID;
 interface_type: ID;
 arr_type: index_operator types?;
-index_operator: LBRACK (DEC_LIT | struct_type) RBRACK index_operator | LBRACK (DEC_LIT | struct_type) RBRACK;
+index_operator: LBRACK (int_lit | struct_type) RBRACK index_operator | LBRACK (int_lit | struct_type) RBRACK;
 
 // literal list
 literals: int_lit | float_lit | str_lit | bool_lit | arr_lit | struct_lit | nil_lit;

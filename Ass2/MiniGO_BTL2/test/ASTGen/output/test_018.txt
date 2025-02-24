@@ -1,2 +1,1 @@
-Program([FuncDecl("votien",[],None,Block([Assign(a,IntLiteral(1))]))
-		])
+Program([FuncDecl(votien,[],VoidType,Block([Assign(Id(a),BinaryOp(Id(a),+,IntLiteral(1)))]))])

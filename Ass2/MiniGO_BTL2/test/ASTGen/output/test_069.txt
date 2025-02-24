@@ -1,2 +1,1 @@
-Program([InterfaceType("Votien",[Prototype("Add",[],ArrayType([2],StringType())),Prototype("Add",[],ID)])
-		])
+Program([InterfaceType(Votien,[Prototype(Add,[],ArrayType(StringType,[IntLiteral(2)])),Prototype(Add,[],Id(ID))])])

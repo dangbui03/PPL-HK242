@@ -1,2 +1,1 @@
-Program([ConstDecl("a",None,[FloatLiteral(value=1.0)])
-		])
+Program([ConstDecl(a,ArrayLiteral([IntLiteral(1),IntLiteral(3)],FloatType,[FloatLiteral(1.0)]))])

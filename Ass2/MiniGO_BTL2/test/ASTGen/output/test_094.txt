@@ -1,2 +1,1 @@
-Program([FuncDecl("foo",[],None,Block([If(IntLiteral(1), [Block(member=[Return(expr=None)])], None, None),If(BinaryOp("+", IntLiteral(1), IntLiteral(1)), [Block(member=[Return(expr=IntLiteral(value=1)), Return(expr=None)])], None, None)]))
-		])
+Program([FuncDecl(foo,[],VoidType,Block([If(IntLiteral(1),Block([Return()])),If(BinaryOp(IntLiteral(1),+,IntLiteral(1)),Block([Return(IntLiteral(1)),Return()]))]))])

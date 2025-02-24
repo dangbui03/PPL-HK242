@@ -1,2 +1,1 @@
-Program([FuncDecl("foo",[('a', <AST.IntType object at 0x7fc1475fe2a0>),('b', ArrayType(dimens=[1], eleType=<AST.IntType object at 0x7fc1475fe150>))],None,Block([Return(None)]))
-		])
+Program([FuncDecl(foo,[ParDecl(a,IntType),ParDecl(b,ArrayType(IntType,[IntLiteral(1)]))],VoidType,Block([Return()]))])
