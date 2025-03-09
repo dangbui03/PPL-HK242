@@ -1,0 +1,1 @@
+Program([FuncDecl(Darkie,[],VoidType,Block([FuncCall(chu,[IntLiteral(1),IntLiteral(2)]),MethodCall(ArrayCell(Id(a),[IntLiteral(2)]),chu,[IntLiteral(1),IntLiteral(3)])]))])

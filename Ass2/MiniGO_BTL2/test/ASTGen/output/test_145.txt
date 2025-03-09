@@ -1,0 +1,1 @@
+Program([FuncDecl(chu,[],VoidType,Block([ForEach(Id(a),Id(b),IntLiteral(2),Block([Return()]))]))])

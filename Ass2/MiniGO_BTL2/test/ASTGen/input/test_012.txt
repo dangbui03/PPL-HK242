@@ -1,4 +1,4 @@
 
-            var Votien = 1;
-            var Votien int;
+            var Darkie = 1;
+            var Darkie int;
             var Votine int = 1;

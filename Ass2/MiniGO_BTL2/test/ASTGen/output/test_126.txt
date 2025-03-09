@@ -1,0 +1,1 @@
+Program([ConstDecl(Darkie,FieldAccess(FieldAccess(Id(a),b),c))])

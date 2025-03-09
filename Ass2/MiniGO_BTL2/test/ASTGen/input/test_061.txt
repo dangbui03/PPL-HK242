@@ -1,4 +1,4 @@
 
-            type Votien struct {
+            type Darkie struct {
                 a int;
             }

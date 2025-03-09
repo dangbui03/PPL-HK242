@@ -1,1 +1,1 @@
-Program([FuncDecl(foo,[ParDecl(a,ArrayType(Id(ID),[IntLiteral(2)]))],VoidType,Block([Return()]))])
+Program([FuncDecl(chu,[ParDecl(a,ArrayType(Id(ID),[IntLiteral(2)]))],VoidType,Block([Return()]))])

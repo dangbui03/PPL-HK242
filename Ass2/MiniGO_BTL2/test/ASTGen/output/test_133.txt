@@ -1,0 +1,1 @@
+Program([MethodDecl(ID,Id(ID),FuncDecl(chu,[],VoidType,Block([VarDecl(a,IntLiteral(1))]))),MethodDecl(ID,Id(ID),FuncDecl(chu,[],IntType,Block([VarDecl(a,IntLiteral(1))]))),MethodDecl(ID,Id(ID),FuncDecl(chu,[],ArrayType(Id(ID),[IntLiteral(2)]),Block([VarDecl(a,IntLiteral(1))])))])

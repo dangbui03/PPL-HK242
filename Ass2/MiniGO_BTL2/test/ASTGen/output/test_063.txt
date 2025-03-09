@@ -1,1 +1,1 @@
-Program([StructType(Votien,[(a,IntType),(b,BoolType),(c,ArrayType(Id(Votien),[IntLiteral(2)]))],[])])
+Program([StructType(Darkie,[(a,IntType),(b,BoolType),(c,ArrayType(Id(Darkie),[IntLiteral(2)]))],[])])

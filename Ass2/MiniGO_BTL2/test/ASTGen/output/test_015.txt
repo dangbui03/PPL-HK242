@@ -1,1 +1,1 @@
-Program([StructType(Votien,[(a,IntType)],[])])
+Program([StructType(Darkie,[(a,IntType)],[])])

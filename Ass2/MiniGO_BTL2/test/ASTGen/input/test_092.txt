@@ -1,5 +1,5 @@
 
-            func foo(){
+            func chu(){
                 return;
-                return foo() + 2;
+                return chu() + 2;
             } 

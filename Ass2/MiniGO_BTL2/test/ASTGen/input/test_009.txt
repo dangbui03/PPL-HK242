@@ -1,1 +1,1 @@
-const VoTien = foo( a * (1+2) ); 
+const Darkie = chu( a * (1+2) ); 

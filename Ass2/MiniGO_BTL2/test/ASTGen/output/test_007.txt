@@ -1,1 +1,1 @@
-Program([ConstDecl(VoTien,FuncCall(foo,[FieldAccess(FieldAccess(Id(a),b),c)]))])
+Program([ConstDecl(Darkie,FuncCall(chu,[FieldAccess(FieldAccess(Id(a),b),c)]))])

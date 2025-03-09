@@ -1,0 +1,9 @@
+
+        type INTERFACE interface {
+            chu();
+            chu() int;
+            chu() [2]ID;
+            chu(a int);
+            chu(a int, b int);
+            chu(a, b int);
+        }

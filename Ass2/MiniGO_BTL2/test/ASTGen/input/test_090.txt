@@ -1,4 +1,4 @@
 
-            func foo(){
+            func chu(){
                 a.b[2].c := 1;
             } 

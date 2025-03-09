@@ -1,5 +1,5 @@
 
-            func votien() {
-                foo(1, 2);
-                a[2].foo(1,3);
+            func Darkie() {
+                chu(1, 2);
+                a[2].chu(1,3);
             }

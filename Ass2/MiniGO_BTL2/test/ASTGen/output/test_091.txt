@@ -1,1 +1,1 @@
-Program([FuncDecl(foo,[],VoidType,Block([Break(),Continue()]))])
+Program([FuncDecl(chu,[],VoidType,Block([Break(),Continue()]))])

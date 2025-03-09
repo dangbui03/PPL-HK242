@@ -131,7 +131,7 @@ value_assign: ID ':=' RANGE;
 // break statement
 break_statement: BREAK (SEMI | newline) newline*;
 
-call_statement: lhs LPAREN list_expr? RPAREN (SEMI | newline)* newline*;
+call_statement: (lhs DOT)? ID LPAREN list_expr? RPAREN (SEMI | newline)* newline*;
 
 continue_statement: CONTINUE (SEMI | newline) newline*;
 

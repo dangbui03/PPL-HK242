@@ -1,1 +1,1 @@
-Program([ConstDecl(a,ArrayCell(FuncCall(foo,[]),[IntLiteral(2)]))])
+Program([ConstDecl(a,ArrayCell(FuncCall(chu,[]),[IntLiteral(2)]))])

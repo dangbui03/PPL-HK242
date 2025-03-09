@@ -1,1 +1,1 @@
-Program([ConstDecl(VoTien,FuncCall(foo,[StructLiteral(Votien,[]),StructLiteral(Votien,[(a,IntLiteral(1))])]))])
+Program([ConstDecl(Darkie,FuncCall(chu,[StructLiteral(Darkie,[]),StructLiteral(Darkie,[(a,IntLiteral(1))])]))])

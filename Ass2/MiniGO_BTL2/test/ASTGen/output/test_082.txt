@@ -1,1 +1,1 @@
-Program([FuncDecl(foo,[],VoidType,Block([VarDecl(a,FloatLiteral(1.0))]))])
+Program([FuncDecl(chu,[],VoidType,Block([VarDecl(a,FloatLiteral(1.))]))])

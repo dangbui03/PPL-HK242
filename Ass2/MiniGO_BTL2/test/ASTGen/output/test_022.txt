@@ -1,1 +1,1 @@
-Program([FuncDecl(votien,[],VoidType,Block([If(IntLiteral(1),Block([Assign(Id(a),IntLiteral(1))]),Block([Assign(Id(a),IntLiteral(1))]))]))])
+Program([FuncDecl(Darkie,[],VoidType,Block([If(IntLiteral(1),Block([Assign(Id(a),IntLiteral(1))]),Block([Assign(Id(a),IntLiteral(1))]))]))])

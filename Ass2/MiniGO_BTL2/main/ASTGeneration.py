@@ -1,11 +1,4 @@
-"""
- * Initial code for Assignment 1, 2
- * Programming Language Principles
- * Author: Võ Tiến
- * Link FB : https://www.facebook.com/Shiba.Vo.Tien
- * Link Group : https://www.facebook.com/groups/khmt.ktmt.cse.bku
- * Date: 20.01.2025
-"""
+# Bùi Hồ Hải Đăng - 2153289
 from MiniGoVisitor import MiniGoVisitor
 from MiniGoParser import MiniGoParser
 from AST import *
@@ -13,7 +6,6 @@ from functools import reduce
 
 from typing import Tuple
 
-##! continue update
 class ASTGeneration(MiniGoVisitor): 
     
     # Visit a parse tree produced by MiniGoParser#program.
@@ -55,7 +47,7 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#const_decl.
     def visitConst_decl(self, ctx:MiniGoParser.Const_declContext):
         conName = ctx.ID().getText() 
-        conType = self.get_type(ctx.types().getText()) if ctx.types() else None
+        conType = self.visit(ctx.types()) if ctx.types() else None
         iniExpr = self.visit(ctx.expr())
         
         return ConstDecl(conName, conType, iniExpr)
@@ -127,27 +119,43 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#interface_method.
     def visitInterface_method(self, ctx:MiniGoParser.Interface_methodContext):
         name = ctx.ID().getText()
-        retType = self.visit(ctx.types()) if ctx.types() else None
+        retType = self.visit(ctx.types()) if ctx.types() else VoidType()
         params = self.visit(ctx.interface_para_list()) if ctx.interface_para_list() else []
         
         return Prototype(name, params, retType)
 
 
     # Visit a parse tree produced by MiniGoParser#interface_para_list.
-    def visitInterface_para_list(self, ctx:MiniGoParser.Interface_para_listContext):
+    # def visitInterface_para_list(self, ctx:MiniGoParser.Interface_para_listContext):
+    #     if ctx.getChildCount() > 1:
+    #         return [self.visit(ctx.interface_para())] + self.visit(ctx.interface_para_list())
+    #     elif ctx.getChildCount() == 1: 
+    #         return [self.visit(ctx.interface_para())]
+    #     else: return []
+    def visitInterface_para_list(self, ctx: MiniGoParser.Interface_para_listContext):
+        params = []
+        
+        # Duyệt qua các tham số
         if ctx.getChildCount() > 1:
-            return [self.visit(ctx.interface_para())] + self.visit(ctx.interface_para_list())
-        elif ctx.getChildCount() == 1: 
-            return [self.visit(ctx.interface_para())]
-        else: return []
+            params = [self.visit(ctx.interface_para())] + self.visit(ctx.interface_para_list())
+        elif ctx.getChildCount() == 1:
+            params = [self.visit(ctx.interface_para())]
+        
+        # Kiểm tra và thay thế các None thành IntType nếu cần
+        for i in range(len(params)):
+            if params[i] is None:
+                params[i] = IntType()  # Hoặc kiểu dữ liệu mặc định khác nếu cần
+        
+        # Trả về danh sách tham số đã xử lý
+        return params
 
 
     # Visit a parse tree produced by MiniGoParser#interface_para.
     def visitInterface_para(self, ctx:MiniGoParser.Interface_paraContext):
         name = ctx.ID().getText() 
-        type = self.visit(ctx.types()) if self.visit(ctx.types()) else None
+        type = self.visit(ctx.types()) if ctx.types() else None
         
-        return ParamDecl(name, type)
+        return type #ParamDecl(name, type)
 
 
     # Visit a parse tree produced by MiniGoParser#func_decl.
@@ -237,16 +245,43 @@ class ASTGeneration(MiniGoVisitor):
 
     # Visit a parse tree produced by MiniGoParser#lhs.
     def visitLhs(self, ctx:MiniGoParser.LhsContext):
-        if ctx.LBRACK():  
+        # if ctx.LBRACK():  
+        #     base = self.visit(ctx.lhs()) 
+        #     index = self.visit(ctx.expr())  
+        #     return ArrayCell(base, [index]) 
+        # elif ctx.DOT():  
+        #     base = self.visit(ctx.lhs())
+        #     field = ctx.ID().getText()
+        #     return FieldAccess(base, field)
+        # elif ctx.ID():  
+        #     return Id(ctx.ID().getText()) 
+        # return None
+        
+        # if ctx.ID():  
+        #     return Id(ctx.ID().getText()) 
+        # lhs = self.visit(ctx.lhs())
+        # print(f'lhs: {lhs}')
+        # if ctx.DOT():  
+        #     #self.visit(ctx.lhs())
+        #     field = ctx.ID().getText()
+        #     return FieldAccess(self.visit(ctx.lhs()), field)
+        # if type(lhs) == ArrayCell: #ctx.LBRACK():  
+        #     return ArrayCell(lhs.arr, lhs.idx + [self.visit(ctx.expr())]) 
+        # return ArrayCell(lhs, [self.visit(ctx.expr())])
+    
+        if ctx.getChildCount() == 1:
+            return Id(ctx.ID().getText()) 
+        elif ctx.getChild(1).getText() == ".":
+            base = self.visit(ctx.lhs())
+            field = ctx.ID().getText()
+            return FieldAccess(base, field)
+        elif ctx.getChild(1).getText() == "[":
             base = self.visit(ctx.lhs()) 
             index = self.visit(ctx.expr())  
             return ArrayCell(base, [index]) 
-        elif ctx.DOT():  
-            base = self.visit(ctx.lhs())
-            return base 
-        elif ctx.ID():  
-            return Id(ctx.ID().getText()) 
+
         return None
+
 
 
     # Visit a parse tree produced by MiniGoParser#ass_operator.
@@ -367,25 +402,26 @@ class ASTGeneration(MiniGoVisitor):
 
     # Visit a parse tree produced by MiniGoParser#call_statement.
     def visitCall_statement(self, ctx:MiniGoParser.Call_statementContext):
-        # return 1
-        # receiver = self.visit(ctx.lhs())
-        # metName = []
+        # lhs = self.visit(ctx.lhs())  
+
+        # if isinstance(lhs, FieldAccess):
+        #     params = self.visit(ctx.list_expr()) if ctx.list_expr() else []
+        #     return MethCall(lhs.receiver, lhs.field, params)
+        # elif isinstance(lhs, Id):
+        #     method_name = ctx.lhs().ID().getText()  # Extract the method name directly
+        #     params = self.visit(ctx.list_expr()) if ctx.list_expr() else []
+        #     return FuncCall(method_name, params)
+        # else:
+        #     params = self.visit(ctx.list_expr()) if ctx.list_expr() else []
+        #     return FuncCall(str(lhs), params)
         
-        # args = self.visit(ctx.list_expr()) if ctx.list_expr() else []
-        
-        # return MethCall(obj, param, args)
-        lhs = self.visit(ctx.lhs())  
-        if isinstance(lhs, ArrayCell):
-            # print(f"Call on array cell: {lhs}")
-            receiver = lhs  
-            if ctx.lhs() and ctx.lhs().ID():
-                method_name = ctx.lhs().ID().getText() 
+        if ctx.lhs():
+            lhs = self.visit(ctx.lhs())
+            # if isinstance(lhs, FieldAccess):
             params = self.visit(ctx.list_expr()) if ctx.list_expr() else []
-            return MethCall(receiver, method_name, params)
-        else:
-            method_name = self.visit(ctx.lhs())  # Extract the method name directly
-            params = self.visit(ctx.list_expr()) if ctx.list_expr() else []
-            return MethCall(None, method_name, params)
+            return MethCall(lhs, ctx.ID().getText(), params)
+        params = self.visit(ctx.list_expr()) if ctx.list_expr() else []
+        return FuncCall(ctx.ID().getText(), params)
 
 
     # Visit a parse tree produced by MiniGoParser#continue_statement.
@@ -467,21 +503,24 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#primary_expr.
     def visitPrimary_expr(self, ctx:MiniGoParser.Primary_exprContext):
         # If it's just an ID or a literal, return the corresponding node
+        # self_expr = 
         if ctx.exprd():
             return self.visit(ctx.exprd())  # Expression
         elif ctx.func_call():
             return self.visit(ctx.func_call())  # Literal value
         
+        self_expr = self.visit(ctx.primary_expr())
         if ctx.DOT():
             if ctx.LPAREN():
-                receiver = self.visit(ctx.primary_expr()) 
+                receiver = self.visit(ctx.primary_expr()) #self.visit(ctx.primary_expr()) 
                 methName = ctx.ID().getText()
                 args = self.visit(ctx.list_expr()) if ctx.list_expr() else [] 
                 return MethCall(receiver, methName, args)
             else: return FieldAccess(self.visit(ctx.primary_expr()), ctx.ID().getText())
         
-        if ctx.LBRACK():
-            return ArrayCell(self.visit(ctx.primary_expr()), [self.visit(ctx.expr())])
+        if type(self_expr) == ArrayCell: #ctx.LBRACK():
+            return ArrayCell(self_expr.arr, self_expr.idx + [self.visit(ctx.expr())])
+        return ArrayCell(self_expr, [self.visit(ctx.expr())])
 
 
     # Visit a parse tree produced by MiniGoParser#exprd.
@@ -612,9 +651,10 @@ class ASTGeneration(MiniGoVisitor):
 
     # Visit a parse tree produced by MiniGoParser#arr_list.
     def visitArr_list(self, ctx:MiniGoParser.Arr_listContext):
+        arrlist = [self.visit(ctx.arr_ele())]
         if ctx.arr_list():
-            return [self.visit(ctx.arr_ele())] + self.visit(ctx.arr_list())
-        return [self.visit(ctx.arr_ele())]
+            arrlist.extend(self.visit(ctx.arr_list()))
+        return arrlist
 
 
     # Visit a parse tree produced by MiniGoParser#arr_ele.
@@ -623,13 +663,13 @@ class ASTGeneration(MiniGoVisitor):
 
 
     # Visit a parse tree produced by MiniGoParser#int_lit.
-    def visitInt_lit(self, ctx:MiniGoParser.Int_litContext):
-        return IntLiteral(int(ctx.getChild(0).getText()))
+    def visitInt_lit(self, ctx:MiniGoParser.Int_litContext): 
+        return IntLiteral(ctx.getChild(0).getText())
 
 
     # Visit a parse tree produced by MiniGoParser#float_lit.
     def visitFloat_lit(self, ctx:MiniGoParser.Float_litContext):
-        return FloatLiteral(float(ctx.getChild(0).getText()))
+        return FloatLiteral(ctx.getChild(0).getText())
 
 
     # Visit a parse tree produced by MiniGoParser#bool_lit.
@@ -643,8 +683,8 @@ class ASTGeneration(MiniGoVisitor):
     # Visit a parse tree produced by MiniGoParser#str_lit.
     def visitStr_lit(self, ctx:MiniGoParser.Str_litContext):
         result = ctx.STR_LIT().getText()
-        if result.startswith('"') and result.endswith('"'):
-            result = result[1:-1]
+        # if result.startswith('"') and result.endswith('"'):
+        #     result = result[1:-1]
         return StringLiteral(result)
 
 

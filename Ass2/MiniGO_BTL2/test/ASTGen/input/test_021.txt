@@ -1,4 +1,4 @@
 
-            func votien() {
+            func Darkie() {
                 if(1) {return;}
             }

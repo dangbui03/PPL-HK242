@@ -1,0 +1,1 @@
+Program([InterfaceType(Darkie,[Prototype(Add,[IntType,IntType,IntType],ArrayType(StringType,[IntLiteral(2)]))])])

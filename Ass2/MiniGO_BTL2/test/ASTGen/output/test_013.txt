@@ -1,1 +1,1 @@
-Program([FuncDecl(foo,[],IntType,Block([Return()])),FuncDecl(foo,[ParDecl(a,IntType),ParDecl(b,IntType)],VoidType,Block([Return()]))])
+Program([FuncDecl(chu,[],IntType,Block([Return()])),FuncDecl(chu,[ParDecl(a,IntType),ParDecl(b,IntType)],VoidType,Block([Return()]))])

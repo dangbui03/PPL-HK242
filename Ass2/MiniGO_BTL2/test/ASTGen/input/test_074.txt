@@ -1,2 +1,2 @@
 
-            func foo() [2]int {return;}
+            func chu() [2]int {return;}

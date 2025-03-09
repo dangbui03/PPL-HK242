@@ -1,0 +1,1 @@
+Program([FuncDecl(chu,[],VoidType,Block([If(Id(a),Block([Return()])),If(Id(b),Block([Return()]),Block([Return()]))]))])

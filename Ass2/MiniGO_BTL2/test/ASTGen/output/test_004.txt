@@ -1,1 +1,1 @@
-Program([ConstDecl(VoTien,FuncCall(foo,[BinaryOp(BinaryOp(BinaryOp(IntLiteral(1),+,IntLiteral(2)),-,IntLiteral(3)),&&,BinaryOp(IntLiteral(5),-,UnaryOp(-,IntLiteral(1))))]))])
+Program([ConstDecl(Darkie,FuncCall(chu,[BinaryOp(BinaryOp(BinaryOp(IntLiteral(1),+,IntLiteral(2)),-,IntLiteral(3)),&&,BinaryOp(IntLiteral(5),-,UnaryOp(-,IntLiteral(1))))]))])

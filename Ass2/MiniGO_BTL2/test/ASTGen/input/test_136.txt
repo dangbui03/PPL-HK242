@@ -1,0 +1,7 @@
+
+    func chu () {
+        continue;
+        break;
+        return;
+        return 1;
+    }

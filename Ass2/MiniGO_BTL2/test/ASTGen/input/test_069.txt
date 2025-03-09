@@ -1,5 +1,5 @@
 
-            type Votien interface {
+            type Darkie interface {
                 Add() [2]string;
                 Add() ID;
             }

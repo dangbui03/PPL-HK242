@@ -1,0 +1,1 @@
+Program([ConstDecl(Darkie,ArrayLiteral([Id(ID)],IntType,[IntLiteral(1)]))])

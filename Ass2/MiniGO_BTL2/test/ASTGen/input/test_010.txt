@@ -1,1 +1,1 @@
-const VoTien = foo( Votien {}, Votien {a: 1} ); 
+const Darkie = chu( Darkie {}, Darkie {a: 1} ); 

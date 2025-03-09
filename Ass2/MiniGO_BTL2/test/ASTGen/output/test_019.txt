@@ -1,1 +1,1 @@
-Program([FuncDecl(votien,[],VoidType,Block([Break(),Continue()]))])
+Program([FuncDecl(Darkie,[],VoidType,Block([Break(),Continue()]))])

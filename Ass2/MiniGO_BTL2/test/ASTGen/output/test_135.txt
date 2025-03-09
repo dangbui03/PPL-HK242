@@ -1,0 +1,1 @@
+Program([InterfaceType(INTERFACE,[Prototype(chu,[],VoidType),Prototype(chu,[],IntType),Prototype(chu,[],ArrayType(Id(ID),[IntLiteral(2)])),Prototype(chu,[IntType],VoidType),Prototype(chu,[IntType,IntType],VoidType),Prototype(chu,[IntType,IntType],VoidType)])])

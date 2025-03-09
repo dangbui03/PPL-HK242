@@ -1,2 +1,2 @@
 
-            func foo(a [2]ID) {return;}
+            func chu(a [2]ID) {return;}

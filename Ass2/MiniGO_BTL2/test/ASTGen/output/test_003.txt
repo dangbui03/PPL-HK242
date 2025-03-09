@@ -1,1 +1,1 @@
-Program([ConstDecl(VoTien,FuncCall(foo,[Id(id)]))])
+Program([ConstDecl(Darkie,FuncCall(chu,[Id(id)]))])

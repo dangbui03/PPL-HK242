@@ -1,4 +1,4 @@
 
-            func votien() {
+            func Darkie() {
                 for index, value := range array[2] {return;}
             }

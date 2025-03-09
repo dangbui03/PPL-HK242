@@ -1,4 +1,4 @@
 
-            type Votien interface {
+            type Darkie interface {
                 Add();
             }

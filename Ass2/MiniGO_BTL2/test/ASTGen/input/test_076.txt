@@ -1,2 +1,2 @@
 
-            func  (Cat c) foo(a [2]ID) {return;}
+            func  (Cat c) chu(a [2]ID) {return;}

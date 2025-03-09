@@ -1,1 +1,1 @@
-Program([FuncDecl(votien,[],VoidType,Block([Assign(Id(a),BinaryOp(Id(a),+,IntLiteral(1)))]))])
+Program([FuncDecl(Darkie,[],VoidType,Block([Assign(Id(a),BinaryOp(Id(a),+,IntLiteral(1)))]))])

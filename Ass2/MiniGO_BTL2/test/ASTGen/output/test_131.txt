@@ -1,0 +1,1 @@
+Program([StructType(ID,[(a,IntType),(b,Id(ID)),(c,ArrayType(IntType,[IntLiteral(2)]))],[])])

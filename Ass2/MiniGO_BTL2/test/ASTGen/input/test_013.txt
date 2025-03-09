@@ -1,3 +1,3 @@
 
-            func foo() int {return;}
-            func foo(a int, b int) {return;}
+            func chu() int {return;}
+            func chu(a int, b int) {return;}

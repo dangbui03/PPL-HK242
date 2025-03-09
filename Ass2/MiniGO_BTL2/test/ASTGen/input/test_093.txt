@@ -1,7 +1,7 @@
 
-            func foo(){
-                foo();
-                foo(foo(), 2);
-                a.foo();
-                a[2].c.foo(foo(), 2);
+            func chu(){
+                chu();
+                chu(chu(), 2);
+                a.chu();
+                a[2].c.chu(chu(), 2);
             } 

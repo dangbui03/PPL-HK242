@@ -1,1 +1,1 @@
-const VoTien = foo( 1+2-3&&5--1 ); 
+const Darkie = chu( 1+2-3&&5--1 ); 

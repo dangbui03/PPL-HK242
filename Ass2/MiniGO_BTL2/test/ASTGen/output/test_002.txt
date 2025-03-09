@@ -1,1 +1,1 @@
-Program([ConstDecl(VoTien,FuncCall(foo,[FloatLiteral(1.0),BooleanLiteral(true),BooleanLiteral(false),Nil,StringLiteral(votien)]))])
+Program([ConstDecl(Darkie,FuncCall(chu,[FloatLiteral(1.0),BooleanLiteral(true),BooleanLiteral(false),Nil,StringLiteral("Darkie")]))])

@@ -1,5 +1,5 @@
 
-            func foo(){
+            func chu(){
                 if(1) { return;
                 }else if(1) {
                     return 1;

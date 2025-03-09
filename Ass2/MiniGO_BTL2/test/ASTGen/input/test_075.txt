@@ -1,2 +1,2 @@
 
-            func (Cat c) foo() {return;}
+            func (Cat c) chu() {return;}

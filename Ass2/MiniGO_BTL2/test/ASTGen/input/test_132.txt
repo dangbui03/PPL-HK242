@@ -1,0 +1,4 @@
+
+    func chu () {var a = 1;}
+    func chu () int {var a = 1;}
+    func chu () [2] ID {var a = 1;}

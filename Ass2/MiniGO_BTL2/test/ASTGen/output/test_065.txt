@@ -1,1 +1,1 @@
-Program([InterfaceType(Votien,[Prototype(Add,[ParDecl(a,IntType)],None)])])
+Program([InterfaceType(Darkie,[Prototype(Add,[IntType],VoidType)])])

@@ -1,1 +1,1 @@
-Program([FuncDecl(foo,[],ArrayType(IntType,[IntLiteral(2)]),Block([Return()]))])
+Program([FuncDecl(chu,[],ArrayType(IntType,[IntLiteral(2)]),Block([Return()]))])

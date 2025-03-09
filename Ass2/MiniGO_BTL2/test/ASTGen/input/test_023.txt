@@ -1,5 +1,5 @@
 
-            func votien() {
+            func Darkie() {
                 if(1) { return;
                 }else if(1) {
                     a := 1;

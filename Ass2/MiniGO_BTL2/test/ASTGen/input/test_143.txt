@@ -1,0 +1,4 @@
+
+        func chu () {
+            for(1) {return;}
+        }

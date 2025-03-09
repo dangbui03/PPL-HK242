@@ -1,0 +1,1 @@
+Program([FuncDecl(Darkie,[],VoidType,Block([MethodCall(ArrayCell(FieldAccess(FieldAccess(Id(a),b),c),[IntLiteral(2)]),d,[])]))])

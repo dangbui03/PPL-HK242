@@ -1,0 +1,4 @@
+
+        func chu () {
+            for a, b := range 2 {return;}
+        }

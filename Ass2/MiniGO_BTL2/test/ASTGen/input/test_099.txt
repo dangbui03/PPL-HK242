@@ -1,4 +1,4 @@
 
-            func votien() {
+            func Darkie() {
                 a.b.c[2].d()
             }
