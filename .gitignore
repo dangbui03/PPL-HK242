@@ -1,5 +1,6 @@
 test
 __pycache__
+*.antlr
 
 # Byte-compiled / optimized / DLL files
 *.py[cod]
@@ -111,6 +112,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+myenv
 
 # Spyder project settings
 .spyderproject
