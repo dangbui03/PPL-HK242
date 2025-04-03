@@ -92,6 +92,45 @@ class StaticChecker(BaseVisitor, Utils):
             return self.checkType(LSH_type.eleType, RHS_type.eleType, list_type_permission)
         return type(LSH_type) == type(RHS_type)
 
+    def compute_expression(self, node, context):
+        # Khởi tạo context mặc định là một từ điển rỗng nếu không được cung cấp
+        if context is None:
+            context = {}
+
+        # Xử lý giá trị nguyên
+        if isinstance(node, IntLiteral):
+            return node.value
+
+        # Xử lý phép toán nhị phân
+        if isinstance(node, BinaryOp):
+            left_value = self.compute_expression(node.left, context)
+            right_value = self.compute_expression(node.right, context)
+            
+            # Kiểm tra giá trị hợp lệ
+            if left_value is None or right_value is None:
+                return None
+            
+            # Thực hiện phép toán dựa trên toán tử
+            operator = node.op
+            if operator == '+':
+                return left_value + right_value
+            elif operator == '-':
+                return left_value - right_value
+            elif operator == '*':
+                return left_value * right_value
+            elif operator == '/':
+                return left_value // right_value  # Sử dụng chia lấy nguyên
+
+        # Xử lý biến (identifier)
+        if isinstance(node, Id):
+            variable_name = node.name
+            # Tìm giá trị của biến trong context
+            if variable_name in context and context[variable_name] is not None:
+                return context[variable_name]
+
+        # Trả về None nếu không thể tính toán
+        return None
+    
     def visitProgram(self, ast: Program, c: None):
         # global_env = c.copy()
         
@@ -164,6 +203,11 @@ class StaticChecker(BaseVisitor, Utils):
         )
 
     def visitStructType(self, ast: StructType, c: List[Union[StructType, InterfaceType]]) -> StructType:
+        # Check if there's already a type with the same name
+        res = self.lookup(ast.name, c, lambda x: x.name)
+        if res is not None:
+            raise Redeclared(StaticErrorType(), ast.name)
+        
         for function in self.list_function:
             if function.name == ast.name:
                 raise Redeclared(StaticErrorType(), ast.name)
@@ -187,6 +231,7 @@ class StaticChecker(BaseVisitor, Utils):
         res = self.lookup(ast.name, c, lambda x: x.name)
         if not res is None:
             raise Redeclared(Prototype(), ast.name)
+        return ast
 
     def visitInterfaceType(self, ast: InterfaceType, c: List[Union[StructType, InterfaceType]]) -> InterfaceType:
         res = self.lookup(ast.name, c, lambda x: x.name)
@@ -229,11 +274,31 @@ class StaticChecker(BaseVisitor, Utils):
 
     def visitMethodDecl(self, ast: MethodDecl, c: List[List[Symbol]]) -> None:
         # TODO: Implement
-        res = self.lookup(ast.fun.name, c[0], lambda x: x.fun.name)
-        if not res is None:
+        # Get the receiver type (struct type)
+        receiver_type = self.lookup(ast.recType.name, self.list_type, lambda x: x.name)
+        if not receiver_type or not isinstance(receiver_type, StructType):
+            raise Undeclared(Type(), ast.recType.name)
+            
+        # Check if method name already exists in the struct
+        if self.lookup(ast.fun.name, receiver_type.methods, lambda x: x.fun.name):
             raise Redeclared(Method(), ast.fun.name)
-        self.visit(ast.fun.body, [list(reduce(lambda acc, ele: [
-                     self.visit(ele, acc)] + acc, ast.fun.params, []))] + c)
+            
+        # Create local environment for method parameters
+        local_env = [[]] + c
+        
+        local_env[0].append(Symbol(ast.receiver, receiver_type, None))
+        
+        # Process parameters and add them to local environment
+        for param in ast.fun.params:
+            param_sym = self.visit(param, local_env[0])
+            local_env[0].append(param_sym)
+        
+        # Visit method body with the local environment
+        self.function_current = ast.fun
+        self.visit(ast.fun.body, local_env)
+        self.function_current = None
+        
+        # Return symbol for the method
         return Symbol(ast.fun.name, FuntionType(), ast.fun.body)
 
     def visitVarDecl(self, ast: VarDecl, c: List[List[Symbol]]) -> Symbol:
@@ -254,19 +319,15 @@ class StaticChecker(BaseVisitor, Utils):
 
     def visitConstDecl(self, ast: ConstDecl, c: List[List[Symbol]]) -> Symbol:
         # TODO: Implement
-        res = self.lookup(ast.constName, c[0], lambda x: x.name)
+        res = self.lookup(ast.conName, c[0], lambda x: x.name)
         if not res is None:
-            raise Redeclared(Constant(), ast.constName)
-        LHS_type = ast.constType if ast.constType else None
-        RHS_type = self.visit(ast.constInit, c) if ast.constInit else None
-
-        if RHS_type is None:
-            return Symbol(ast.constName, LHS_type, None)
-        elif LHS_type is None:
-            return Symbol(ast.constName, RHS_type, None)
-        elif self.checkType(LHS_type, RHS_type, [(FloatType, IntType), (InterfaceType, StructType)]):
-            return Symbol(ast.constName, LHS_type, None)
-        raise TypeMismatch(ast)
+            raise Redeclared(Constant(), ast.conName)
+        LHS_type = ast.conType if ast.conType else None
+        RHS_type = self.visit(ast.iniExpr, c) if ast.iniExpr else None
+        
+        initValue = self.compute_expression(ast.iniExpr, c)
+        c[0].append(Symbol(ast.conName, LHS_type, initValue))
+        return Symbol(ast.conName, LHS_type, initValue)
 
     def visitBlock(self, ast: Block, c: List[List[Symbol]]) -> None:
         acc = [[]] + c
@@ -413,7 +474,7 @@ class StaticChecker(BaseVisitor, Utils):
         expected_type = self.function_current.retType
         if ast.expr:
             expr_type = self.visit(ast.expr, c)
-            if not self.typeCheck(expr_type, expected_type):
+            if not self.checkType(expected_type, expr_type, [(FloatType, IntType), (InterfaceType, StructType)]):
                 raise TypeMismatch(ast)
         elif not isinstance(expected_type, VoidType):
             raise TypeMismatch(ast)
@@ -519,10 +580,10 @@ class StaticChecker(BaseVisitor, Utils):
                 list(map(lambda value: nested2recursive(value, c), dat))
             else:
                 self.visit(dat, c)
-        nested2recursive(ast.value) # TODO: Implement)
+        nested2recursive(ast.value, c) # TODO: Implement)
         return ArrayType(ast.dimens, ast.eleType)
     def visitStructLiteral(self, ast: StructLiteral, c: List[List[Symbol]]) -> Type:
         list(map(lambda value: self.visit(value[1], c), ast.elements))
-        return  # TODO: Implement
+        return StructType(ast.name, [], [])# TODO: Implement
     def visitNilLiteral(self, ast: NilLiteral,
                         c: List[List[Symbol]]) -> Type: return StructType("", [], [])
