@@ -142,36 +142,57 @@ class StaticChecker(BaseVisitor, Utils):
             c.methods.append(ast)
             return ast
         
-        used_names = {"getInt","putInt","putIntLn","getString","putString","putStringLn","putLn"}
+        # used_names = {"getInt","putInt","putIntLn","getString","putString","putStringLn","putLn"}
+        # for decl in ast.decl:
+        #     if isinstance(decl, VarDecl):
+        #         # Nếu decl.varName trùng used_names => Redeclared
+        #         if decl.varName in used_names:
+        #             raise Redeclared(Variable(), decl.varName)
+        #         used_names.add(decl.varName)
+
+        #     elif isinstance(decl, ConstDecl):
+        #         if decl.conName in used_names:
+        #             raise Redeclared(Constant(), decl.conName)
+        #         used_names.add(decl.conName)
+
+        #     elif isinstance(decl, FuncDecl):
+        #         if decl.name in used_names:
+        #             raise Redeclared(Function(), decl.name)
+        #         used_names.add(decl.name)
+
+        #     elif isinstance(decl, StructType):
+        #         # Quan trọng: Kiểm tra "A" có trong used_names
+        #         if decl.name in used_names:
+        #             # => "Redeclared Type: A"
+        #             raise Redeclared(StaticErrorType(), decl.name)
+        #         used_names.add(decl.name)
+
+        #     elif isinstance(decl, InterfaceType):
+        #         # Tương tự struct
+        #         if decl.name in used_names:
+        #             raise Redeclared(StaticErrorType(), decl.name)
+        #         used_names.add(decl.name)
+        
+        used_names = {"getInt", "putInt", "putIntLn", "getString", "putString", "putStringLn", "putLn"}
+
         for decl in ast.decl:
-            if isinstance(decl, VarDecl):
-                # Nếu decl.varName trùng used_names => Redeclared
-                if decl.varName in used_names:
-                    raise Redeclared(Variable(), decl.varName)
-                used_names.add(decl.varName)
-
-            elif isinstance(decl, ConstDecl):
-                if decl.conName in used_names:
-                    raise Redeclared(Constant(), decl.conName)
-                used_names.add(decl.conName)
-
-            elif isinstance(decl, FuncDecl):
-                if decl.name in used_names:
-                    raise Redeclared(Function(), decl.name)
-                used_names.add(decl.name)
-
-            elif isinstance(decl, StructType):
-                # Quan trọng: Kiểm tra "A" có trong used_names
-                if decl.name in used_names:
-                    # => "Redeclared Type: A"
-                    raise Redeclared(StaticErrorType(), decl.name)
-                used_names.add(decl.name)
-
-            elif isinstance(decl, InterfaceType):
-                # Tương tự struct
-                if decl.name in used_names:
-                    raise Redeclared(StaticErrorType(), decl.name)
-                used_names.add(decl.name)
+            match decl:
+                case VarDecl(varName=name):
+                    if name in used_names:
+                        raise Redeclared(Variable(), name)
+                    used_names.add(name)
+                case ConstDecl(conName=name):
+                    if name in used_names:
+                        raise Redeclared(Constant(), name)
+                    used_names.add(name)
+                case FuncDecl(name=name):
+                    if name in used_names:
+                        raise Redeclared(Function(), name)
+                    used_names.add(name)
+                case StructType(name=name) | InterfaceType(name=name):
+                    if name in used_names:
+                        raise Redeclared(StaticErrorType(), name)
+                    used_names.add(name)
                 
         self.list_type = reduce(lambda acc, ele: [self.visit(
             ele, acc)] + acc if isinstance(ele, Type) else acc, ast.decl, [])
@@ -204,8 +225,10 @@ class StaticChecker(BaseVisitor, Utils):
 
     def visitStructType(self, ast: StructType, c: List[Union[StructType, InterfaceType]]) -> StructType:
         # Check if there's already a type with the same name
-        res = self.lookup(ast.name, c, lambda x: x.name)
-        if res is not None:
+        # res = self.lookup(ast.name, c, lambda x: x.name)
+        # if res is not None:
+        #     raise Redeclared(StaticErrorType(), ast.name)
+        if ast.name in c:
             raise Redeclared(StaticErrorType(), ast.name)
         
         for function in self.list_function:
@@ -228,8 +251,10 @@ class StaticChecker(BaseVisitor, Utils):
 
     def visitPrototype(self, ast: Prototype, c: List[Prototype]) -> Prototype:
         # TODO: Implement
-        res = self.lookup(ast.name, c, lambda x: x.name)
-        if not res is None:
+        # res = self.lookup(ast.name, c, lambda x: x.name)
+        # if not res is None:
+        #     raise Redeclared(Prototype(), ast.name)
+        if any(obj.name == ast.name for obj in c):
             raise Redeclared(Prototype(), ast.name)
         return ast
 
@@ -243,9 +268,13 @@ class StaticChecker(BaseVisitor, Utils):
 
     def visitFuncDecl(self, ast: FuncDecl, c: List[List[Symbol]]) -> Symbol:
         # TODO: Implement
-        res = self.lookup(ast.name, c[0], lambda x: x.name)
-        if not res is None:
-            raise Redeclared(Function(), ast.name)
+                
+        # res = self.lookup(ast.name, c[0], lambda x: x.name)
+        # if not res is None:
+        #     raise Redeclared(Function(), ast.name)
+        if any(obj.name == ast.name for obj in c[0]):
+            raise Redeclared(Prototype(), ast.name)
+        oldfunc = self.function_current
         
         param_types = [self.visit(param.parType, c) for param in ast.params]
         ret_type = self.visit(ast.retType, c) if ast.retType else VoidType()
@@ -257,7 +286,7 @@ class StaticChecker(BaseVisitor, Utils):
         
         self.function_current = ast
         self.visit(ast.body, local_env)
-        self.function_current = None
+        self.function_current = oldfunc
             
         return Symbol(ast.name, FuntionType(), None)
         # self.visit(ast.body, [list(reduce(lambda acc, ele: [
@@ -267,9 +296,11 @@ class StaticChecker(BaseVisitor, Utils):
 
     def visitParamDecl(self, ast: ParamDecl, c: list[Symbol]) -> Symbol:
         # TODO: Implement
-        res = self.lookup(ast.parName, c[0], lambda x: x.name)
-        if not res is None:
-            raise Redeclared(Parameter(), ast.parName)
+        # res = self.lookup(ast.parName, c[0], lambda x: x.name)
+        # if not res is None:
+        #     raise Redeclared(Parameter(), ast.parName)
+        if any(obj.name == ast.name for obj in c[0]):
+            raise Redeclared(Parameter(), ast.name)
         return Symbol(ast.parName, ast.parType, None)
 
     def visitMethodDecl(self, ast: MethodDecl, c: List[List[Symbol]]) -> None:
@@ -284,9 +315,7 @@ class StaticChecker(BaseVisitor, Utils):
             raise Redeclared(Method(), ast.fun.name)
             
         # Create local environment for method parameters
-        local_env = [[]] + c
-        
-        local_env[0].append(Symbol(ast.receiver, receiver_type, None))
+        local_env = [[Symbol(ast.receiver, receiver_type, None)]] + c
         
         # Process parameters and add them to local environment
         for param in ast.fun.params:
@@ -302,8 +331,11 @@ class StaticChecker(BaseVisitor, Utils):
         return Symbol(ast.fun.name, FuntionType(), ast.fun.body)
 
     def visitVarDecl(self, ast: VarDecl, c: List[List[Symbol]]) -> Symbol:
-        res = self.lookup(ast.varName, c[0], lambda x: x.name)
-        if not res is None:
+        # res = self.lookup(ast.varName, c[0], lambda x: x.name)
+        # if not res is None:
+        #     raise Redeclared(Variable(), ast.varName)
+        
+        if ast.varName in c[0]:
             raise Redeclared(Variable(), ast.varName)
 
         LHS_type = ast.varType if ast.varType else None
@@ -319,9 +351,13 @@ class StaticChecker(BaseVisitor, Utils):
 
     def visitConstDecl(self, ast: ConstDecl, c: List[List[Symbol]]) -> Symbol:
         # TODO: Implement
-        res = self.lookup(ast.conName, c[0], lambda x: x.name)
-        if not res is None:
+        # res = self.lookup(ast.conName, c[0], lambda x: x.name)
+        # if not res is None:
+        #     raise Redeclared(Constant(), ast.conName)
+        
+        if ast.conName in c[0]:
             raise Redeclared(Constant(), ast.conName)
+        
         LHS_type = ast.conType if ast.conType else None
         RHS_type = self.visit(ast.iniExpr, c) if ast.iniExpr else None
         
