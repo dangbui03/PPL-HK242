@@ -33,7 +33,7 @@ class StaticChecker(BaseVisitor, Utils):
         self.ast = ast
         self.list_type: List[Union[StructType, InterfaceType]] = []
         self.list_function: List[FuncDecl] = [
-                FuncDecl("getInt", [], IntType(), Block([])),
+            FuncDecl("getInt", [], IntType(), Block([])),
             FuncDecl("putInt", [ParamDecl(
                 "VOTIEN", IntType())], VoidType(), Block([])),
             FuncDecl("putIntLn", [ParamDecl(
@@ -47,7 +47,7 @@ class StaticChecker(BaseVisitor, Utils):
             FuncDecl("getBool", [], BoolType(), Block([])),
             FuncDecl("putFloat", [ParamDecl(
                 "VOTIEN", FloatType())], VoidType(), Block([])),
-            ]
+        ]
         self.function_current: FuncDecl = None
 
     def check(self):
@@ -105,11 +105,11 @@ class StaticChecker(BaseVisitor, Utils):
         if isinstance(node, BinaryOp):
             left_value = self.compute_expression(node.left, context)
             right_value = self.compute_expression(node.right, context)
-            
+
             # Kiểm tra giá trị hợp lệ
             if left_value is None or right_value is None:
                 return None
-            
+
             # Thực hiện phép toán dựa trên toán tử
             operator = node.op
             if operator == '+':
@@ -130,10 +130,10 @@ class StaticChecker(BaseVisitor, Utils):
 
         # Trả về None nếu không thể tính toán
         return None
-    
+
     def visitProgram(self, ast: Program, c: None):
         # global_env = c.copy()
-        
+
         def visitMethodDecl(ast: MethodDecl, c: StructType) -> MethodDecl:
             # TODO: Implement
             if self.lookup(ast.fun.name, c.methods, lambda x: x.fun.name):
@@ -141,39 +141,9 @@ class StaticChecker(BaseVisitor, Utils):
 
             c.methods.append(ast)
             return ast
-        
-        # used_names = {"getInt","putInt","putIntLn","getString","putString","putStringLn","putLn"}
-        # for decl in ast.decl:
-        #     if isinstance(decl, VarDecl):
-        #         # Nếu decl.varName trùng used_names => Redeclared
-        #         if decl.varName in used_names:
-        #             raise Redeclared(Variable(), decl.varName)
-        #         used_names.add(decl.varName)
 
-        #     elif isinstance(decl, ConstDecl):
-        #         if decl.conName in used_names:
-        #             raise Redeclared(Constant(), decl.conName)
-        #         used_names.add(decl.conName)
-
-        #     elif isinstance(decl, FuncDecl):
-        #         if decl.name in used_names:
-        #             raise Redeclared(Function(), decl.name)
-        #         used_names.add(decl.name)
-
-        #     elif isinstance(decl, StructType):
-        #         # Quan trọng: Kiểm tra "A" có trong used_names
-        #         if decl.name in used_names:
-        #             # => "Redeclared Type: A"
-        #             raise Redeclared(StaticErrorType(), decl.name)
-        #         used_names.add(decl.name)
-
-        #     elif isinstance(decl, InterfaceType):
-        #         # Tương tự struct
-        #         if decl.name in used_names:
-        #             raise Redeclared(StaticErrorType(), decl.name)
-        #         used_names.add(decl.name)
-        
-        used_names = {"getInt", "putInt", "putIntLn", "getString", "putString", "putStringLn", "putLn"}
+        used_names = {"getInt", "putInt", "putIntLn",
+                      "getString", "putString", "putStringLn", "putLn"}
 
         for decl in ast.decl:
             match decl:
@@ -193,7 +163,7 @@ class StaticChecker(BaseVisitor, Utils):
                     if name in used_names:
                         raise Redeclared(StaticErrorType(), name)
                     used_names.add(name)
-                
+
         self.list_type = reduce(lambda acc, ele: [self.visit(
             ele, acc)] + acc if isinstance(ele, Type) else acc, ast.decl, [])
         self.list_function = self.list_function + \
@@ -203,12 +173,12 @@ class StaticChecker(BaseVisitor, Utils):
             lambda item: visitMethodDecl(item, self.lookup(
                 item.recType.name, self.list_type, lambda x: x.name)),
              list(filter(lambda item: isinstance(item, MethodDecl), ast.decl))
-        ))
+             ))
 
         reduce(
             lambda acc, ele: [
                 ([result] + acc[0]) if isinstance(result :=
-                 self.visit(ele, acc), Symbol) else acc[0]
+                                                  self.visit(ele, acc), Symbol) else acc[0]
             ] + acc[1:],
             filter(lambda item: isinstance(item, Decl), ast.decl),
             [[
@@ -230,7 +200,7 @@ class StaticChecker(BaseVisitor, Utils):
         #     raise Redeclared(StaticErrorType(), ast.name)
         if ast.name in c:
             raise Redeclared(StaticErrorType(), ast.name)
-        
+
         for function in self.list_function:
             if function.name == ast.name:
                 raise Redeclared(StaticErrorType(), ast.name)
@@ -267,66 +237,68 @@ class StaticChecker(BaseVisitor, Utils):
         return ast
 
     def visitFuncDecl(self, ast: FuncDecl, c: List[List[Symbol]]) -> Symbol:
-        # TODO: Implement
-                
         # res = self.lookup(ast.name, c[0], lambda x: x.name)
         # if not res is None:
         #     raise Redeclared(Function(), ast.name)
         if any(obj.name == ast.name for obj in c[0]):
             raise Redeclared(Prototype(), ast.name)
         oldfunc = self.function_current
-        
+
         param_types = [self.visit(param.parType, c) for param in ast.params]
         ret_type = self.visit(ast.retType, c) if ast.retType else VoidType()
         local_env = [[]] + c
+        self.function_current = ast
 
         for param in ast.params:
-            param_sym = self.visit(param, local_env[0])
+            param_sym = self.visit(param, local_env)
             local_env[0].append(param_sym)
-        
-        self.function_current = ast
+
         self.visit(ast.body, local_env)
         self.function_current = oldfunc
-            
+
         return Symbol(ast.name, FuntionType(), None)
-        # self.visit(ast.body, [list(reduce(lambda acc, ele: [
-        #            self.visit(ele, acc)] + acc, ast.params, []))] + c)
-        # return Symbol(ast.name, FuntionType(), ast.body)
-        # TODO: Implement
 
     def visitParamDecl(self, ast: ParamDecl, c: list[Symbol]) -> Symbol:
         # TODO: Implement
         # res = self.lookup(ast.parName, c[0], lambda x: x.name)
         # if not res is None:
         #     raise Redeclared(Parameter(), ast.parName)
-        if any(obj.name == ast.name for obj in c[0]):
-            raise Redeclared(Parameter(), ast.name)
+        if any(obj.name == ast.parName for obj in c[0]):
+            raise Redeclared(Parameter(), ast.parName)
         return Symbol(ast.parName, ast.parType, None)
 
     def visitMethodDecl(self, ast: MethodDecl, c: List[List[Symbol]]) -> None:
         # TODO: Implement
         # Get the receiver type (struct type)
-        receiver_type = self.lookup(ast.recType.name, self.list_type, lambda x: x.name)
-        if not receiver_type or not isinstance(receiver_type, StructType):
-            raise Undeclared(Type(), ast.recType.name)
-            
+        recType = ast.recType
+        receiver_type = self.lookup(
+            ast.recType.name, self.list_type, lambda x: x.name)
+        # or not isinstance(receiver_type, StructType):
+        if not receiver_type and isinstance(recType, Id):
+            raise Undeclared(Identifier(), ast.recType.name)
+        if isinstance(recType, Id):
+            recType = self.lookup(receiver_type.name,
+                                  self.list_type, lambda x: x.name)
+
         # Check if method name already exists in the struct
         if self.lookup(ast.fun.name, receiver_type.methods, lambda x: x.fun.name):
             raise Redeclared(Method(), ast.fun.name)
-            
+
         # Create local environment for method parameters
-        local_env = [[Symbol(ast.receiver, receiver_type, None)]] + c
-        
+        methoddecl = Symbol(ast.recType.name, receiver_type, None)
+        local_env = [[]] + c
+        local_env[0].append(methoddecl)
+
         # Process parameters and add them to local environment
         for param in ast.fun.params:
-            param_sym = self.visit(param, local_env[0])
+            param_sym = self.visit(param, local_env)
             local_env[0].append(param_sym)
-        
+
         # Visit method body with the local environment
         self.function_current = ast.fun
         self.visit(ast.fun.body, local_env)
         self.function_current = None
-        
+
         # Return symbol for the method
         return Symbol(ast.fun.name, FuntionType(), ast.fun.body)
 
@@ -334,8 +306,9 @@ class StaticChecker(BaseVisitor, Utils):
         # res = self.lookup(ast.varName, c[0], lambda x: x.name)
         # if not res is None:
         #     raise Redeclared(Variable(), ast.varName)
-        
-        if ast.varName in c[0]:
+
+        res = self.lookup(ast.varName, c[0], lambda x: x.name)
+        if res != None:  # Explicitly check for None
             raise Redeclared(Variable(), ast.varName)
 
         LHS_type = ast.varType if ast.varType else None
@@ -350,20 +323,20 @@ class StaticChecker(BaseVisitor, Utils):
         raise TypeMismatch(ast)
 
     def visitConstDecl(self, ast: ConstDecl, c: List[List[Symbol]]) -> Symbol:
-        # TODO: Implement
-        # res = self.lookup(ast.conName, c[0], lambda x: x.name)
-        # if not res is None:
-        #     raise Redeclared(Constant(), ast.conName)
-        
-        if ast.conName in c[0]:
+        found = False
+        for sym in c[0]:
+            if sym.name == ast.conName:
+                found = True
+                break
+        if found:
             raise Redeclared(Constant(), ast.conName)
-        
+
         LHS_type = ast.conType if ast.conType else None
         RHS_type = self.visit(ast.iniExpr, c) if ast.iniExpr else None
-        
+
         initValue = self.compute_expression(ast.iniExpr, c)
-        c[0].append(Symbol(ast.conName, LHS_type, initValue))
-        return Symbol(ast.conName, LHS_type, initValue)
+        c[0].append(Symbol(ast.conName, RHS_type, initValue))
+        return Symbol(ast.conName, RHS_type, initValue)
 
     def visitBlock(self, ast: Block, c: List[List[Symbol]]) -> None:
         acc = [[]] + c
@@ -377,32 +350,60 @@ class StaticChecker(BaseVisitor, Utils):
     def visitForBasic(self, ast: ForBasic, c: List[List[Symbol]]) -> None:
         visit = self.visit(ast.cond, c)
         if not isinstance(visit, BoolType):
-        # TODO: Implement:
             raise TypeMismatch(ast)
         self.visit(ast.loop, c)
 
     def visitForStep(self, ast: ForStep, c: List[List[Symbol]]) -> None:
-        symbol = self.visit(ast.init, [[]] + c)
-        if isinstance(symbol, Symbol):
-            # cập nhật c
-            c[0] = [symbol] + c[0]
-
-        if not isinstance(symbol.mtype, (IntType, FloatType)):
+        # Create a new scope for the for loop
+        loop_env = [[]] + c
+        
+        # Visit the initialization statement
+        init_result = self.visit(ast.init, loop_env)
+        if isinstance(init_result, Symbol):
+            loop_env[0] = [init_result] + loop_env[0]
+        
+        # Check condition type
+        cond_type = self.visit(ast.cond, loop_env)
+        if not isinstance(cond_type, BoolType):
             raise TypeMismatch(ast)
-        self.visit(Block([ast.init] + ast.loop.member + [ast.upda]), c)
+        
+        # Visit the loop body with the loop environment
+        self.visit(ast.loop, loop_env)
+        
+        # Visit the update statement
+        self.visit(ast.upda, loop_env)
 
     def visitForEach(self, ast: ForEach, c: List[List[Symbol]]) -> None:
         type_array = self.visit(ast.arr, c)
         if not isinstance(type_array, ArrayType):
             raise TypeMismatch(ast)
+        if len(type_array.dimens) == 1:
+            # If array has only one dimension, value is the element type
+            value_type = type_array.eleType
+        else:
+            # If array has multiple dimensions, value is an array with one less dimension
+            value_type = ArrayType(type_array.dimens[1:], type_array.eleType)
 
-        self.visit(Block([VarDecl(ast.key.name, type_array.eleType, None),
-                          VarDecl(ast.value.name,
-                                  type_array.eleType,
-                                  None)] + ast.loop.member), c)
+        # self.visit(Block([VarDecl(ast.idx.name, IntType(), None),
+        #             VarDecl(ast.value.name,
+        #                     value_type,
+        #                     None)] + ast.loop.member), c)
+        
+        # Add index and value variables to the loop scope
+        idx_sym = Symbol(ast.idx.name, IntType(), None)
+        val_sym = Symbol(ast.value.name, value_type, None)
+        c[0] = [idx_sym, val_sym] + c[0]
+        
+        # Visit the loop body with the loop environment
+        self.visit(ast.loop, c)
 
     def visitId(self, ast: Id, c: List[List[Symbol]]) -> Type:
-        res = next(filter(lambda env: ast.name in env, c), False)
+        res = None
+        for scope in c:
+            result = self.lookup(ast.name, scope, lambda x: x.name)
+            if result:
+                res = result
+                break
         if res and not isinstance(res.mtype, Function):
             return res.mtype
         raise Undeclared(Identifier(), ast.name)
@@ -413,11 +414,16 @@ class StaticChecker(BaseVisitor, Utils):
             c, is_stmt = c
 
         res = self.lookup(ast.funName, self.list_function, lambda x: x.name)
+
         if res:
             if len(res.params) != len(ast.args):
                 raise TypeMismatch(ast)
             for param, arg in zip(res.params, ast.args):
                 arg_type = self.visit(arg, c)
+                if res.name == "putFloat":
+                    # putFloat không cho phép chuyển đổi int -> float
+                    if not isinstance(arg_type, FloatType):
+                        raise TypeMismatch(ast)
                 if not self.checkType(param.parType, arg_type, [(FloatType, IntType)]):
                     raise TypeMismatch(ast)
 
@@ -426,7 +432,8 @@ class StaticChecker(BaseVisitor, Utils):
             if not is_stmt and not isinstance(res.retType, VoidType):
                 return res.retType
             raise TypeMismatch(ast)
-        raise Undeclared(Function(), ast.funName)
+        else:
+            raise Undeclared(Function(), ast.funName)
 
     def visitFieldAccess(self, ast: FieldAccess, c: List[List[Symbol]]) -> Type:
         receiver_type = self.visit(ast.receiver, c)
@@ -485,27 +492,34 @@ class StaticChecker(BaseVisitor, Utils):
     def visitVoidType(self, ast, c: List[List[Symbol]]) -> Type: return ast
 
     def visitArrayType(self, ast: ArrayType, c: List[List[Symbol]]):
-        # TODO: Implement, ast.dimens))
         list(map(lambda item: self.visit(item, c), ast.dimens))
-        return ast
+        return ArrayType(ast.dimens, ast.eleType)
 
     def visitAssign(self, ast: Assign, c: List[List[Symbol]]) -> None:
         LHS_type = self.visit(ast.lhs, c)
         RHS_type = self.visit(ast.rhs, c)
-        # TODO: Implement]):
-        if not self.checkType(LHS_type, RHS_type, [(FloatType, IntType), (InterfaceType, StructType)]):
+
+        if isinstance(LHS_type, ArrayType) and isinstance(RHS_type, ArrayType):
+            if len(LHS_type.dimens) != len(RHS_type.dimens):
+                raise TypeMismatch(ast)
+        if not self.checkType(LHS_type.eleType, RHS_type.eleType, [(FloatType, IntType), (InterfaceType, StructType)]):
             raise TypeMismatch(ast)
+        return None
 
     def visitIf(self, ast: If, c: List[List[Symbol]]) -> None:
-        if not isinstance(self.visit(ast.expr, c), BoolType):
+        expr = self.visit(ast.expr, c)
+        if not isinstance(expr, BoolType):
             raise TypeMismatch(ast)
-        self.visit(Block(ast.thenStmt.member), c)
+
+        self.visit(ast.thenStmt, c)
         if ast.elseStmt:
             # TODO: Implement
-            self.visit(Block(ast.elseStmt.member), c)
+            self.visit(ast.elseStmt, c)
+        return None
 
     def visitContinue(self, ast, c: List[List[Symbol]]) -> None: return None
     def visitBreak(self, ast, c: List[List[Symbol]]) -> None: return None
+
     def visitReturn(self, ast, c: List[List[Symbol]]) -> None:
         expected_type = self.function_current.retType
         if ast.expr:
@@ -515,111 +529,114 @@ class StaticChecker(BaseVisitor, Utils):
         elif not isinstance(expected_type, VoidType):
             raise TypeMismatch(ast)
         return None
+
     def visitBinaryOp(self, ast: BinaryOp, c: List[List[Symbol]]):
         LHS_type = self.visit(ast.left, c)
         RHS_type = self.visit(ast.right, c)
 
         if ast.op in ['+']:
             if self.checkType(LHS_type, RHS_type, [(IntType, FloatType), (FloatType, IntType)]):
-                if type(LHS_type) == StringType:
-                    return StringType()
-                elif type(LHS_type) == FloatType:
-                    return FloatType()
-                elif type(RHS_type) == FloatType:
-                    return FloatType()
-                elif type(LHS_type) == IntType:
-                    return IntType()
-        
-        if ast.op in ['-', '*', '/']:
-            if (isinstance(LHS_type, IntType) or isinstance(LHS_type, FloatType)) and \
-               (isinstance(RHS_type, IntType) or isinstance(RHS_type, FloatType)):
                 if isinstance(LHS_type, FloatType) or isinstance(RHS_type, FloatType):
                     return FloatType()
+                if isinstance(LHS_type, StringType) or isinstance(RHS_type, StringType):
+                    return StringType()
                 return IntType()
-                
+
+        if ast.op in ['*', '/']:
+            if self.checkType(LHS_type, RHS_type, [(IntType, FloatType), (FloatType, IntType)]):
+                if isinstance(LHS_type, FloatType) or isinstance(RHS_type, FloatType):
+                    return FloatType()
+                if isinstance(LHS_type, StringType) or isinstance(RHS_type, StringType):
+                    return StringType()
+                return IntType()
+
         if ast.op == '%':
-            if isinstance(LHS_type, IntType) and isinstance(RHS_type, IntType):
-                return IntType()
-                
+            if self.checkType(LHS_type, RHS_type, [(IntType, FloatType), (FloatType, IntType)]):
+                if isinstance(LHS_type, IntType) and isinstance(RHS_type, FloatType):
+                    raise TypeMismatch(ast)
+                if isinstance(LHS_type, IntType) and isinstance(RHS_type, IntType):
+                    return IntType()
+
         if ast.op in ['&&', '||']:
-            if isinstance(LHS_type, BoolType) and isinstance(RHS_type, BoolType):
-                return BoolType()
-                
-        if ast.op in ['==', '!=']:
-            if (isinstance(LHS_type, IntType) and isinstance(RHS_type, IntType)) or \
+            if type(LHS_type) != type(RHS_type):
+                raise TypeMismatch(ast)
+            if (isinstance(LHS_type, StringType) and isinstance(RHS_type, StringType)) or \
                (isinstance(LHS_type, BoolType) and isinstance(RHS_type, BoolType)):
                 return BoolType()
-                
+
+        if ast.op in ['==', '!=']:
+            if type(LHS_type) != type(RHS_type):
+                raise TypeMismatch(ast)
+            if (isinstance(LHS_type, StringType) and isinstance(RHS_type, StringType)) or \
+               (isinstance(LHS_type, BoolType) and isinstance(RHS_type, BoolType)):
+                return BoolType()
+
         if ast.op in ['<', '>', '<=', '>=']:
+            if type(LHS_type) != type(RHS_type):
+                raise TypeMismatch(ast)
             if (isinstance(LHS_type, IntType) or isinstance(LHS_type, FloatType)) and \
                (isinstance(RHS_type, IntType) or isinstance(RHS_type, FloatType)):
                 return BoolType()
-                
+
         raise TypeMismatch(ast)
 
     def visitUnaryOp(self, ast: UnaryOp, c: List[List[Symbol]]):
-        expr_type=self.visit(ast.body, c)
+        expr_type = self.visit(ast.body, c)
         # TODO: Implement
         if ast.op == '!':
             if isinstance(expr_type, BoolType):
                 return BoolType()
             else:
                 raise TypeMismatch(ast)
-        
-        elif ast.op in ['+', '-']:
+
+        elif ast.op in ['-']:
             if isinstance(expr_type, IntType):
                 return IntType()
             elif isinstance(expr_type, FloatType):
                 return FloatType()
             else:
                 raise TypeMismatch(ast)
-        
+
         raise TypeMismatch(ast)
 
     def visitArrayCell(self, ast: ArrayCell, c: List[List[Symbol]]):
-        # array_type=  # TODO: Implement
-        # if not isinstance(array_type, ArrayType):
-        #     raise TypeMismatch(ast)
-
-        # if not all(map(lambda item: self.checkType(self.visit(item, c),  # TODO: Implement), ast.idx)):
-        #     raise TypeMismatch(ast)
-        # if len(array_type.dimens) == len(ast.idx):
-        #     return  # TODO: Implement
-        # elif len(array_type.dimens) > len(ast.idx):
-        #     return  # TODO: Implement
-        # raise TypeMismatch(ast)
         arr_type = self.visit(ast.arr, c)
         if not isinstance(arr_type, ArrayType):
             raise TypeMismatch(ast)
-        
-        if len(ast.idx) != len(arr_type.dimens):
+
+        if not all(map(lambda item: self.checkType(self.visit(item, c), IntType()), ast.idx)):
             raise TypeMismatch(ast)
-        
-        for idx in ast.idx:
-            idx_type = self.visit(idx, c)
-            if not isinstance(idx_type, IntType):
-                raise TypeMismatch(ast)
-        
-        return arr_type.eleType
+
+        if len(arr_type.dimens) == len(ast.idx):
+            return arr_type.eleType
+        elif len(arr_type.dimens) > len(ast.idx):
+            return ArrayType(arr_type.dimens[len(ast.idx):], arr_type.eleType)
+        raise TypeMismatch(ast)
 
     def visitIntLiteral(
         self, ast, c: List[List[Symbol]]) -> Type: return IntType()
+
     def visitFloatLiteral(
         self, ast, c: List[List[Symbol]]) -> Type: return FloatType()
+
     def visitBooleanLiteral(
         self, ast, c: List[List[Symbol]]) -> Type: return BoolType()
+
     def visitStringLiteral(
         self, ast, c: List[List[Symbol]]) -> Type: return StringType()
+
     def visitArrayLiteral(self, ast: ArrayLiteral, c: List[List[Symbol]]) -> Type:
         def nested2recursive(dat: Union[Literal, list['NestedList']], c: List[List[Symbol]]):
             if isinstance(dat, list):
                 list(map(lambda value: nested2recursive(value, c), dat))
             else:
                 self.visit(dat, c)
-        nested2recursive(ast.value, c) # TODO: Implement)
+        nested2recursive(ast.value, c)
         return ArrayType(ast.dimens, ast.eleType)
+
     def visitStructLiteral(self, ast: StructLiteral, c: List[List[Symbol]]) -> Type:
         list(map(lambda value: self.visit(value[1], c), ast.elements))
-        return StructType(ast.name, [], [])# TODO: Implement
+        return self.lookup(ast.name, self.list_type, lambda x: x.name)
+
     def visitNilLiteral(self, ast: NilLiteral,
                         c: List[List[Symbol]]) -> Type: return StructType("", [], [])

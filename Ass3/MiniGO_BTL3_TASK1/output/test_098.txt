@@ -1,1 +1,1 @@
-Undeclared Identifier: a
+Type Mismatch: VarDecl("c",ArrayType([IntLiteral(3),IntLiteral(2)],IntType()),Id("a"))

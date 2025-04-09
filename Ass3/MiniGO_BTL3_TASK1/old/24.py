@@ -486,4 +486,5 @@ class StaticChecker(BaseVisitor,Utils):
     def visitStructLiteral(self, ast:StructLiteral, c: List[List[Symbol]]) -> Type: 
         list(map(lambda value: self.visit(value[1], c), ast.elements))
         return self.lookup(ast.name, self.list_type, lambda x: x.name)
-    def visitNilLiteral(self, ast:NilLiteral, c: List[List[Symbol]]) -> Type: return StructType("", [], [])
+    def visitNilLiteral(self, ast:NilLiteral, c: List[List[Symbol]]) -> Type: 
+        return StructType("", [], [])
