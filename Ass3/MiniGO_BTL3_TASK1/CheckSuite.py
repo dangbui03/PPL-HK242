@@ -233,14 +233,15 @@ func foo () {
     def test_053(self):
         """ 
 func foo () {
-    const a = 1;
+    var a = 1;
+    var b = 1;
     for a, b := range [3]int {1, 2, 3} {
         var b = 1;
     }
 }
         """
-        input = Program([FuncDecl("foo",[],VoidType(),Block([ConstDecl("a",None,IntLiteral(1)),ForEach(Id("a"),Id("b"),ArrayLiteral([IntLiteral(3)],IntType(),[IntLiteral(1),IntLiteral(2),IntLiteral(3)]),Block([VarDecl("b", None,IntLiteral(1))]))]))])
-        self.assertTrue(TestChecker.test(input, "Redeclared Variable: b", inspect.stack()[0].function)) 
+        input = Program([FuncDecl("foo",[],VoidType(),Block([VarDecl("a", None,IntLiteral(1)),VarDecl("b", None,IntLiteral(1)),ForEach(Id("a"),Id("b"),ArrayLiteral([IntLiteral(3)],IntType(),[IntLiteral(1),IntLiteral(2),IntLiteral(3)]),Block([VarDecl("b", None,IntLiteral(1))]))]))])
+        self.assertTrue(TestChecker.test(input, "VOTIEN", inspect.stack()[0].function)) 
     
     def test_061(self):
         """ 
@@ -671,3 +672,97 @@ type TIEN struct {
         """
         input = Program([MethodDecl("v",Id("TIEN"),FuncDecl("Votien",[],VoidType(),Block([Return(None)]))),StructType("TIEN",[("Votien",IntType())],[])])
         self.assertTrue(TestChecker.test(input, """Redeclared Field: Votien""", inspect.stack()[0].function))
+        
+    def test_231(self):
+        """
+func foo() {
+    var a = foo
+}
+        """
+        input = Program([FuncDecl("foo",[],VoidType(),Block([VarDecl("a", None,Id("foo"))]))])
+        self.assertTrue(TestChecker.test(input, """Undeclared Identifier: foo""", inspect.stack()[0].function))
+
+    def test_244(self):
+        """
+func Votien () {
+    var array = [2] int {1,2}
+    var index int;
+    var value float;
+    for index, value := range array {
+        return;
+    }
+}
+  
+        """
+        input = Program([FuncDecl("Votien",[],VoidType(),Block([VarDecl("array", None,ArrayLiteral([IntLiteral(2)],IntType(),[IntLiteral(1),IntLiteral(2)])),VarDecl("index",IntType(), None),VarDecl("value",FloatType(), None),ForEach(Id("index"),Id("value"),Id("array"),Block([Return(None)]))]))])
+        self.assertTrue(TestChecker.test(input, """Type Mismatch: ForEach(Id(index),Id(value),Id(array),Block([Return(None)]))""", inspect.stack()[0].function))
+# thay Type Mismatch: ForEach(Id("index"),Id("value"),Id("array"),Block([Return(None)])) nếu ast mới
+    
+    def test_245(self):
+        """
+func Votien () {
+    var array [2][3] int;
+    var index int;
+    var value [3] int;
+    for index, value := range array {
+        var value [2] int;
+        for index, value := range array {
+            return
+        }
+    }
+}
+        """
+        input = Program([FuncDecl("Votien",[],VoidType(),Block([VarDecl("array",ArrayType([IntLiteral(2),IntLiteral(3)],IntType()), None),VarDecl("index",IntType(), None),VarDecl("value",ArrayType([IntLiteral(3)],IntType()), None),ForEach(Id("index"),Id("value"),Id("array"),Block([VarDecl("value",ArrayType([IntLiteral(2)],IntType()), None),ForEach(Id("index"),Id("value"),Id("array"),Block([Return(None)]))]))]))])
+        self.assertTrue(TestChecker.test(input, """Type Mismatch: ForEach(Id(index),Id(value),Id(array),Block([Return(None)]))""", inspect.stack()[0].function))
+# Type Mismatch: ForEach(Id("index"),Id("value"),Id("array"),Block([Return(None)]))
+        
+    def test_247(self):
+        """
+func Votien () {
+    var array [2][3] float;
+    index := 1;
+    value := [3] float {1.0,2.0,3.0};
+    for index, value := range array {
+        value := array[0]
+        index := 1;
+        var index int;
+        var value [3] float;
+    }
+}
+        """
+        input = Program([FuncDecl("Votien",[],VoidType(),Block([VarDecl("array",ArrayType([IntLiteral(2),IntLiteral(3)],FloatType()), None),Assign(Id("index"),IntLiteral(1)),Assign(Id("value"),ArrayLiteral([IntLiteral(3)],FloatType(),[FloatLiteral(1.0),FloatLiteral(2.0),FloatLiteral(3.0)])),ForEach(Id("index"),Id("value"),Id("array"),Block([Assign(Id("value"),ArrayCell(Id("array"),[IntLiteral(0)])),Assign(Id("index"),IntLiteral(1)),VarDecl("index",IntType(), None),VarDecl("value",ArrayType([IntLiteral(3)],FloatType()), None)]))]))])
+        self.assertTrue(TestChecker.test(input, """VOTIEN""", inspect.stack()[0].function))
+        
+    def test_250(self):
+        """
+type TIEN struct {
+    a int;
+} 
+type VO interface {
+    fooA();
+
+}
+func (v TIEN) fooA() {return ;}
+
+var index int;
+
+func Votien () {
+    var array [--3][7%4] VO;
+    var value [4-1] VO;
+
+    for index, value := range array {
+        return;
+    }
+}
+
+func Votien1 () {
+    var array [1+3][3*1] TIEN;
+    var value [9/3] TIEN;
+
+    for index, value := range array {
+        return;
+    }
+}
+        """
+        input = Program([StructType("TIEN",[("a",IntType())],[]),InterfaceType("VO",[Prototype("fooA",[],VoidType())]),MethodDecl("v",Id("TIEN"),FuncDecl("fooA",[],VoidType(),Block([Return(None)]))),VarDecl("index",IntType(), None),FuncDecl("Votien",[],VoidType(),Block([VarDecl("array",ArrayType([UnaryOp("-",UnaryOp("-",IntLiteral(3))),BinaryOp("%", IntLiteral(7), IntLiteral(4))],Id("VO")), None),VarDecl("value",ArrayType([BinaryOp("-", IntLiteral(4), IntLiteral(1))],Id("VO")), None),ForEach(Id("index"),Id("value"),Id("array"),Block([Return(None)]))])),FuncDecl("Votien1",[],VoidType(),Block([VarDecl("array",ArrayType([BinaryOp("+", IntLiteral(1), IntLiteral(3)),BinaryOp("*", IntLiteral(3), IntLiteral(1))],Id("TIEN")), None),VarDecl("value",ArrayType([BinaryOp("/", IntLiteral(9), IntLiteral(3))],Id("TIEN")), None),ForEach(Id("index"),Id("value"),Id("array"),Block([Return(None)]))]))])
+        self.assertTrue(TestChecker.test(input, """VOTIEN""", inspect.stack()[0].function))
