@@ -1,1 +1,1 @@
-Type Mismatch: VarDecl("v",IntType(),FloatLiteral(1.2))
+Type Mismatch: BinaryOp("<", Id("i"), FloatLiteral(2.0))

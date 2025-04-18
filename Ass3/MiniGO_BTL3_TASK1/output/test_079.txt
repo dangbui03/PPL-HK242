@@ -1,1 +1,1 @@
-Redeclared Method: votien
+Type Mismatch: Return(BinaryOp("+", FloatLiteral(1.0), Id("x")))
