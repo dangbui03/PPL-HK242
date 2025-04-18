@@ -134,6 +134,30 @@ class CodeGenVisitor(Visitor):
             self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [IntType()], VoidType()), frame))
             return 
         # TODO
+        if ast.funName == "putFloat":
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [FloatType()], VoidType()), frame))
+            return
+        if ast.funName == "putBool":
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [BoolType()], VoidType()), frame))
+            return
+        if ast.funName == "putString":
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [StringType()], VoidType()), frame))
+            return
+        if ast.funName == "putLn":
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [VoidType()], VoidType()), frame))
+            return
+        if ast.funName == "putIntLn":
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [IntType()], VoidType()), frame))
+            return
+        if ast.funName == "putFloatLn":
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [FloatType()], VoidType()), frame))
+            return
+        if ast.funName == "putBoolLn":
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [BoolType()], VoidType()), frame))
+            return
+        if ast.funName == "putStringLn":
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"io/{ast.funName}", FunctionType(ast.funName, [StringType()], VoidType()), frame))
+            return
 
     def visitMethCall(self, ast, o : Access):
         return None
@@ -152,7 +176,7 @@ class CodeGenVisitor(Visitor):
     
     def visitFloatLiteral(self, ast, o : Access):
         # TODO
-        return None
+        return self.emit.emitPUSHCONST(ast.value, FloatType(), o.frame), FloatType()
     
     def visitBooleanLiteral(self, ast, o : Access):
         return None
