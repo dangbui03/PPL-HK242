@@ -8,7 +8,8 @@ from functools import reduce
 from Visitor import *
 from AST import *
 
-class CodeGenerator(BaseVisitor,Utils):
+
+class CodeGenerator(BaseVisitor, Utils):
     def __init__(self):
         self.className = "MiniGoClass"
         self.astTree = None
@@ -19,11 +20,28 @@ class CodeGenerator(BaseVisitor,Utils):
 
     def init(self):
         mem = [
-            Symbol("putInt", MType([IntType()], VoidType()), CName("io", True)),
-            Symbol("putIntLn", MType([IntType()], VoidType()), CName("io", True)),
-            Symbol("putFloat", MType([FloatType()], VoidType()), CName("io", True)),
-            Symbol("putFloatLn", MType([FloatType()], VoidType()), CName("io", True)),
-           ## TODO implement
+            Symbol("putInt", MType([IntType()],
+                   VoidType()), CName("io", True)),
+            Symbol("putIntLn", MType([IntType()],
+                   VoidType()), CName("io", True)),
+            Symbol("putFloat", MType([FloatType()],
+                   VoidType()), CName("io", True)),
+            Symbol("putFloatLn", MType(
+                [FloatType()], VoidType()), CName("io", True)),
+            # TODO implement
+            Symbol("putBool", MType([BoolType()],
+                                    VoidType()), CName("io", True)),
+            Symbol("putBoolLn", MType([BoolType()],
+                   VoidType()), CName("io", True)),
+            Symbol("putString", MType(
+                [StringType()], VoidType()), CName("io", True)),
+            Symbol("putStringLn", MType(
+                [StringType()], VoidType()), CName("io", True)),
+            Symbol("putLn", MType([], VoidType()), CName("io", True)),
+            Symbol("getInt", MType([], IntType()), CName("io", True)),
+            Symbol("getFloat", MType([], FloatType()), CName("io", True)),
+            Symbol("getBool", MType([], BoolType()), CName("io", True)),
+            Symbol("getString", MType([], StringType()), CName("io", True))
         ]
         return mem
 
@@ -33,75 +51,86 @@ class CodeGenerator(BaseVisitor,Utils):
         self.path = dir_
         self.emit = Emitter(dir_ + "/" + self.className + ".j")
         self.visit(ast, gl)
-       
-        
+
     def emitObjectInit(self):
-        frame = Frame("<init>", VoidType())  
-        self.emit.printout(self.emit.emitMETHOD("<init>", MType([], VoidType()), False, frame))  # Bắt đầu định nghĩa phương thức <init>
-        frame.enterScope(True)  
-        self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "this", ClassType(self.className), frame.getStartLabel(), frame.getEndLabel(), frame))  # Tạo biến "this" trong phương thức <init>
-        
+        frame = Frame("<init>", VoidType())
+        self.emit.printout(self.emit.emitMETHOD("<init>", MType(
+            [], VoidType()), False, frame))  # Bắt đầu định nghĩa phương thức <init>
+        frame.enterScope(True)
+        self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "this", ClassType(
+            # Tạo biến "this" trong phương thức <init>
+            self.className), frame.getStartLabel(), frame.getEndLabel(), frame))
+
         self.emit.printout(self.emit.emitLABEL(frame.getStartLabel(), frame))
-        self.emit.printout(self.emit.emitREADVAR("this", ClassType(self.className), 0, frame))  
-        self.emit.printout(self.emit.emitINVOKESPECIAL(frame))  
-    
-        
+        self.emit.printout(self.emit.emitREADVAR(
+            "this", ClassType(self.className), 0, frame))
+        self.emit.printout(self.emit.emitINVOKESPECIAL(frame))
+
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(), frame))
-        self.emit.printout(self.emit.emitRETURN(VoidType(), frame))  
-        self.emit.printout(self.emit.emitENDMETHOD(frame))  
-        frame.exitScope()  
+        self.emit.printout(self.emit.emitRETURN(VoidType(), frame))
+        self.emit.printout(self.emit.emitENDMETHOD(frame))
+        frame.exitScope()
 
     def emitObjectCInit(self, ast: Program, env):
-        frame = Frame("<cinit>", VoidType())  
-        self.emit.printout(self.emit.emitMETHOD("<clinit>", MType([], VoidType()), True, frame)) 
-        frame.enterScope(True)  
+        frame = Frame("<cinit>", VoidType())
+        self.emit.printout(self.emit.emitMETHOD(
+            "<clinit>", MType([], VoidType()), True, frame))
+        frame.enterScope(True)
         self.emit.printout(self.emit.emitLABEL(frame.getStartLabel(), frame))
 
         env['frame'] = frame
-        self.visit(Block([## TODO implement for item in ast.decl if isinstance(item, VarDecl) and item.varInit]),env)
-        
+        self.visit(Block([item for item in ast.decl if isinstance(
+            item, VarDecl) and item.varInit]), env)
+        # TODO implement for item in ast.decl if isinstance(item, VarDecl) and item.varInit]),env)
+
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(), frame))
-        self.emit.printout(self.emit.emitRETURN(VoidType(), frame))  
-        self.emit.printout(self.emit.emitENDMETHOD(frame))  
+        self.emit.printout(self.emit.emitRETURN(VoidType(), frame))
+        self.emit.printout(self.emit.emitENDMETHOD(frame))
         frame.exitScope()
 
     def visitProgram(self, ast: Program, c):
-        self.list_function = c + [Symbol(item.name, MType(list(map(lambda x: x.parType, item.params)), item.retType), CName(self.className)) for item in ast.decl if isinstance(item, FuncDecl)]
-        env ={}
+        self.list_function = c + [Symbol(item.name, MType(list(map(lambda x: x.parType, item.params)),
+                                         item.retType), CName(self.className)) for item in ast.decl if isinstance(item, FuncDecl)]
+        env = {}
         env['env'] = [c]
-        self.emit.printout(self.emit.emitPROLOG(self.className, "java.lang.Object"))
-        env = reduce(lambda a, x: self.visit(x, a) if isinstance(x, VarDecl) else a, ast.decl, env)
-        reduce(lambda a, x: self.visit(x, a) if isinstance(x, FuncDecl) else a, ast.decl, env)
+        self.emit.printout(self.emit.emitPROLOG(
+            self.className, "java.lang.Object"))
+        env = reduce(lambda a, x: self.visit(x, a)
+                     if isinstance(x, VarDecl) else a, ast.decl, env)
+        reduce(lambda a, x: self.visit(x, a) if isinstance(
+            x, FuncDecl) else a, ast.decl, env)
         self.emitObjectInit()
         self.emitObjectCInit(ast, env)
         self.emit.printout(self.emit.emitEPILOG())
         return env
 
-    ## TODO decl ------------------------------
+    # TODO decl ------------------------------
     def visitFuncDecl(self, ast: FuncCall, o: dict) -> dict:
         self.function = ast
         frame = Frame(ast.name, ast.retType)
         isMain = ast.name == "main"
         if isMain:
-            mtype = MType([ArrayType([None],StringType())], VoidType())
+            mtype = MType([ArrayType([None], StringType())], VoidType())
             ast.body = Block([] + ast.body.member)
         else:
-            mtype = MType(list(map(lambda x: x.parType, ast.params)), ast.retType)
-        
+            mtype = MType(
+                list(map(lambda x: x.parType, ast.params)), ast.retType)
+
         env = o.copy()
         env['frame'] = frame
-        self.emit.printout(self.emit.emitMETHOD(ast.name, mtype,True, frame))
+        self.emit.printout(self.emit.emitMETHOD(ast.name, mtype, True, frame))
         frame.enterScope(True)
         self.emit.printout(self.emit.emitLABEL(frame.getStartLabel(), frame))
         env['env'] = [[]] + env['env']
         if isMain:
-            self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "args", ArrayType([None],StringType()), frame.getStartLabel(), frame.getEndLabel(), frame))
+            self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "args", ArrayType(
+                [None], StringType()), frame.getStartLabel(), frame.getEndLabel(), frame))
         else:
-            env = reduce(lambda acc,e: self.visit(e,acc),ast.params,env)
-        self.visit(ast.body,env)
+            env = reduce(lambda acc, e: self.visit(e, acc), ast.params, env)
+        self.visit(ast.body, env)
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(), frame))
         if type(ast.retType) is VoidType:
-            self.emit.printout(self.emit.emitRETURN(VoidType(), frame)) 
+            self.emit.printout(self.emit.emitRETURN(VoidType(), frame))
         self.emit.printout(self.emit.emitENDMETHOD(frame))
         frame.exitScope()
         return o
@@ -110,7 +139,8 @@ class CodeGenerator(BaseVisitor,Utils):
         frame = o['frame']
         index = frame.getNewIndex()
         o['env'][0].append(Symbol(ast.parName, ast.parType, Index(index)))
-        self.emit.printout(self.emit.emitVAR(index, ast.parName, ast.parType, frame.getStartLabel() ,frame.getEndLabel(), frame))     
+        self.emit.printout(self.emit.emitVAR(
+            index, ast.parName, ast.parType, frame.getStartLabel(), frame.getEndLabel(), frame))
         return o
 
     def visitVarDecl(self, ast: VarDecl, o: dict) -> dict:
@@ -121,78 +151,105 @@ class CodeGenerator(BaseVisitor,Utils):
                 varInit = IntLiteral(0)
             elif type(varType) is FloatType:
                 varInit = FloatLiteral(0.0)
-            ## TODO implement
+            # TODO implement
+            elif type(varType) is BoolType:
+                varInit = BooleanLiteral(False)
+            elif type(varType) is StringType:
+                varInit = StringLiteral("")
             ast.varInit = varInit
         env = o.copy()
-        env['frame'] = Frame("<template_VT>", VoidType()) 
+        env['frame'] = Frame("<template_VT>", VoidType())
         rhsCode, rhsType = self.visit(varInit, env)
         if not varType:
             varType = rhsType
 
-        if 'frame' not in o: # global var
-            o['env'][0].append(Symbol(ast.varName, varType, CName(self.className)))
-            self.emit.printout(self.emit.emitATTRIBUTE(ast.varName, varType, True, False, None))
+        if 'frame' not in o:  # global var
+            o['env'][0].append(
+                Symbol(ast.varName, varType, CName(self.className)))
+            self.emit.printout(self.emit.emitATTRIBUTE(
+                ast.varName, varType, True, False, None))
         else:
             frame = o['frame']
             index = frame.getNewIndex()
             o['env'][0].append(Symbol(ast.varName, varType, Index(index)))
-            self.emit.printout(## TODO implement))  
+            # self.emit.printout(self.emit.emitATTRIBUTE(ast.varName, varType, True, False, None))
+            self.emit.printout(self.emit.emitVAR(
+                index, ast.varName, varType, frame.getStartLabel(), frame.getEndLabel(), frame))
+            # TODO implement))
             rhsCode, rhsType = self.visit(varInit, o)
             if type(varType) is FloatType and type(rhsType) is IntType:
-                ## TODO implement            
+                rhsCode = rhsCode + self.emit.emitI2F(frame)
+                # TODO implement
             self.emit.printout(rhsCode)
-            self.emit.printout(self.emit.emitWRITEVAR(ast.varName, varType, index,  frame))                    
+            self.emit.printout(self.emit.emitWRITEVAR(
+                ast.varName, varType, index,  frame))
         return o
-    
+
     def visitFuncCall(self, ast: FuncCall, o: dict) -> dict:
-        sym = next(filter(lambda x: x.name == ast.funName, self.list_function),None)
+        sym = next(filter(lambda x: x.name ==
+                   ast.funName, self.list_function), None)
         env = o.copy()
         if o.get('stmt'):
-            env["stmt"] = False
-            [## TODO implement]
-            self.emit.printout(self.emit.emitINVOKESTATIC(f"{sym.value.value}/{ast.funName}",sym.mtype, o['frame']))
-            return ## TODO implement
+            o["stmt"] = False
+            [self.visit(arg, env) for arg in ast.args]  # TODO implement]
+            self.emit.printout(self.emit.emitINVOKESTATIC(
+                f"{sym.value.value}/{ast.funName}", sym.mtype, o['frame']))
+            return  # TODO implement
         output = "".join([str(self.visit(x, env)[0]) for x in ast.args])
-        output += ## TODO implement
-        return ## TODO implement
+        # TODO implement
+        output += self.emit.emitINVOKESTATIC(
+            f"{sym.value.value}/{ast.funName}", sym.mtype, o['frame'])
+        return output, sym.mtype.rettype  # TODO implement
 
     def visitBlock(self, ast: Block, o: dict) -> dict:
         env = o.copy()
         env['env'] = [[]] + env['env']
         env['frame'].enterScope(False)
-        self.emit.printout(self.emit.emitLABEL(## TODO implement))
+        self.emit.printout(self.emit.emitLABEL(
+            env['frame'].getStartLabel(), env['frame']))  # TODO implement))
 
         for item in ast.member:
             if type(item) is FuncCall:
-                env["stmt"] = True
-            env = self.visit(item, env)
+                o["stmt"] = False
+            result = self.visit(item, env)
+            # Only update env if result is a dict (i.e., for statements/declarations)
+            if isinstance(result, dict):
+                env = result
 
-        self.emit.printout(self.emit.emitLABEL(## TODO implement))
+        self.emit.printout(self.emit.emitLABEL(
+            env['frame'].getEndLabel(), env['frame']))  # TODO implement))
         env['frame'].exitScope()
         return o
-    
+
     def visitId(self, ast: Id, o: dict) -> dict:
-        sym = next(filter(lambda x: x.name == ast.name, [j for i in o['env'] for j in i]),None)
+        sym = next(filter(lambda x: x.name == ast.name, [
+            j for i in o['env'] for j in i]), None)
         if o.get('isLeft'):
             if type(sym.value) is Index:
-                return self.emit.emitWRITEVAR(## TODO implement), sym.mtype
-            else:         
-                return self.emit.emitPUTSTATIC(## TODO implement),sym.mtype        
+                # TODO implement), sym.mtype
+                return self.emit.emitWRITEVAR(ast.name, sym.mtype, sym.value.value, o['frame']), sym.mtype
+            else:
+                # TODO implement),sym.mtype
+                return self.emit.emitPUTSTATIC(f"{sym.value.value}.{ast.name}", sym.mtype, o['frame']), sym.mtype
         if type(sym.value) is Index:
-            return self.emit.emitREADVAR(## TODO implement),sym.mtype
-        else:         
-            return self.emit.emitGETSTATIC(## TODO implement),sym.mtype
+            # TODO implement),sym.mtype
+            return self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, o['frame']), sym.mtype
+        else:
+            # TODO implement),sym.mtype
+            return self.emit.emitGETSTATIC(f"{sym.value.value}.{ast.name}", sym.mtype, o['frame']), sym.mtype
 
     def visitAssign(self, ast: Assign, o: dict) -> dict:
-        if type(ast.lhs) is Id and not next(filter(lambda x: ## TODO implement),None):
-            return ## TODO implement
+        # TODO implement),None):
+        if type(ast.lhs) is Id and not next(filter(lambda x: x.name == ast.lhs.name, [j for i in o['env'] for j in i]), None):
+            return o  # TODO implement
         rhsCode, rhsType = self.visit(ast.rhs, o)
         o['isLeft'] = True
         lhsCode, lhsType = self.visit(ast.lhs, o)
         o['isLeft'] = False
 
         if type(lhsType) is FloatType and type(rhsType) is IntType:
-            ## TODO implement
+            rhsCode = rhsCode + self.emit.emitI2F(o['frame'])
+            # TODO implement
         self.emit.printout(rhsCode)
         self.emit.printout(lhsCode)
         return o
@@ -200,65 +257,91 @@ class CodeGenerator(BaseVisitor,Utils):
     def visitReturn(self, ast: Return, o: dict) -> dict:
         if ast.expr:
             self.emit.printout(self.visit(ast.expr, o)[0])
-        self.emit.printout(self.emit.emitRETURN(## TODO implement, o['frame']))
+        # TODO implement, o['frame']))
+        self.emit.printout(self.emit.emitRETURN(
+            self.function.retType, o['frame']))
         return o
 
-    ## TODO END decl ------------------------------
+    # TODO END decl ------------------------------
 
-    ## TODO basic expression ------------------------------
+    # TODO basic expression ------------------------------
     def visitBinaryOp(self, ast: BinaryOp, o: dict) -> tuple[str, Type]:
         op = ast.op
         frame = o['frame']
         codeLeft, typeLeft = self.visit(ast.left, o)
         codeRight, typeRight = self.visit(ast.right, o)
         if op in ['+', '-'] and type(typeLeft) in [FloatType, IntType]:
-            typeReturn = IntType() if type(typeLeft) is IntType and type(typeRight) is IntType else FloatType()
+            typeReturn = IntType() if type(typeLeft) is IntType and type(
+                typeRight) is IntType else FloatType()
             if type(typeReturn) is FloatType:
                 if type(typeLeft) is IntType:
                     codeLeft += self.emit.emitI2F(frame)
-                ## TODO implement
-            return codeLeft + codeRight + ## TODO implement
+                # TODO implement
+                if type(typeRight) is IntType:
+                    codeRight += self.emit.emitI2F(frame)
+            # TODO implement
+            return codeLeft + codeRight + self.emit.emitADDOP(op, typeReturn, frame), typeReturn
         if op in ['*', '/']:
-            typeReturn = ## TODO implement
+            typeReturn = IntType() if type(typeLeft) is IntType and type(
+                typeRight) is IntType else FloatType()  # TODO implement
             if type(typeReturn) is FloatType:
                 if type(typeLeft) is IntType:
                     codeLeft += self.emit.emitI2F(frame)
-                ## TODO implement
-            return codeLeft + codeRight + ## TODO implement 
+                # TODO implement
+                if type(typeRight) is IntType:
+                    codeRight += self.emit.emitI2F(frame)
+            # TODO implement
+            return codeLeft + codeRight + self.emit.emitMULOP(op, typeReturn, frame), typeReturn
         if op in ['%']:
-            return codeLeft + codeRight + ## TODO implement
+            # TODO implement
+            return codeLeft + codeRight + self.emit.emitMOD(frame), IntType()
         if op in ['==', '!=', '<', '>', '>=', '<='] and type(typeLeft) in [FloatType, IntType]:
-            return codeLeft + codeRight + ## TODO implement
+            # TODO implement
+            return codeLeft + codeRight + self.emit.emitREOP(op, typeLeft, frame), BoolType()
         if op in ['||']:
-            return codeLeft + codeRight + ## TODO implement
+            # TODO implement
+            return codeLeft + codeRight + self.emit.emitOROP(frame), BoolType()
         if op in ['&&']:
-            return codeLeft + codeRight + self.emit.emitANDOP(frame), BoolType()  
+            return codeLeft + codeRight + self.emit.emitANDOP(frame), BoolType()
 
-        # string        
+        # string
         if op in ['+', '-'] and type(typeLeft) in [StringType]:
-            return codeLeft + codeRight + ## TODO implement, StringType()    
+            # TODO implement, StringType()
+            return codeLeft + codeRight + self.emit.emitADDOP(op, StringType(), frame), StringType()
         if op in ['==', '!=', '<', '>', '>=', '<='] and type(typeLeft) in [StringType]:
-            code = codeLeft + codeRight + ## TODO implement, frame)
-            code = code + ## TODO implement + self.emit.emitREOP(op, IntType(), frame)
-            return code, BoolType()    
-              
+            code = codeLeft + codeRight + self.emit.emitINVOKEVIRTUAL(
+                # TODO implement, frame)
+                "compareTo", MType([StringType()], IntType()), frame)
+            # TODO implement + self.emit.emitREOP(op, IntType(), frame)
+            code = code + \
+                self.emit.emitPUSHICONST(
+                    0, frame) + self.emit.emitREOP(op, IntType(), frame)
+            return code, BoolType()
+
     def visitUnaryOp(self, ast: UnaryOp, o: dict) -> tuple[str, Type]:
         if ast.op == '!':
             code, type_return = self.visit(ast.body, o)
             return code + self.emit.emitNOT(BoolType(), o['frame']), BoolType()
 
-        ## TODO implement
-    
+        # TODO implement
+        code, type_return = self.visit(ast.body, o)
+        if ast.op == '-':
+            return code + self.emit.emitNEGOP(type_return, o['frame']), type_return
+        return code, type_return
+
     def visitIntLiteral(self, ast: IntLiteral, o: dict) -> tuple[str, Type]:
         return self.emit.emitPUSHICONST(ast.value, o['frame']), IntType()
-    
+
     def visitFloatLiteral(self, ast: FloatLiteral, o: dict) -> tuple[str, Type]:
-        ## TODO implement
-    
+        # TODO implement
+        return self.emit.emitPUSHFCONST(str(ast.value), o['frame']), FloatType()
+
     def visitBooleanLiteral(self, ast: BooleanLiteral, o: dict) -> tuple[str, Type]:
-        ## TODO implement
-    
+        # TODO implement
+        return self.emit.emitPUSHICONST(str(ast.value).lower(), o['frame']), BoolType()
+
     def visitStringLiteral(self, ast: StringLiteral, o: dict) -> tuple[str, Type]:
-        ## TODO implement
-    
-    ## TODO END basic expression ------------------------------
+        # TODO implement
+        return self.emit.emitPUSHCONST(ast.value, StringType(), o['frame']), StringType()
+
+    # TODO END basic expression ------------------------------
