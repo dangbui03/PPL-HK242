@@ -6,6 +6,8 @@
 .method public static fvoid()V
 Label0:
 Label2:
+	ldc "VoTien"
+	invokestatic io/putStringLn(Ljava/lang/String;)V
 Label3:
 Label1:
 	return
@@ -17,13 +19,32 @@ Label1:
 Label0:
 .var 0 is args [Ljava/lang/String; from Label0 to Label1
 Label2:
+	invokestatic MiniGoClass/fvoid()V
+	getstatic MiniGoClass.global I
+	i2f
+	fconst_2
+	fadd
+	invokestatic io/putFloatLn(<class 'AST.FloatType'>)V
 .var 1 is local Ljava/lang/String; from Label2 to Label3
 	ldc "a"
 	astore_1
 	aload_1
+	ldc "b"
+	invokevirtual java/lang/String/compareTo(Ljava/lang/String;)I
+	iconst_0
+	if_icmpgt Label4
+	iconst_1
+	goto Label5
+Label4:
+	iconst_0
+Label5:
+	invokestatic io/putBoolLn(Z)V
+	aload_1
 	ldc "c"
-	fadd
+	invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;
 	astore_1
+	aload_1
+	invokestatic io/putStringLn(Ljava/lang/String;)V
 Label3:
 Label1:
 	return
@@ -55,13 +76,10 @@ Label1:
 
 .method public static <clinit>()V
 Label0:
-Label2:
-.var 0 is global I from Label2 to Label3
 	invokestatic MiniGoClass/fint()I
-	istore_0
-Label3:
+	putstatic MiniGoClass.global <class 'NoneType'>
 Label1:
 	return
 .limit stack 1
-.limit locals 1
+.limit locals 0
 .end method
