@@ -17,6 +17,8 @@ class CodeGenerator(BaseVisitor, Utils):
         self.emit = None
         self.function = None
         self.list_function = []
+        self.arrayCell = None # Dùng để lưu kiểu của mảng khi duyệt vào 1 ArrayCell
+        self.arrayCellType = None
 
     def init(self):
         mem = [
@@ -264,6 +266,7 @@ class CodeGenerator(BaseVisitor, Utils):
         # TODO implement),None):
         if type(ast.lhs) is Id and not next(filter(lambda x: x.name == ast.lhs.name, [j for i in o['env'] for j in i]), None):
             return o  # TODO implement
+        
         rhsCode, rhsType = self.visit(ast.rhs, o)
         o['isLeft'] = True
         lhsCode, lhsType = self.visit(ast.lhs, o)
@@ -274,10 +277,13 @@ class CodeGenerator(BaseVisitor, Utils):
             # TODO implement
         # self.emit.printout(rhsCode)
         # self.emit.printout(lhsCode)
+
+        # Increase stack size by 1, as we'll use the stack to store the value of this variable
+        o['frame'].push() 
         if type(ast.lhs) is ArrayCell:
             self.emit.printout(lhsCode)
             self.emit.printout(rhsCode)
-            self.emit.printout(self.emit.emitASTORE(self.arrayCell, o['frame']))## TODO  )
+            self.emit.printout(self.emit.emitASTORE(self.arrayCellType, o['frame'])) ## TODO  )
         # access id
         else:
             self.emit.printout(rhsCode)
@@ -380,3 +386,113 @@ class CodeGenerator(BaseVisitor, Utils):
         return self.emit.emitPUSHCONST(ast.value, StringType(), o['frame']), StringType()
 
     # TODO END basic expression ------------------------------
+
+    ## TODO array ------------------------------
+    def visitArrayCell(self, ast: ArrayCell, o: dict) -> tuple[str, Type]:
+        newO = o.copy()
+        newO['isLeft'] = False
+        codeGen, arrType = self.visit(ast.arr, newO) #TODO visit thằng expr của array cell này, nên nhớ arraycell gồm phần expr phía trước và index phía sau.
+
+        for idx, item in enumerate(ast.idx):
+            codeGen += self.visit(item, newO)[0]
+            if idx != len(ast.idx) - 1:
+                codeGen += self.emit.emitALOAD(arrType, o['frame'])
+
+        retType = None
+        if len(arrType.dimens) == len(ast.idx):
+            retType = arrType.eleType 
+            if not o.get('isLeft'):
+                codeGen += self.emit.emitALOAD(retType, o['frame']) #TODO: thêm mã cho trường hợp này => dùng emitALOAD để lấy giá trị của phần tử trong mảng ra
+            else:
+                self.arrayCell = ast # TODO: Nếu nó arraycell nằm bên vế trái thì mình gán vào biến này để biết đang duyệt vào arraycell nào, dùng sau này.
+        else:
+            retType = ArrayType(arrType.dimens[len(ast.idx): ], arrType.eleType)
+            if not o.get('isLeft'):
+                codeGen += self.emit.emitALOAD(retType, o['frame']) #TODO: thêm mã cho trường hợp này => dùng emitALOAD để lấy giá trị của phần tử trong mảng ra
+            else:
+                self.arrayCell = ast # TODO: Nếu nó arraycell nằm bên vế trái thì mình gán vào biến này để biết đang duyệt vào arraycell nào, dùng sau này.
+        return codeGen, retType
+        #TODO trả vè mã nãy giờ tạo để thằng nào gọi thằng đó in và type -> tuple[str, Type]:
+
+    def visitArrayLiteral(self, ast:ArrayLiteral , o: dict) -> tuple[str, Type]:
+
+        # Phần ArrayLiteral.value là 1 nested list nên mình sẽ dùng đệ quy để duyệt nó.
+        def nested2recursive(dat: Union[Literal, list['NestedList']], o: dict) -> tuple[str, Type]:
+            #dat có thể là 1 Literal hoặc là 1 list chứa các Literal khác, nên mình sẽ kiểm tra xem dat có phải là list hay không.
+
+            #Nếu là Literal thôi thì chỉ cần visit tới là xong, không cần đệ quy nữa, tham số o là 0
+            if not isinstance(dat,list): 
+                return self.visit(dat, 0)
+
+            #Nếu dat là 1 list thì đoạn code dưới sẽ giải quyết
+            #chuẩn bị ngữ cảnh
+            frame = o['frame'] # lấy frame từ o
+            codeGen = self.emit.emitPUSHCONST(len(dat), IntType(), frame) #sinh mã đẩy số lượng phần tử của mảng vào stack
+
+            #Trường hợp danh sách không lồng nhau(vì phần tử đầu tiên không phải là list)
+            if not isinstance(dat[0],list):
+                _, type_element_array = self.visit(dat[0], o)  # gọi hàm visit cho phần tử đầu tiên để lấy kiểu của nó
+                codeGen += self.emit.emitPUSHCONST(len(dat), IntType(), frame) #TODO cần dùng 1 trong 2 emitNEWARRAY hoặc emitANEWARRAY để tạo mảng với kiểu phần tử là type_element_array
+
+                # # Lặp qua từng phần tử trong danh sách:
+                # for idx, item in enumerate(dat):
+                #     codeGen += "TODO"  # TODO Nhân đôi tham chiếu mảng trên stack (emitDUP).
+                #     codeGen +="TODO"  # TODO Đẩy chỉ số của phần tử (emitPUSHCONST) lên stack.
+                #     codeGen += "TODO"  # TODO Gọi self.visit(item, o) để xử lý giá trị phần tử.
+                #     codeGen += "TODO"  # TODO Lưu giá trị vào mảng (emitASTORE).
+                # return codeGen , ArrayType("TODO") #TODO: Chú ý dùng đến len(dat)
+                # Lặp qua từng phần tử trong danh sách:
+                for idx, item in enumerate(dat):
+                    codeGen += self.emit.emitDUP(frame)  # Duplicate array reference on stack
+                    codeGen += self.emit.emitPUSHCONST(idx, IntType(), frame)  # Push index onto stack
+                    element_code, _ = self.visit(item, o)  # Process the element value
+                    codeGen += element_code
+                    codeGen += self.emit.emitASTORE(type_element_array, frame)  # Store element in array
+                return codeGen, ArrayType([len(dat)], type_element_array)  # Return array type with dimension
+
+            #Trường hợp danh sách lồng nhau:
+            # Nếu phần tử đầu tiên của danh sách là một danh sách khác (danh sách lồng nhau), thì:
+            # Gọi đệ quy nested2recursive(dat[0], o) để xử lý danh sách con.
+            # Sinh mã code để tạo một mảng mới với kiểu phần tử là kiểu của danh sách con.
+            _, type_element_array = nested2recursive(dat[0], o)
+            codeGen += self.emit.emitANEWARRAY(type_element_array, frame) #TODO cần dùng 1 trong 2 emitNEWARRAY hoặc emitANEWARRAY để tạo mảng với kiểu phần tử là type_element_array
+
+            # # Lặp qua từng phần tử trong danh sách:
+            #     # Nhân đôi tham chiếu mảng trên stack (emitDUP).
+            #     # Đẩy chỉ số của phần tử (emitPUSHCONST).
+            #     # Gọi đệ quy nested2recursive(item, o) để xử lý danh sách con.
+            #     # Lưu giá trị vào mảng (emitASTORE).
+            # for idx, item in enumerate(dat):
+            #     codeGen += "TODO"
+            #     codeGen += "TODO"
+            #     codeGen +="TODO"
+            #     codeGen += "TODO"
+            # return  codeGen, ArrayType("TODO") #TODO: Chú ý dùng đến len(dat)
+            # Lặp qua từng phần tử trong danh sách:
+            for idx, item in enumerate(dat):
+                codeGen += self.emit.emitDUP(frame)  # Duplicate array reference on stack
+                codeGen += self.emit.emitPUSHCONST(idx, IntType(), frame)  # Push index onto stack
+                item_code, _ = nested2recursive(item, o)  # Process nested list
+                codeGen += item_code  # Add code for nested element
+                codeGen += self.emit.emitASTORE(type_element_array, frame)  # Store element in array
+            
+            return codeGen, ArrayType([len(dat)], type_element_array)  # Return array type with dimension
+
+        #Gọi hàm đệ quy trong đó tham số truyền vào là ast.value, o
+        return nested2recursive(ast.value, o)
+
+    def visitConstDecl(self, ast:ConstDecl, o: dict) -> dict:
+        return self.visit(VarDecl(ast.conName, ast.conType, ast.iniExpr), o)
+    
+    def visitArrayType(self, ast:ArrayType, o):
+        codeGen = ""
+        # TODO : Lặp qua dimens để thêm code vào codeGen, dùng visit và lưu ý rằng visit sẽ trả về cặp mã và kiểu của nó.
+        # Cuối cùng đủ tham số thì dùng emitMULTIANEWARRAY để tạo mảng mới.
+        dimensions = []
+        for dim in ast.dimens:
+            dim_code, dim_type = self.visit(dim, o)
+            codeGen += dim_code
+            dimensions.append(dim)
+
+        codeGen += self.emit.emitMULTIANEWARRAY(ast, o['frame'])
+        return codeGen, ast

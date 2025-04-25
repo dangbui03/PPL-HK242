@@ -79,3 +79,22 @@ func main() {
 """
         self.assertTrue(TestCodeGen.test(input,"3.0\nfalse\nvotien\ntrue\n",inspect.stack()[0].function)) 
     
+    def test_090(self):
+        input = """
+func main() {
+    var a [1] int ;
+    a[0] := 1
+    putInt(a[0]);
+}
+    """
+        self.assertTrue(TestCodeGen.test(input,"1",inspect.stack()[0].function))
+
+    def test_091(self):
+        input = """
+func main() {
+    var a [1][1][1] int  = [1][1][1] int {{{0}}};
+    a[0][0][0] := 1
+    putInt(a[0][0][0]);
+}
+    """
+        self.assertTrue(TestCodeGen.test(input,"1",inspect.stack()[0].function))
