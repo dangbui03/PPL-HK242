@@ -17,6 +17,18 @@ from AST import *
     java -cp ../_io:. MiniGoClass)
 """
 class CodeGenSuite(unittest.TestCase):
+    def test_000(self):
+        input = """
+func foo() int {return foo1();}
+var a = foo() + foo1();
+func main() {
+    putInt(a)
+    a := foo()
+    putInt(a)
+}
+func foo1() int {return 1;}
+        """
+        self.assertTrue(TestCodeGen.test(input, "21", inspect.stack()[0].function))  
 
     def test_001(self):
         input = """
@@ -38,3 +50,32 @@ func fint() int {return 1;}
 """
         self.assertTrue(TestCodeGen.test(input,"VoTien\n3.0\ntrue\nac\n",inspect.stack()[0].function)) 
 
+    def test_002(self):
+        input = """
+func foo(a int, c int) {
+    var b = a + c;
+    putInt(b)
+}
+func main() {
+    foo(2, 3)
+}
+func foo1() int {return 1;}
+        """
+        self.assertTrue(TestCodeGen.test(input, "5", inspect.stack()[0].function))  
+
+    def test_051(self):
+        input = """
+func main() {
+    var a = 1 + 2.0;
+    var b = 1.0 > 2.0;
+    var c = "vo" + "tien";
+    var d = "a" < "b";
+
+    putFloatLn(a)
+    putBoolLn(b)
+    putStringLn(c)
+    putBoolLn(d)
+}
+"""
+        self.assertTrue(TestCodeGen.test(input,"3.0\nfalse\nvotien\ntrue\n",inspect.stack()[0].function)) 
+    

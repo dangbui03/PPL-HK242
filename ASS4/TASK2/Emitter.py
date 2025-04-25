@@ -50,13 +50,44 @@ class Emitter():
         self.buff = list()
         self.jvm = JasminCode()
 
+    def emitNEWARRAY(self, in_, frame):
+        # if type(in_) is IntType:
+        #     return self.jvm.emitNEWARRAY("int") 
+        ## TODO
+        val = ""
+        if type(in_) is IntType:
+            val = "int"
+        if type(in_) is FloatType:
+            val = "float"
+        elif type(in_) is BoolType:
+            val = "boolean"
+        elif type(in_) is StringType:
+            return self.emitANEWARRAY(in_, frame)
+        return self.jvm.emitNEWARRAY(val)
+        
+    def emitANEWARRAY(self, in_, frame):
+        ## TODO
+        val = ""
+        if type(in_) is FloatType:
+            val = "float"
+        if type(in_) is IntType:
+            val = "int"
+        elif type(in_) is BoolType:
+            val = "boolean"
+        elif type(in_) is StringType:
+            val = "java/lang/String"
+        elif type(in_) is ArrayType:
+            val = self.getJVMType(in_)
+        return self.jvm.emitANEWARRAY(val)
+        # return self.jvm.emitANEWARRAY("int")
+
     def getJVMType(self, inType):
         typeIn = type(inType)
         if typeIn is IntType:
             return "I"
         if typeIn is FloatType:
             ## TODO implement
-            pass
+            return "F" 
         if typeIn is BoolType:
             return "Z"   
         elif typeIn is StringType:
@@ -188,6 +219,7 @@ class Emitter():
             return self.jvm.emitILOAD(index)
         elif type(inType) is FloatType:
             ## TODO implement
+            return self.jvm.emitFLOAD(index)
             pass
         elif type(inType) is cgen.ArrayType or type(inType) is cgen.ClassType or type(inType) is StringType:
             return self.jvm.emitALOAD(index)
@@ -223,6 +255,7 @@ class Emitter():
             return self.jvm.emitISTORE(index)
         elif type(inType) is FloatType:
             ## TODO implement
+            return self.jvm.emitFSTORE(index)
             pass
         elif type(inType) is cgen.ArrayType or type(inType) is cgen.ClassType or type(inType) is StringType:
             return self.jvm.emitASTORE(index)
@@ -474,6 +507,15 @@ class Emitter():
                 result.append(self.jvm.emitIFICMPNE(labelF))
         elif type(in_) is FloatType:
             ## TODO implement
+            result.append(self.jvm.emitFCMPL())
+            if op == ">":
+                result.append(self.jvm.emitIFLE(labelF))
+            elif op == ">=":
+                result.append(self.jvm.emitIFLT(labelF))
+            elif op == "<":
+                result.append(self.jvm.emitIFGE(labelF))
+            elif op == "<=":
+                result.append(self.jvm.emitIFGT(labelF))
             pass
         result.append(self.emitPUSHCONST("1", IntType(), frame))
         frame.pop()

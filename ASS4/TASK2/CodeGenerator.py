@@ -80,15 +80,20 @@ class CodeGenerator(BaseVisitor, Utils):
 
         env['frame'] = frame
         # Process global variable initializations
-        for item in ast.decl:
-            if isinstance(item, VarDecl) and item.varInit:
-                # Generate code for the initialization expression
-                rhsCode, rhsType = self.visit(item.varInit, env)
-                self.emit.printout(rhsCode)
-                # Store the result in the static field
-                self.emit.printout(self.emit.emitPUTSTATIC(
-                    f"{self.className}.{item.varName}", item.varType, frame))
-
+        # for item in ast.decl:
+        #     if isinstance(item, VarDecl) and item.varInit:
+                
+        #         # Generate code for the initialization expression
+        #         rhsCode, rhsType = self.visit(item.varInit, env)
+        #         self.emit.printout(rhsCode)
+        #         # Store the result in the static field
+        #         self.emit.printout(self.emit.emitPUTSTATIC(
+        #             f"{self.className}.{item.varName}", rhsType, frame))
+        self.visit(Block([
+                Assign(Id(item.varName), item.varInit) if isinstance(item, VarDecl) else
+                Assign(Id(item.varName), item.value)
+                for item in ast.decl if isinstance(item, (VarDecl, ConstDecl))
+            ]), env)
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(), frame))
         self.emit.printout(self.emit.emitRETURN(VoidType(), frame))
         self.emit.printout(self.emit.emitENDMETHOD(frame))
@@ -247,13 +252,13 @@ class CodeGenerator(BaseVisitor, Utils):
                 return self.emit.emitWRITEVAR(ast.name, sym.mtype, sym.value.value, o['frame']), sym.mtype
             else:
                 # Use dot notation for static field access
-                return self.emit.emitPUTSTATIC(f"{sym.value.value}.{ast.name}", sym.mtype, o['frame']), sym.mtype
+                return self.emit.emitPUTSTATIC(f"{sym.value.value}/{ast.name}", sym.mtype, o['frame']), sym.mtype
         if type(sym.value) is Index:
             # TODO implement),sym.mtype
             return self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, o['frame']), sym.mtype
         else:
             # Use dot notation for static field access
-            return self.emit.emitGETSTATIC(f"{sym.value.value}.{ast.name}", sym.mtype, o['frame']), sym.mtype
+            return self.emit.emitGETSTATIC(f"{sym.value.value}/{ast.name}", sym.mtype, o['frame']), sym.mtype
 
     def visitAssign(self, ast: Assign, o: dict) -> dict:
         # TODO implement),None):
@@ -267,8 +272,16 @@ class CodeGenerator(BaseVisitor, Utils):
         if type(lhsType) is FloatType and type(rhsType) is IntType:
             rhsCode = rhsCode + self.emit.emitI2F(o['frame'])
             # TODO implement
-        self.emit.printout(rhsCode)
-        self.emit.printout(lhsCode)
+        # self.emit.printout(rhsCode)
+        # self.emit.printout(lhsCode)
+        if type(ast.lhs) is ArrayCell:
+            self.emit.printout(lhsCode)
+            self.emit.printout(rhsCode)
+            self.emit.printout(self.emit.emitASTORE(self.arrayCell, o['frame']))## TODO  )
+        # access id
+        else:
+            self.emit.printout(rhsCode)
+            self.emit.printout(lhsCode)
         return o
 
     def visitReturn(self, ast: Return, o: dict) -> dict:

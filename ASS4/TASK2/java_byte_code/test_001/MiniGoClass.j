@@ -20,11 +20,11 @@ Label0:
 .var 0 is args [Ljava/lang/String; from Label0 to Label1
 Label2:
 	invokestatic MiniGoClass/fvoid()V
-	getstatic MiniGoClass.global I
+	getstatic MiniGoClass/global I
 	i2f
 	fconst_2
 	fadd
-	invokestatic io/putFloatLn(<class 'AST.FloatType'>)V
+	invokestatic io/putFloatLn(F)V
 .var 1 is local Ljava/lang/String; from Label2 to Label3
 	ldc "a"
 	astore_1
@@ -76,8 +76,10 @@ Label1:
 
 .method public static <clinit>()V
 Label0:
+Label2:
 	invokestatic MiniGoClass/fint()I
-	putstatic MiniGoClass.global <class 'NoneType'>
+	putstatic MiniGoClass/global I
+Label3:
 Label1:
 	return
 .limit stack 1

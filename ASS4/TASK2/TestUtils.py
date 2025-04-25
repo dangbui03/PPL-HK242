@@ -72,7 +72,7 @@ class TestCodeGen:
             )
 
             subprocess.run(
-                ["java", "-cp", "../_io:.", miniGO_class],
+                ["java", "-cp", "../_io;.", miniGO_class],
                 cwd=base_path,
                 stdout=f,
                 stderr=subprocess.STDOUT,
