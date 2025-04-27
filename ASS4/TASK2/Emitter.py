@@ -80,7 +80,15 @@ class Emitter():
             val = self.getJVMType(in_)
         return self.jvm.emitANEWARRAY(val)
         # return self.jvm.emitANEWARRAY("int")
-
+        
+    #* tạo ra array nhiều chiều
+    def emitMULTIANEWARRAY(self, in_, frame):
+        # frame: Frame
+        # in_: Type
+        if type(in_) is ArrayType:
+            dimens = len(in_.size)
+            return self.jvm.emitMULTIANEWARRAY(self.getJVMType(in_), str(dimens))
+    
     def getJVMType(self, inType):
         typeIn = type(inType)
         if typeIn is IntType:

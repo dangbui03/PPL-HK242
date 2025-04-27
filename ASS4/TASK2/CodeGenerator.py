@@ -157,21 +157,54 @@ class CodeGenerator(BaseVisitor, Utils):
         return o
 
     def visitVarDecl(self, ast: VarDecl, o: dict) -> dict:
-        varInit = ast.varInit
-        varType = ast.varType
-        if not varInit:
+        # varInit = ast.varInit
+        # varType = ast.varType
+        # if not varInit:
+        #     if type(varType) is IntType:
+        #         varInit = IntLiteral(0)
+        #     elif type(varType) is FloatType:
+        #         varInit = FloatLiteral(0.0)
+        #     # TODO implement
+        #     elif type(varType) is StringType:
+        #         return StringLiteral("\"\"")
+        #     elif type(varType) is BoolType:
+        #         return BooleanLiteral("false")
+        #     elif type(varType) is ArrayType:
+        #         varInit = ArrayLiteral(varType.dimens, varType.dimens, varInit)
+        #     ast.varInit = varInit
+        
+        def create_init(varType: Type, o: dict):
             if type(varType) is IntType:
-                varInit = IntLiteral(0)
+                return IntLiteral(0)
             elif type(varType) is FloatType:
-                varInit = FloatLiteral(0.0)
-            # TODO implement
+                return FloatLiteral(0.0)
             elif type(varType) is StringType:
                 return StringLiteral("\"\"")
             elif type(varType) is BoolType:
                 return BooleanLiteral("false")
             elif type(varType) is ArrayType:
-                varInit = ArrayLiteral(varType.dimens, varType.dimens, varInit)
+                # Với mảng thì mình dùng đệ quy để sinh ra mảng giá trị cho đúng nhé.
+                # VD mảng nguyên 1 chiều thì sẽ là [0,0,0,...], mảng 2 chiều thì sẽ là [[0,0,0,...],[0,0,0,...],...]
+                # VD mảng bool 1 chiều thì sẽ là [false,false,false,...], mảng 2 chiều thì sẽ là [[false,false,false,...],[false,false,false,...],...] 
+                
+                # Create base element based on array element type
+                element_init = create_init(varType.eleType, o)
+                
+                # Create array with initialized elements
+                elements = []
+                # We'll handle dimensions recursively when creating the ArrayLiteral
+                return element_init
+
+        varInit = ast.varInit  # Giá trị khởi tạo của biến
+        varType = ast.varType  # Kiểu của biến
+
+        # Nếu không có giá trị khởi tạo thì tự động gán cho nó 0, 0.0, false, "",..tùy vào kiểu biến
+        if not varInit:
+            varInit = create_init(varType, o)
+            if type(varType) is ArrayType:
+                varInit = ArrayLiteral(varType.dimens, varType.eleType, varInit)
             ast.varInit = varInit
+            
         env = o.copy()
         env['frame'] = Frame("<template_VT>", VoidType())
         rhsCode, rhsType = self.visit(varInit, env)
@@ -283,7 +316,8 @@ class CodeGenerator(BaseVisitor, Utils):
         if type(ast.lhs) is ArrayCell:
             self.emit.printout(lhsCode)
             self.emit.printout(rhsCode)
-            self.emit.printout(self.emit.emitASTORE(self.arrayCellType, o['frame'])) ## TODO  )
+            self.emit.printout(self.emit.emitASTORE(self.arrayCell, o['frame'])) 
+            ## TODO  )
         # access id
         else:
             self.emit.printout(rhsCode)
@@ -391,7 +425,8 @@ class CodeGenerator(BaseVisitor, Utils):
     def visitArrayCell(self, ast: ArrayCell, o: dict) -> tuple[str, Type]:
         newO = o.copy()
         newO['isLeft'] = False
-        codeGen, arrType = self.visit(ast.arr, newO) #TODO visit thằng expr của array cell này, nên nhớ arraycell gồm phần expr phía trước và index phía sau.
+        codeGen, arrType = self.visit(ast.arr, newO)
+        #TODO visit thằng expr của array cell này, nên nhớ arraycell gồm phần expr phía trước và index phía sau.
 
         for idx, item in enumerate(ast.idx):
             codeGen += self.visit(item, newO)[0]
@@ -404,13 +439,13 @@ class CodeGenerator(BaseVisitor, Utils):
             if not o.get('isLeft'):
                 codeGen += self.emit.emitALOAD(retType, o['frame']) #TODO: thêm mã cho trường hợp này => dùng emitALOAD để lấy giá trị của phần tử trong mảng ra
             else:
-                self.arrayCell = ast # TODO: Nếu nó arraycell nằm bên vế trái thì mình gán vào biến này để biết đang duyệt vào arraycell nào, dùng sau này.
+                self.arrayCell = retType # TODO: Nếu nó arraycell nằm bên vế trái thì mình gán vào biến này để biết đang duyệt vào arraycell nào, dùng sau này.
         else:
             retType = ArrayType(arrType.dimens[len(ast.idx): ], arrType.eleType)
             if not o.get('isLeft'):
                 codeGen += self.emit.emitALOAD(retType, o['frame']) #TODO: thêm mã cho trường hợp này => dùng emitALOAD để lấy giá trị của phần tử trong mảng ra
             else:
-                self.arrayCell = ast # TODO: Nếu nó arraycell nằm bên vế trái thì mình gán vào biến này để biết đang duyệt vào arraycell nào, dùng sau này.
+                self.arrayCell = retType # TODO: Nếu nó arraycell nằm bên vế trái thì mình gán vào biến này để biết đang duyệt vào arraycell nào, dùng sau này.
         return codeGen, retType
         #TODO trả vè mã nãy giờ tạo để thằng nào gọi thằng đó in và type -> tuple[str, Type]:
 
@@ -422,31 +457,30 @@ class CodeGenerator(BaseVisitor, Utils):
 
             #Nếu là Literal thôi thì chỉ cần visit tới là xong, không cần đệ quy nữa, tham số o là 0
             if not isinstance(dat,list): 
-                return self.visit(dat, 0)
+                return self.visit(dat, o)  # Changed from 0 to o to avoid NoneType error
 
             #Nếu dat là 1 list thì đoạn code dưới sẽ giải quyết
             #chuẩn bị ngữ cảnh
             frame = o['frame'] # lấy frame từ o
             codeGen = self.emit.emitPUSHCONST(len(dat), IntType(), frame) #sinh mã đẩy số lượng phần tử của mảng vào stack
+            
+            # # Handle empty list case
+            # if len(dat) == 0:
+            #     # Create an empty array with Object type
+            #     codeGen += self.emit.emitANEWARRAY(VoidType(), frame)
+            #     return codeGen, ArrayType([0], VoidType())
 
             #Trường hợp danh sách không lồng nhau(vì phần tử đầu tiên không phải là list)
             if not isinstance(dat[0],list):
                 _, type_element_array = self.visit(dat[0], o)  # gọi hàm visit cho phần tử đầu tiên để lấy kiểu của nó
-                codeGen += self.emit.emitPUSHCONST(len(dat), IntType(), frame) #TODO cần dùng 1 trong 2 emitNEWARRAY hoặc emitANEWARRAY để tạo mảng với kiểu phần tử là type_element_array
+                codeGen += self.emit.emitANEWARRAY(type_element_array, frame)  # Create array with element type
 
-                # # Lặp qua từng phần tử trong danh sách:
-                # for idx, item in enumerate(dat):
-                #     codeGen += "TODO"  # TODO Nhân đôi tham chiếu mảng trên stack (emitDUP).
-                #     codeGen +="TODO"  # TODO Đẩy chỉ số của phần tử (emitPUSHCONST) lên stack.
-                #     codeGen += "TODO"  # TODO Gọi self.visit(item, o) để xử lý giá trị phần tử.
-                #     codeGen += "TODO"  # TODO Lưu giá trị vào mảng (emitASTORE).
-                # return codeGen , ArrayType("TODO") #TODO: Chú ý dùng đến len(dat)
                 # Lặp qua từng phần tử trong danh sách:
                 for idx, item in enumerate(dat):
                     codeGen += self.emit.emitDUP(frame)  # Duplicate array reference on stack
                     codeGen += self.emit.emitPUSHCONST(idx, IntType(), frame)  # Push index onto stack
-                    element_code, _ = self.visit(item, o)  # Process the element value
-                    codeGen += element_code
+                    item_code, _ = self.visit(item, o)  # Process the element value
+                    codeGen += item_code  # Add code for element
                     codeGen += self.emit.emitASTORE(type_element_array, frame)  # Store element in array
                 return codeGen, ArrayType([len(dat)], type_element_array)  # Return array type with dimension
 
@@ -455,27 +489,15 @@ class CodeGenerator(BaseVisitor, Utils):
             # Gọi đệ quy nested2recursive(dat[0], o) để xử lý danh sách con.
             # Sinh mã code để tạo một mảng mới với kiểu phần tử là kiểu của danh sách con.
             _, type_element_array = nested2recursive(dat[0], o)
-            codeGen += self.emit.emitANEWARRAY(type_element_array, frame) #TODO cần dùng 1 trong 2 emitNEWARRAY hoặc emitANEWARRAY để tạo mảng với kiểu phần tử là type_element_array
+            codeGen += self.emit.emitANEWARRAY(type_element_array, frame)  # Create array with nested type
 
-            # # Lặp qua từng phần tử trong danh sách:
-            #     # Nhân đôi tham chiếu mảng trên stack (emitDUP).
-            #     # Đẩy chỉ số của phần tử (emitPUSHCONST).
-            #     # Gọi đệ quy nested2recursive(item, o) để xử lý danh sách con.
-            #     # Lưu giá trị vào mảng (emitASTORE).
-            # for idx, item in enumerate(dat):
-            #     codeGen += "TODO"
-            #     codeGen += "TODO"
-            #     codeGen +="TODO"
-            #     codeGen += "TODO"
-            # return  codeGen, ArrayType("TODO") #TODO: Chú ý dùng đến len(dat)
             # Lặp qua từng phần tử trong danh sách:
             for idx, item in enumerate(dat):
-                codeGen += self.emit.emitDUP(frame)  # Duplicate array reference on stack
-                codeGen += self.emit.emitPUSHCONST(idx, IntType(), frame)  # Push index onto stack
-                item_code, _ = nested2recursive(item, o)  # Process nested list
-                codeGen += item_code  # Add code for nested element
-                codeGen += self.emit.emitASTORE(type_element_array, frame)  # Store element in array
-            
+                codeGen += self.emit.emitDUP(frame)  # Duplicate array reference
+                codeGen += self.emit.emitPUSHCONST(idx, IntType(), frame)  # Push index
+                item_code, _ = nested2recursive(item, o)  # Process nested item
+                codeGen += item_code  # Add code for nested item
+                codeGen += self.emit.emitASTORE(type_element_array, frame)  # Store in array
             return codeGen, ArrayType([len(dat)], type_element_array)  # Return array type with dimension
 
         #Gọi hàm đệ quy trong đó tham số truyền vào là ast.value, o
