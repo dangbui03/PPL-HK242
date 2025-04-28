@@ -2,30 +2,53 @@
 .class public MiniGoClass
 .super java.lang.Object
 
+.method public static createArray()[I
+Label0:
+Label2:
+	iconst_3
+	newarray int
+	dup
+	iconst_0
+	bipush 10
+	iastore
+	dup
+	iconst_1
+	bipush 20
+	iastore
+	dup
+	iconst_2
+	bipush 30
+	iastore
+	areturn
+Label3:
+Label1:
+.limit stack 5
+.limit locals 0
+.end method
+
 .method public static main([Ljava/lang/String;)V
 Label0:
 .var 0 is args [Ljava/lang/String; from Label0 to Label1
 Label2:
 .var 1 is a [I from Label2 to Label3
-	iconst_1
-	newarray int
-	dup
-	iconst_0
-	iconst_0
-	iastore
+	invokestatic MiniGoClass/createArray()[I
 	astore_1
 	aload_1
 	iconst_0
-	iconst_1
-	iastore
+	iaload
+	invokestatic io/putInt(I)V
 	aload_1
-	iconst_0
+	iconst_1
+	iaload
+	invokestatic io/putInt(I)V
+	aload_1
+	iconst_2
 	iaload
 	invokestatic io/putInt(I)V
 Label3:
 Label1:
 	return
-.limit stack 7
+.limit stack 2
 .limit locals 2
 .end method
 

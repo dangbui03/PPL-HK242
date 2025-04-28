@@ -689,7 +689,7 @@ class Emitter():
         elif type(in_) is FloatType:
             frame.pop()
             return self.jvm.emitFRETURN()  
-        elif type(in_) is StringType:
+        elif type(in_) is StringType or type(in_) is ArrayType:
             frame.pop()
             return self.jvm.emitARETURN()                 
         elif type(in_) is VoidType:
@@ -750,7 +750,7 @@ class Emitter():
     '''
     def printout(self, in_):
         #in_: String
-
+        # if in_ is not None:    
         self.buff.append(in_)
 
     def clearBuff(self):

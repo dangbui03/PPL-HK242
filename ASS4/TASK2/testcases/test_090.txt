@@ -4,4 +4,4 @@ func main() {
     a[0] := 1
     putInt(a[0]);
 }
-    
+        

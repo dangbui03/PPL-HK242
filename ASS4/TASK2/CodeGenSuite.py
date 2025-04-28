@@ -135,6 +135,21 @@ func main() {
     }
         """
         self.assertTrue(TestCodeGen.test(input,"200",inspect.stack()[0].function))
+        
+    def test_085(self):
+        input = """
+func createArray() [3] int {
+    return [3] int {10, 20, 30};
+}
+
+func main() {
+    var a [3] int = createArray();
+    putInt(a[0]);
+    putInt(a[1]);
+    putInt(a[2]);
+}
+        """
+        self.assertTrue(TestCodeGen.test(input,"102030",inspect.stack()[0].function))
     
     def test_090(self):
         input = """
@@ -143,7 +158,7 @@ func main() {
     a[0] := 1
     putInt(a[0]);
 }
-    """
+        """
         self.assertTrue(TestCodeGen.test(input,"1",inspect.stack()[0].function))
 
     def test_091(self):

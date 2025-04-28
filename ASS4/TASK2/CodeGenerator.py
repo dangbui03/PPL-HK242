@@ -20,6 +20,8 @@ class CodeGenerator(BaseVisitor, Utils):
         self.list_function = []
         self.arrayCell = None # Dùng để lưu kiểu của mảng khi duyệt vào 1 ArrayCell
         self.arrayCellType = None
+        self.list_type = {}
+        self.struct: StructType = None
 
     def init(self):
         mem = [
@@ -110,12 +112,19 @@ class CodeGenerator(BaseVisitor, Utils):
         self.emit.printout(self.emit.emitPROLOG(
             self.className, "java.lang.Object"))
         env = reduce(lambda a, x: self.visit(x, a)
-                     if isinstance(x, VarDecl) else a, ast.decl, env)
+                     if isinstance(x, VarDecl) or isinstance(x, ConstDecl) else a, ast.decl, env)
         reduce(lambda a, x: self.visit(x, a) if isinstance(
             x, FuncDecl) else a, ast.decl, env)
         self.emitObjectInit()
         self.emitObjectCInit(ast, env)
         self.emit.printout(self.emit.emitEPILOG())
+        
+        for item in self.list_type.values():
+            self.struct = item
+            self.emit = Emitter(self.path + "/" + item.name + ".j")
+            self.visit(item, {
+                'env': env['env']
+            })
         return env
 
     # TODO decl ------------------------------
@@ -331,6 +340,8 @@ class CodeGenerator(BaseVisitor, Utils):
         # Increase stack size by 1, as we'll use the stack to store the value of this variable
         o['frame'].push() 
         if type(ast.lhs) is ArrayCell:
+            if 'frame' in o:
+                o['frame'].push()
             self.emit.printout(lhsCode)
             self.emit.printout(rhsCode)
             self.emit.printout(self.emit.emitASTORE(self.arrayCell, o['frame'])) 
@@ -535,3 +546,51 @@ class CodeGenerator(BaseVisitor, Utils):
 
         codeGen += self.emit.emitMULTIANEWARRAY(ast, o['frame'])
         return codeGen, ast
+    
+    # def visitIf(self, ast: If, o: dict) -> dict:
+    #     frame = o['frame']
+    #     label_exit = frame.getNewLabel()
+    #     label_end_if = ## TODO
+    #     condCode, _ = self.visit(ast.expr, o)
+    #     self.emit.printout(condCode)
+    #     self.emit.printout(## TODO)
+    #     self.visit(ast.thenStmt, o)
+    #     self.emit.printout(## TODO)
+    #     self.emit.printout(## TODO)
+
+    #     if ast.elseStmt is not None:
+    #         ## TODO
+    #     self.emit.printout(## TODO)
+    #     return o
+    
+
+    # def visitForBasic(self, ast: ForBasic, o: dict) -> dict:
+    #     frame = o['frame']
+    #     frame.enterLoop()
+    #     lable_new = ## TODO
+    #     lable_Break = frame.getBreakLabel() 
+    #     lable_Cont = ## TODO
+    #     self.emit.printout(## TODO)
+    #     self.emit.printout(self.visit(ast.cond, o)[0])
+    #     self.emit.printout(## TODO)
+    #     self.visit(## TODO)
+    #     self.emit.printout(## TODO)
+    #     self.emit.printout(## TODO)
+    #     self.emit.printout(## TODO)
+    #     frame.exitLoop()
+    #     return o
+    
+    # def visitForStep(self, ast: ForStep, o: dict) -> dict:
+    #     ## TODO
+
+    # def visitForEach(self, ast, o: dict) -> dict:
+    #     # thẩy bỏ qua (đặt thầy thầy có nói)
+    #     return o
+
+    # def visitContinue(self, ast, o: dict) -> dict:
+    #     self.emit.printout(## TODO)
+    #     return o
+
+    # def visitBreak(self, ast, o: dict) -> dict:
+    #     self.emit.printout(## TODO)
+    #     return o
