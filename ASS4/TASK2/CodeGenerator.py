@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from functools import reduce
 from Visitor import *
 from AST import *
+from typing import Union, Any
 
 
 class CodeGenerator(BaseVisitor, Utils):
@@ -183,18 +184,20 @@ class CodeGenerator(BaseVisitor, Utils):
             elif type(varType) is BoolType:
                 return BooleanLiteral("false")
             elif type(varType) is ArrayType:
-                # Với mảng thì mình dùng đệ quy để sinh ra mảng giá trị cho đúng nhé.
-                # VD mảng nguyên 1 chiều thì sẽ là [0,0,0,...], mảng 2 chiều thì sẽ là [[0,0,0,...],[0,0,0,...],...]
-                # VD mảng bool 1 chiều thì sẽ là [false,false,false,...], mảng 2 chiều thì sẽ là [[false,false,false,...],[false,false,false,...],...] 
+                # Create a default element for the base type
+                baseInit = create_init(varType.eleType, o)
                 
-                # Create base element based on array element type
-                element_init = create_init(varType.eleType, o)
+                # Create a properly nested structure based on dimensions
+                def create_nested_init(dims, baseValue):
+                    if not dims:
+                        return baseValue
+                    # Create a list with 'size' elements, each containing nested initializations
+                    size = dims[0].value if isinstance(dims[0], IntLiteral) else 0
+                    return [create_nested_init(dims[1:], baseValue) for _ in range(size)]
                 
-                # Create array with initialized elements
-                elements = []
-                # We'll handle dimensions recursively when creating the ArrayLiteral
-                return element_init
-
+                # Create the nested initialization value
+                return create_nested_init(varType.dimens, baseInit)
+ 
         varInit = ast.varInit  # Giá trị khởi tạo của biến
         varType = ast.varType  # Kiểu của biến
 
@@ -202,8 +205,11 @@ class CodeGenerator(BaseVisitor, Utils):
         if not varInit:
             varInit = create_init(varType, o)
             if type(varType) is ArrayType:
-                varInit = ArrayLiteral(varType.dimens, varType.eleType, varInit)
+                if 'frame' in o:
+                    o['frame'].push()
+                varInit = ArrayLiteral(varType.dimens, varType.dimens, varInit)
             ast.varInit = varInit
+
             
         env = o.copy()
         env['frame'] = Frame("<template_VT>", VoidType())
@@ -451,7 +457,7 @@ class CodeGenerator(BaseVisitor, Utils):
 
     def visitArrayLiteral(self, ast:ArrayLiteral , o: dict) -> tuple[str, Type]:
 
-        # Phần ArrayLiteral.value là 1 nested list nên mình sẽ dùng đệ quy để duyệt nó.
+        # def nested2recursive(dat: Union[Literal, list]|Any, o: dict) -> tuple[str, Type]:
         def nested2recursive(dat: Union[Literal, list['NestedList']], o: dict) -> tuple[str, Type]:
             #dat có thể là 1 Literal hoặc là 1 list chứa các Literal khác, nên mình sẽ kiểm tra xem dat có phải là list hay không.
 
@@ -473,7 +479,7 @@ class CodeGenerator(BaseVisitor, Utils):
             #Trường hợp danh sách không lồng nhau(vì phần tử đầu tiên không phải là list)
             if not isinstance(dat[0],list):
                 _, type_element_array = self.visit(dat[0], o)  # gọi hàm visit cho phần tử đầu tiên để lấy kiểu của nó
-                codeGen += self.emit.emitANEWARRAY(type_element_array, frame)  # Create array with element type
+                codeGen += self.emit.emitNEWARRAY(type_element_array, frame)  # Create array with element type
 
                 # Lặp qua từng phần tử trong danh sách:
                 for idx, item in enumerate(dat):
@@ -484,10 +490,7 @@ class CodeGenerator(BaseVisitor, Utils):
                     codeGen += self.emit.emitASTORE(type_element_array, frame)  # Store element in array
                 return codeGen, ArrayType([len(dat)], type_element_array)  # Return array type with dimension
 
-            #Trường hợp danh sách lồng nhau:
-            # Nếu phần tử đầu tiên của danh sách là một danh sách khác (danh sách lồng nhau), thì:
-            # Gọi đệ quy nested2recursive(dat[0], o) để xử lý danh sách con.
-            # Sinh mã code để tạo một mảng mới với kiểu phần tử là kiểu của danh sách con.
+            # trường hợp mảng 2 chiều 
             _, type_element_array = nested2recursive(dat[0], o)
             codeGen += self.emit.emitANEWARRAY(type_element_array, frame)  # Create array with nested type
 
@@ -500,6 +503,10 @@ class CodeGenerator(BaseVisitor, Utils):
                 codeGen += self.emit.emitASTORE(type_element_array, frame)  # Store in array
             return codeGen, ArrayType([len(dat)], type_element_array)  # Return array type with dimension
 
+        if type(ast.value) is ArrayType:
+            # Nếu là mảng 1 chiều thì mình sẽ gọi hàm visit cho nó, nếu là mảng 2 chiều thì mình sẽ gọi hàm đệ quy cho nó.
+            # Nếu là mảng 3 chiều thì mình sẽ gọi hàm đệ quy cho nó, và cứ như vậy cho đến khi nào không còn mảng nữa thì thôi.
+            return self.visit(ast.value, o)
         #Gọi hàm đệ quy trong đó tham số truyền vào là ast.value, o
         return nested2recursive(ast.value, o)
 

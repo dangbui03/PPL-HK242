@@ -7,7 +7,12 @@ Label0:
 .var 0 is args [Ljava/lang/String; from Label0 to Label1
 Label2:
 .var 1 is a [I from Label2 to Label3
+	iconst_1
+	newarray int
+	dup
 	iconst_0
+	iconst_0
+	iastore
 	astore_1
 	aload_1
 	iconst_0
@@ -20,7 +25,7 @@ Label2:
 Label3:
 Label1:
 	return
-.limit stack 4
+.limit stack 6
 .limit locals 2
 .end method
 

@@ -103,7 +103,7 @@ class Emitter():
         elif typeIn is VoidType:
             return "V"
         elif typeIn is ArrayType:
-            return "[" + self.getJVMType(inType.eleType)
+            return "[" * len(inType.dimens) + self.getJVMType(inType.eleType)
         elif typeIn is MType:
             return "(" + "".join(list(map(lambda x: self.getJVMType(x), inType.partype))) + ")" + self.getJVMType(inType.rettype)
         elif typeIn is cgen.ClassType:
