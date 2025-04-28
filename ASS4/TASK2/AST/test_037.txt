@@ -1,0 +1,1 @@
+Program([VarDecl(a,IntLiteral(1)),FuncDecl(main,[],VoidType,Block([Assign(Id(b),BinaryOp(Id(a),+,IntLiteral(1))),FuncCall(putInt,[Id(a)]),FuncCall(putInt,[Id(b)])]))])

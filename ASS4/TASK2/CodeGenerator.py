@@ -239,33 +239,34 @@ class CodeGenerator(BaseVisitor, Utils):
                 ast.varName, varType, index,  frame))
         return o
 
-    def visitFuncCall(self, ast: FuncCall, o: dict):
+    def visitFuncCall(self, ast: FuncCall, o: dict) -> dict:
         sym = next(filter(lambda x: x.name == ast.funName, self.list_function), None)
-        env = o.copy()
-
-        # ----- 1. Nhánh STATEMENT -----
+        
         if o.get('stmt'):
-            o['stmt'] = False                 # reset cờ
-
-            # 2. Phát sinh mã cho từng đối số
+            o["stmt"] = False
+            # Generate code for each argument and append to output
+            params_code = ""
             for arg in ast.args:
-                arg_code, _ = self.visit(arg, env)
-                self.emit.printout(arg_code)
-
-            # 3. Gọi hàm (INVOKESTATIC)
-            self.emit.printout(
-                self.emit.emitINVOKESTATIC(f"{sym.value.value}/{ast.funName}",
-                                        sym.mtype,
-                                        o['frame'])
-            )
-            return o                          # luôn trả về môi trường
-
-        # ----- 4. Nhánh EXPRESSION -----
-        codes = "".join(self.visit(arg, env)[0] for arg in ast.args)
-        codes += self.emit.emitINVOKESTATIC(
-            f"{sym.value.value}/{ast.funName}", sym.mtype, o['frame']
-        )
-        return codes, sym.mtype.rettype
+                arg_code, arg_type = self.visit(arg, o)
+                params_code += arg_code
+            
+            # Emit the function call after parameters are pushed to stack
+            self.emit.printout(params_code)
+            self.emit.printout(self.emit.emitINVOKESTATIC(f"{sym.value.value}/{ast.funName}", sym.mtype, o['frame']))
+            
+            return o  # Return o since statements always return void
+        
+        # For expressions, generate code for parameters and function call
+        output = ""
+        for arg in ast.args:
+            arg_code, arg_type = self.visit(arg, o)
+            output += arg_code
+        
+        # Add the function call instruction
+        output += self.emit.emitINVOKESTATIC(f"{sym.value.value}/{ast.funName}", sym.mtype, o['frame'])
+        
+        # Return the generated code and return type since this is an expression
+        return output, sym.mtype.rettype
 
     def visitBlock(self, ast: Block, o: dict) -> dict:
         env = o.copy()
@@ -304,7 +305,17 @@ class CodeGenerator(BaseVisitor, Utils):
     def visitAssign(self, ast: Assign, o: dict) -> dict:
         # TODO implement),None):
         if type(ast.lhs) is Id and not next(filter(lambda x: x.name == ast.lhs.name, [j for i in o['env'] for j in i]), None):
-            return o  # TODO implement
+            # return o  # TODO implement
+            rhsCode, rhsType = self.visit(ast.rhs, o)
+            frame = o['frame']
+            index = frame.getNewIndex()
+            o['env'][0].append(Symbol(ast.lhs.name, rhsType, Index(index)))
+            self.emit.printout(self.emit.emitVAR(
+                index, ast.lhs.name, rhsType, frame.getStartLabel(), frame.getEndLabel(), frame))
+            self.emit.printout(rhsCode)
+            self.emit.printout(self.emit.emitWRITEVAR(
+                ast.lhs.name, rhsType, index, frame))
+            return o
         
         rhsCode, rhsType = self.visit(ast.rhs, o)
         o['isLeft'] = True
@@ -433,7 +444,6 @@ class CodeGenerator(BaseVisitor, Utils):
         newO['isLeft'] = False
         codeGen, arrType = self.visit(ast.arr, newO)
         #TODO visit thằng expr của array cell này, nên nhớ arraycell gồm phần expr phía trước và index phía sau.
-
         for idx, item in enumerate(ast.idx):
             codeGen += self.visit(item, newO)[0]
             if idx != len(ast.idx) - 1:
@@ -501,7 +511,7 @@ class CodeGenerator(BaseVisitor, Utils):
                 item_code, _ = nested2recursive(item, o)  # Process nested item
                 codeGen += item_code  # Add code for nested item
                 codeGen += self.emit.emitASTORE(type_element_array, frame)  # Store in array
-            return codeGen, ArrayType([len(dat)], type_element_array)  # Return array type with dimension
+            return codeGen, ArrayType([len(dat)] + type_element_array.dimens, type_element_array.eleType)  # Return array type with dimension
 
         if type(ast.value) is ArrayType:
             # Nếu là mảng 1 chiều thì mình sẽ gọi hàm visit cho nó, nếu là mảng 2 chiều thì mình sẽ gọi hàm đệ quy cho nó.

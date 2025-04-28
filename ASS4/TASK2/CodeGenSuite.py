@@ -62,7 +62,42 @@ func main() {
 func foo1() int {return 1;}
         """
         self.assertTrue(TestCodeGen.test(input, "5", inspect.stack()[0].function))  
+    
+    def test_019(self):
+        input = """
+func main() {
+    putBoolLn(5.0 > 2.0)
+    putBoolLn(5.0 < 2.0)
+    putBoolLn(5.0 <= 5.0)
+    putBoolLn(5.0 >= 5.0)
+    putBoolLn(5.0 == 5.0)
+    putBoolLn(5.0 != 5.0)
+}
+        """
+        self.assertTrue(TestCodeGen.test(input, "true\nfalse\ntrue\ntrue\ntrue\nfalse\n", inspect.stack()[0].function))
+        
+    def test_032(self):
+        input = """
+func foo() int {return 1;}        
 
+func main() {
+    putInt(foo())
+}
+        """
+        self.assertTrue(TestCodeGen.test(input, "1", inspect.stack()[0].function))
+
+    def test_037(self):
+        input = """
+
+var a = 1;
+func main() {
+    b := a + 1;
+    putInt(a)
+    putInt(b)
+}
+        """
+        self.assertTrue(TestCodeGen.test(input, "12", inspect.stack()[0].function))
+    
     def test_051(self):
         input = """
 func main() {
@@ -78,6 +113,28 @@ func main() {
 }
 """
         self.assertTrue(TestCodeGen.test(input,"3.0\nfalse\nvotien\ntrue\n",inspect.stack()[0].function)) 
+        
+    def test_065(self):
+        input = """
+
+func main() {
+    var a [2][3] float;
+    a[0][0] += 2.0
+    putFloat(a[0][0] + a[0][1])
+}
+        """
+        self.assertTrue(TestCodeGen.test(input,"2.0",inspect.stack()[0].function))
+        
+    def test_077(self):
+        input = """
+    var a [2] int;
+    func main() {
+        a[0] := 100
+        a[1] += a[0] + a[0]
+        putInt(a[1])
+    }
+        """
+        self.assertTrue(TestCodeGen.test(input,"200",inspect.stack()[0].function))
     
     def test_090(self):
         input = """
