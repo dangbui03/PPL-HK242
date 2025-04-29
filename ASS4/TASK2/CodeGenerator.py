@@ -547,50 +547,160 @@ class CodeGenerator(BaseVisitor, Utils):
         codeGen += self.emit.emitMULTIANEWARRAY(ast, o['frame'])
         return codeGen, ast
     
-    # def visitIf(self, ast: If, o: dict) -> dict:
-    #     frame = o['frame']
-    #     label_exit = frame.getNewLabel()
-    #     label_end_if = ## TODO
-    #     condCode, _ = self.visit(ast.expr, o)
-    #     self.emit.printout(condCode)
-    #     self.emit.printout(## TODO)
-    #     self.visit(ast.thenStmt, o)
-    #     self.emit.printout(## TODO)
-    #     self.emit.printout(## TODO)
+    def visitIf(self, ast: If, o: dict) -> dict:
+        frame = o['frame']
+        label_exit = frame.getNewLabel()
+        label_end_if =  frame.getNewLabel() ## TODO
+        condCode, _ = self.visit(ast.expr, o)
+        self.emit.printout(condCode)
+        self.emit.printout(self.emit.emitIFFALSE(label_end_if, frame)) ## TODO)
+        self.visit(ast.thenStmt, o)
+        self.emit.printout(self.emit.emitGOTO(label_exit, frame))## TODO)
+        self.emit.printout(self.emit.emitLABEL(label_end_if, frame))## TODO)
 
-    #     if ast.elseStmt is not None:
-    #         ## TODO
-    #     self.emit.printout(## TODO)
-    #     return o
+        if ast.elseStmt is not None:
+            ## TODO
+            self.visit(ast.elseStmt, o)
+        self.emit.printout(self.emit.emitLABEL(label_exit, frame))## TODO)
+        return o
     
 
-    # def visitForBasic(self, ast: ForBasic, o: dict) -> dict:
-    #     frame = o['frame']
-    #     frame.enterLoop()
-    #     lable_new = ## TODO
-    #     lable_Break = frame.getBreakLabel() 
-    #     lable_Cont = ## TODO
-    #     self.emit.printout(## TODO)
-    #     self.emit.printout(self.visit(ast.cond, o)[0])
-    #     self.emit.printout(## TODO)
-    #     self.visit(## TODO)
-    #     self.emit.printout(## TODO)
-    #     self.emit.printout(## TODO)
-    #     self.emit.printout(## TODO)
-    #     frame.exitLoop()
-    #     return o
+    def visitForBasic(self, ast: ForBasic, o: dict) -> dict:
+        frame = o['frame']
+        frame.enterLoop()
+        lable_new = frame.getNewLabel() ## TODO
+        lable_Break = frame.getBreakLabel() 
+        lable_Cont = frame.getContinueLabel() ## TODO
+        self.emit.printout(self.emit.emitLABEL(lable_new, frame))## TODO)
+        self.emit.printout(self.visit(ast.cond, o)[0])
+        self.emit.printout(self.emit.emitIFFALSE(lable_Break, frame))## TODO)
+        self.visit(ast.loop, o)## TODO)
+        self.emit.printout(self.emit.emitLABEL(lable_Break, frame)) ## TODO)
+        self.emit.printout(self.emit.emitLABEL(lable_new, frame)) ## TODO)
+        self.emit.printout(self.emit.emitLABEL(lable_Cont, frame)) ## TODO)
+        frame.exitLoop()
+        return o
     
-    # def visitForStep(self, ast: ForStep, o: dict) -> dict:
-    #     ## TODO
+    def visitForStep(self, ast: ForStep, o: dict) -> dict:
+        frame = o['frame']
+        frame.enterLoop()
+        
+        # Initialize loop variable
+        self.visit(ast.init, o)
+        
+        label_start = frame.getNewLabel()  # Label for start of loop
+        label_break = frame.getBreakLabel()  # Label for break
+        label_cont = frame.getContinueLabel()  # Label for continue
+        
+        # Label for start of loop
+        self.emit.printout(self.emit.emitLABEL(label_start, frame))
+        
+        # Check condition
+        condCode, condType = self.visit(ast.cond, o)
+        self.emit.printout(condCode)
+        
+        # If condition is false, jump to break
+        self.emit.printout(self.emit.emitIFFALSE(label_break, frame))
+        
+        # Execute loop body
+        self.visit(ast.loop, o)
+        
+        # Label for continue point
+        self.emit.printout(self.emit.emitLABEL(label_cont, frame))
+        
+        # Execute update expression
+        self.visit(ast.upda, o)
+        
+        # Jump back to start of loop
+        self.emit.printout(self.emit.emitGOTO(label_start, frame))
+        
+        # Label for break
+        self.emit.printout(self.emit.emitLABEL(label_break, frame))
+        
+        frame.exitLoop()
+        return o
 
-    # def visitForEach(self, ast, o: dict) -> dict:
-    #     # thẩy bỏ qua (đặt thầy thầy có nói)
-    #     return o
+    def visitForEach(self, ast: ForEach, o: dict) -> dict:
+        frame = o['frame']
+        frame.enterLoop()
+        
+        # Get array reference
+        arrCode, arrType = self.visit(ast.arr, o)
+        self.emit.printout(arrCode)
+        
+        # Assuming the array is of type ArrayType and we know its element type
+        eleType = arrType.eleType
+        
+        # Create a temporary local variable for the array
+        tempArr = frame.getNewIndex()
+        self.emit.printout(self.emit.emitWRITEVAR("$arr", arrType, tempArr, frame))
+        
+        # Create index variable and initialize it to 0
+        idxIndex = frame.getIndex(ast.idx.name)
+        self.emit.printout(self.emit.emitPUSHICONST(0, frame))
+        self.emit.printout(self.emit.emitWRITEVAR(ast.idx.name, IntType(), idxIndex, frame))
+        
+        # Get array length (assuming array.length operation is supported)
+        self.emit.printout(self.emit.emitREADVAR("$arr", arrType, tempArr, frame))
+        self.emit.printout(self.emit.emitARRAYLEN(frame))
+        
+        # Store array length in a temporary variable
+        tempLen = frame.getNewIndex()
+        self.emit.printout(self.emit.emitWRITEVAR("$len", IntType(), tempLen, frame))
+        
+        # Labels for loop
+        label_start = frame.getNewLabel()
+        label_break = frame.getBreakLabel()
+        label_cont = frame.getContinueLabel()
+        
+        # Start of loop
+        self.emit.printout(self.emit.emitLABEL(label_start, frame))
+        
+        # Check if index < array length
+        self.emit.printout(self.emit.emitREADVAR(ast.idx.name, IntType(), idxIndex, frame))
+        self.emit.printout(self.emit.emitREADVAR("$len", IntType(), tempLen, frame))
+        self.emit.printout(self.emit.emitREOP("<", IntType(), frame))
+        
+        # If condition is false (index >= length), break out of loop
+        self.emit.printout(self.emit.emitIFFALSE(label_break, frame))
+        
+        # Get array element at current index
+        self.emit.printout(self.emit.emitREADVAR("$arr", arrType, tempArr, frame))
+        self.emit.printout(self.emit.emitREADVAR(ast.idx.name, IntType(), idxIndex, frame))
+        self.emit.printout(self.emit.emitALOAD(eleType, frame))
+        
+        # Store element value in the loop variable
+        valueIndex = frame.getIndex(ast.value.name)
+        self.emit.printout(self.emit.emitWRITEVAR(ast.value.name, eleType, valueIndex, frame))
+        
+        # Execute loop body
+        self.visit(ast.loop, o)
+        
+        # Continue label
+        self.emit.printout(self.emit.emitLABEL(label_cont, frame))
+        
+        # Increment index
+        self.emit.printout(self.emit.emitREADVAR(ast.idx.name, IntType(), idxIndex, frame))
+        self.emit.printout(self.emit.emitPUSHICONST(1, frame))
+        self.emit.printout(self.emit.emitADDOP("+", IntType(), frame))
+        self.emit.printout(self.emit.emitWRITEVAR(ast.idx.name, IntType(), idxIndex, frame))
+        
+        # Jump back to start of loop
+        self.emit.printout(self.emit.emitGOTO(label_start, frame))
+        
+        # Break label
+        self.emit.printout(self.emit.emitLABEL(label_break, frame))
+        
+        frame.exitLoop()
+        return o
 
-    # def visitContinue(self, ast, o: dict) -> dict:
-    #     self.emit.printout(## TODO)
-    #     return o
+    def visitContinue(self, ast, o: dict) -> dict:
+        # Jump to the continue label of the current loop
+        self.emit.printout(self.emit.emitGOTO(o['frame'].getContinueLabel(), o['frame']))
+        return o
 
-    # def visitBreak(self, ast, o: dict) -> dict:
-    #     self.emit.printout(## TODO)
-    #     return o
+
+    def visitBreak(self, ast, o: dict) -> dict:
+        # Jump to the break label of the current loop
+        self.emit.printout(self.emit.emitGOTO(o['frame'].getBreakLabel(), o['frame']))
+        return o

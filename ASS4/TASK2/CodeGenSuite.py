@@ -170,3 +170,63 @@ func main() {
 }
     """
         self.assertTrue(TestCodeGen.test(input,"1",inspect.stack()[0].function))
+        
+    def test_096(self):
+        input = """
+func main() {
+    if (true) {
+        putBool(true)
+    } 
+}
+    """
+        self.assertTrue(TestCodeGen.test(input,"true",inspect.stack()[0].function))
+
+    def test_097(self):
+        input = """
+func main() {
+    if (true) {
+        putBool(true)
+    } else {
+        putBool(false)     
+    }
+}
+    """
+        self.assertTrue(TestCodeGen.test(input,"true",inspect.stack()[0].function))
+
+    def test_098(self):
+        input = """
+func main() {
+    if (false) {
+        putBool(true)
+    } else {
+        putBool(false)     
+    }
+}
+    """
+        self.assertTrue(TestCodeGen.test(input,"false",inspect.stack()[0].function))
+
+    def test_126(self):
+        input = """
+func main() {
+    var i int = 10;
+    for var i int = 0; i < 2; i += 1 {
+        putIntLn(i)
+        break;
+    }
+    putInt(i)
+}
+        """
+        self.assertTrue(TestCodeGen.test(input, "0\n10", inspect.stack()[0].function))
+    
+    def test_137(self):
+      input = """
+const a = 1 + 1
+const c = 5 - a
+func main() {
+  var b [a][c] int;
+  putInt(b[0][0]);
+  b[0][0] := 20;
+  putInt(b[0][0]);
+}
+      """
+      self.assertTrue(TestCodeGen.test(input, "020", inspect.stack()[0].function))
