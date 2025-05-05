@@ -86,7 +86,7 @@ class Emitter():
         # frame: Frame
         # in_: Type
         if type(in_) is ArrayType:
-            dimens = len(in_.size)
+            dimens = len(in_.dimens)
             return self.jvm.emitMULTIANEWARRAY(self.getJVMType(in_), str(dimens))
     
     def getJVMType(self, inType):

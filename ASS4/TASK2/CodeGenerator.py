@@ -96,7 +96,7 @@ class CodeGenerator(BaseVisitor, Utils):
         #             f"{self.className}.{item.varName}", rhsType, frame))
         self.visit(Block([
                 Assign(Id(item.varName), item.varInit) if isinstance(item, VarDecl) else
-                Assign(Id(item.varName), item.value)
+                Assign(Id(item.conName), item.iniExpr) if isinstance(item, ConstDecl) else item
                 for item in ast.decl if isinstance(item, (VarDecl, ConstDecl))
             ]), env)
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(), frame))
@@ -166,6 +166,19 @@ class CodeGenerator(BaseVisitor, Utils):
             index, ast.parName, ast.parType, frame.getStartLabel(), frame.getEndLabel(), frame))
         return o
 
+    def arrayLitRcs(self, size, typ):
+        #size: [3,2,1]
+        #typ: NumberType...
+        if(len(size) == 1):
+            if type(typ) is IntType:
+                return ArrayLiteral([IntType(0) for _ in range(size)])
+            if type(typ) is StringType:
+                return ArrayLiteral([StringLiteral("") for _ in range(size)])
+            if type(typ) is BoolType:
+                return ArrayLiteral([BooleanLiteral(True) for _ in range(size)])
+        else:
+            return ArrayLiteral([self.arrayLitRcs(size[1:], typ) for _ in range(size)])
+    
     def visitVarDecl(self, ast: VarDecl, o: dict) -> dict:
         # varInit = ast.varInit
         # varType = ast.varType
@@ -192,7 +205,7 @@ class CodeGenerator(BaseVisitor, Utils):
                 return StringLiteral("\"\"")
             elif type(varType) is BoolType:
                 return BooleanLiteral("false")
-            elif type(varType) is ArrayType:
+            elif type(varType) is ArrayType:                
                 # Create a default element for the base type
                 baseInit = create_init(varType.eleType, o)
                 
@@ -200,9 +213,16 @@ class CodeGenerator(BaseVisitor, Utils):
                 def create_nested_init(dims, baseValue):
                     if not dims:
                         return baseValue
-                    # Create a list with 'size' elements, each containing nested initializations
-                    size = dims[0].value if isinstance(dims[0], IntLiteral) else 0
-                    return [create_nested_init(dims[1:], baseValue) for _ in range(size)]
+                    
+                    if isinstance(dims[0], Id) or (not isinstance(dims[0], IntLiteral)):
+                        # When index is variable, create a reasonable default size (e.g., 10)
+                        var_info = next(filter(lambda x: x.name == dims[0].name, [j for i in o['env'] for j in i]), None)
+                        size = var_info.var
+                        return [create_nested_init(dims[1:], baseValue) for _ in range(size)]
+                    else:
+                        # Create a list with 'size' elements, each containing nested initializations
+                        size = dims[0].value if isinstance(dims[0], IntLiteral) else 0
+                        return [create_nested_init(dims[1:], baseValue) for _ in range(size)]
                 
                 # Create the nested initialization value
                 return create_nested_init(varType.dimens, baseInit)
@@ -481,7 +501,10 @@ class CodeGenerator(BaseVisitor, Utils):
         # def nested2recursive(dat: Union[Literal, list]|Any, o: dict) -> tuple[str, Type]:
         def nested2recursive(dat: Union[Literal, list['NestedList']], o: dict) -> tuple[str, Type]:
             #dat có thể là 1 Literal hoặc là 1 list chứa các Literal khác, nên mình sẽ kiểm tra xem dat có phải là list hay không.
-
+            #     frame = o['frame']
+            #     codeGen = self.emit.emitPUSHCONST(0, IntType(), frame)
+            #     codeGen += self.emit.emitANEWARRAY(VoidType(), frame)
+            #     return codeGen, ArrayType([0], VoidType())
             #Nếu là Literal thôi thì chỉ cần visit tới là xong, không cần đệ quy nữa, tham số o là 0
             if not isinstance(dat,list): 
                 return self.visit(dat, o)  # Changed from 0 to o to avoid NoneType error
