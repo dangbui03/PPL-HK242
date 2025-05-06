@@ -205,6 +205,51 @@ func main() {
     """
         self.assertTrue(TestCodeGen.test(input,"false",inspect.stack()[0].function))
 
+#      def test_113(self):
+#         input = """
+# func main() {
+#     var i = 0;
+#     for i < 3 {
+#         putInt(i);
+#         i += 1;
+#     }
+#     putInt(i);
+# }
+#         """
+#         self.assertTrue(TestCodeGen.test(input, "0123", inspect.stack()[0].function))
+
+#     def test_114(self):
+#         input = """
+# func main() {
+#     var i = 0;
+#     for i < 5 {
+#         if (i == 3) {
+#             break;
+#         }
+#         putInt(i);
+#         i += 1;
+#     }
+#     putInt(i);
+# }
+#         """
+#         self.assertTrue(TestCodeGen.test(input, "0123", inspect.stack()[0].function))
+
+#     def test_115(self):
+#         input = """
+# func main() {
+#     var i = 0;
+#     for i < 5 {
+#         i += 1;
+#         if (i % 2 == 0) {
+#             continue;
+#         }
+#         putInt(i);
+#     }
+#     putInt(i);
+# }
+#         """
+#         self.assertTrue(TestCodeGen.test(input, "1355", inspect.stack()[0].function))
+
     def test_126(self):
         input = """
 func main() {

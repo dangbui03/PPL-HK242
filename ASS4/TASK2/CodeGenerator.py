@@ -166,7 +166,7 @@ class CodeGenerator(BaseVisitor, Utils):
             index, ast.parName, ast.parType, frame.getStartLabel(), frame.getEndLabel(), frame))
         return o
 
-    def arrayLitRcs(self, size, typ):
+    def arrayLitchange(self, size, typ):
         #size: [3,2,1]
         #typ: NumberType...
         if(len(size) == 1):
@@ -177,7 +177,9 @@ class CodeGenerator(BaseVisitor, Utils):
             if type(typ) is BoolType:
                 return ArrayLiteral([BooleanLiteral(True) for _ in range(size)])
         else:
-            return ArrayLiteral([self.arrayLitRcs(size[1:], typ) for _ in range(size)])
+            # Extract integer value from the first dimension
+            dim_value = size[0].value if hasattr(size[0], 'value') else int(size[0])
+            return [self.arrayLitchange(size[1:], typ) for _ in range(dim_value)]
     
     def visitVarDecl(self, ast: VarDecl, o: dict) -> dict:
         # varInit = ast.varInit
@@ -214,18 +216,15 @@ class CodeGenerator(BaseVisitor, Utils):
                     if not dims:
                         return baseValue
                     
-                    if isinstance(dims[0], Id) or (not isinstance(dims[0], IntLiteral)):
-                        # When index is variable, create a reasonable default size (e.g., 10)
-                        var_info = next(filter(lambda x: x.name == dims[0].name, [j for i in o['env'] for j in i]), None)
-                        size = var_info.var
-                        return [create_nested_init(dims[1:], baseValue) for _ in range(size)]
-                    else:
-                        # Create a list with 'size' elements, each containing nested initializations
-                        size = dims[0].value if isinstance(dims[0], IntLiteral) else 0
-                        return [create_nested_init(dims[1:], baseValue) for _ in range(size)]
+                    if (isinstance(dims[0], Id)):
+                        return ArrayType(varType.dimens, varType.eleType)
+                    # Create a list with 'size' elements, each containing nested initializations
+                    size = dims[0].value if isinstance(dims[0], IntLiteral) else 1
+                    return [create_nested_init(dims[1:], baseValue) for _ in range(size)]
                 
                 # Create the nested initialization value
                 return create_nested_init(varType.dimens, baseInit)
+                # return ArrayType(varType.dimens, varType.eleType)  # Return the type itself for array initialization
  
         varInit = ast.varInit  # Giá trị khởi tạo của biến
         varType = ast.varType  # Kiểu của biến
@@ -233,7 +232,7 @@ class CodeGenerator(BaseVisitor, Utils):
         # Nếu không có giá trị khởi tạo thì tự động gán cho nó 0, 0.0, false, "",..tùy vào kiểu biến
         if not varInit:
             varInit = create_init(varType, o)
-            if type(varType) is ArrayType:
+            if type(varType) is ArrayType and not isinstance(varInit, ArrayType):
                 if 'frame' in o:
                     o['frame'].push()
                 varInit = ArrayLiteral(varType.dimens, varType.dimens, varInit)
@@ -555,6 +554,7 @@ class CodeGenerator(BaseVisitor, Utils):
         return nested2recursive(ast.value, o)
 
     def visitConstDecl(self, ast:ConstDecl, o: dict) -> dict:
+        
         return self.visit(VarDecl(ast.conName, ast.conType, ast.iniExpr), o)
     
     def visitArrayType(self, ast:ArrayType, o):
@@ -606,40 +606,56 @@ class CodeGenerator(BaseVisitor, Utils):
     
     def visitForStep(self, ast: ForStep, o: dict) -> dict:
         frame = o['frame']
+
+        # ──────────────────────────────────────────────────────────────
+        # 1. Create a *new* symbol scope for the whole loop
+        # ──────────────────────────────────────────────────────────────
+        loop_env = o.copy()
+        loop_env['env'] = [[]] + loop_env['env']
+
+        # ──────────────────────────────────────────────────────────────
+        # 2. Emit the initialisation *outside* the loop context
+        #    (this gives the loop‑local variable its own slot)
+        # ──────────────────────────────────────────────────────────────
+        self.visit(ast.init, loop_env)
+
+        # ──────────────────────────────────────────────────────────────
+        # 3. Now enter the real “loop context” (break/continue labels)
+        # ──────────────────────────────────────────────────────────────
         frame.enterLoop()
-        
-        # Initialize loop variable
-        self.visit(ast.init, o)
-        
-        label_start = frame.getNewLabel()  # Label for start of loop
-        label_break = frame.getBreakLabel()  # Label for break
-        label_cont = frame.getContinueLabel()  # Label for continue
-        
-        # Label for start of loop
+        label_start    = frame.getNewLabel()      # top‑of‑loop
+        label_break    = frame.getBreakLabel()    # for “break”
+        label_continue = frame.getContinueLabel() # for “continue”
+
+        # ──────────────────────────────────────────────────────────────
+        # 4.   start:
+        # ──────────────────────────────────────────────────────────────
         self.emit.printout(self.emit.emitLABEL(label_start, frame))
-        
-        # Check condition
-        condCode, condType = self.visit(ast.cond, o)
-        self.emit.printout(condCode)
-        
-        # If condition is false, jump to break
+
+        #    condition
+        cond_code, _ = self.visit(ast.cond, loop_env)
+        self.emit.printout(cond_code)
         self.emit.printout(self.emit.emitIFFALSE(label_break, frame))
-        
-        # Execute loop body
-        self.visit(ast.loop, o)
-        
-        # Label for continue point
-        self.emit.printout(self.emit.emitLABEL(label_cont, frame))
-        
-        # Execute update expression
-        self.visit(ast.upda, o)
-        
-        # Jump back to start of loop
+
+        #    body
+        self.visit(ast.loop, loop_env)
+
+        # ──────────────────────────────────────────────────────────────
+        # 5.   continue:          ←  target of every “continue”
+        # ──────────────────────────────────────────────────────────────
+        self.emit.printout(self.emit.emitLABEL(label_continue, frame))
+
+        #    update
+        self.visit(ast.upda, loop_env)
+
+        #    goto start
         self.emit.printout(self.emit.emitGOTO(label_start, frame))
-        
-        # Label for break
+
+        # ──────────────────────────────────────────────────────────────
+        # 6.   break:
+        # ──────────────────────────────────────────────────────────────
         self.emit.printout(self.emit.emitLABEL(label_break, frame))
-        
+
         frame.exitLoop()
         return o
 
