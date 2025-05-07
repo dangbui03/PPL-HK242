@@ -50,6 +50,14 @@ class Emitter():
         self.buff = list()
         self.jvm = JasminCode()
 
+    def emitNEW(self, lexeme, frame):
+        frame.push()
+        return self.jvm.emitNEW(lexeme)
+
+    def emitPUSHNULL(self, frame):
+        frame.push()
+        return self.jvm.emitPUSHNULL()
+    
     def emitNEWARRAY(self, in_, frame):
         # if type(in_) is IntType:
         #     return self.jvm.emitNEWARRAY("int") 

@@ -16,6 +16,8 @@ from AST import *
     java  -jar ../jasmin.jar MiniGoClass.j && 
     java -cp ../_io:. MiniGoClass)
 """
+
+
 class CodeGenSuite(unittest.TestCase):
     def test_000(self):
         input = """
@@ -28,7 +30,8 @@ func main() {
 }
 func foo1() int {return 1;}
         """
-        self.assertTrue(TestCodeGen.test(input, "21", inspect.stack()[0].function))  
+        self.assertTrue(TestCodeGen.test(
+            input, "21", inspect.stack()[0].function))
 
     def test_001(self):
         input = """
@@ -48,7 +51,8 @@ func main() {
 
 func fint() int {return 1;}
 """
-        self.assertTrue(TestCodeGen.test(input,"VoTien\n3.0\ntrue\nac\n",inspect.stack()[0].function)) 
+        self.assertTrue(TestCodeGen.test(
+            input, "VoTien\n3.0\ntrue\nac\n", inspect.stack()[0].function))
 
     def test_002(self):
         input = """
@@ -61,8 +65,9 @@ func main() {
 }
 func foo1() int {return 1;}
         """
-        self.assertTrue(TestCodeGen.test(input, "5", inspect.stack()[0].function))  
-    
+        self.assertTrue(TestCodeGen.test(
+            input, "5", inspect.stack()[0].function))
+
     def test_019(self):
         input = """
 func main() {
@@ -74,8 +79,9 @@ func main() {
     putBoolLn(5.0 != 5.0)
 }
         """
-        self.assertTrue(TestCodeGen.test(input, "true\nfalse\ntrue\ntrue\ntrue\nfalse\n", inspect.stack()[0].function))
-        
+        self.assertTrue(TestCodeGen.test(
+            input, "true\nfalse\ntrue\ntrue\ntrue\nfalse\n", inspect.stack()[0].function))
+
     def test_032(self):
         input = """
 func foo() int {return 1;}        
@@ -84,7 +90,8 @@ func main() {
     putInt(foo())
 }
         """
-        self.assertTrue(TestCodeGen.test(input, "1", inspect.stack()[0].function))
+        self.assertTrue(TestCodeGen.test(
+            input, "1", inspect.stack()[0].function))
 
     def test_037(self):
         input = """
@@ -96,8 +103,9 @@ func main() {
     putInt(b)
 }
         """
-        self.assertTrue(TestCodeGen.test(input, "12", inspect.stack()[0].function))
-    
+        self.assertTrue(TestCodeGen.test(
+            input, "12", inspect.stack()[0].function))
+
     def test_051(self):
         input = """
 func main() {
@@ -112,8 +120,9 @@ func main() {
     putBoolLn(d)
 }
 """
-        self.assertTrue(TestCodeGen.test(input,"3.0\nfalse\nvotien\ntrue\n",inspect.stack()[0].function)) 
-        
+        self.assertTrue(TestCodeGen.test(
+            input, "3.0\nfalse\nvotien\ntrue\n", inspect.stack()[0].function))
+
     def test_065(self):
         input = """
 
@@ -123,8 +132,9 @@ func main() {
     putFloat(a[0][0] + a[0][1])
 }
         """
-        self.assertTrue(TestCodeGen.test(input,"2.0",inspect.stack()[0].function))
-        
+        self.assertTrue(TestCodeGen.test(
+            input, "2.0", inspect.stack()[0].function))
+
     def test_077(self):
         input = """
     var a [2] int;
@@ -134,8 +144,9 @@ func main() {
         putInt(a[1])
     }
         """
-        self.assertTrue(TestCodeGen.test(input,"200",inspect.stack()[0].function))
-        
+        self.assertTrue(TestCodeGen.test(
+            input, "200", inspect.stack()[0].function))
+
     def test_085(self):
         input = """
 func createArray() [3] int {
@@ -149,8 +160,9 @@ func main() {
     putInt(a[2]);
 }
         """
-        self.assertTrue(TestCodeGen.test(input,"102030",inspect.stack()[0].function))
-    
+        self.assertTrue(TestCodeGen.test(
+            input, "102030", inspect.stack()[0].function))
+
     def test_090(self):
         input = """
 func main() {
@@ -159,7 +171,8 @@ func main() {
     putInt(a[0]);
 }
         """
-        self.assertTrue(TestCodeGen.test(input,"1",inspect.stack()[0].function))
+        self.assertTrue(TestCodeGen.test(
+            input, "1", inspect.stack()[0].function))
 
     def test_091(self):
         input = """
@@ -169,8 +182,9 @@ func main() {
     putInt(a[0][0][0]);
 }
     """
-        self.assertTrue(TestCodeGen.test(input,"1",inspect.stack()[0].function))
-        
+        self.assertTrue(TestCodeGen.test(
+            input, "1", inspect.stack()[0].function))
+
     def test_096(self):
         input = """
 func main() {
@@ -179,7 +193,8 @@ func main() {
     } 
 }
     """
-        self.assertTrue(TestCodeGen.test(input,"true",inspect.stack()[0].function))
+        self.assertTrue(TestCodeGen.test(
+            input, "true", inspect.stack()[0].function))
 
     def test_097(self):
         input = """
@@ -191,7 +206,8 @@ func main() {
     }
 }
     """
-        self.assertTrue(TestCodeGen.test(input,"true",inspect.stack()[0].function))
+        self.assertTrue(TestCodeGen.test(
+            input, "true", inspect.stack()[0].function))
 
     def test_098(self):
         input = """
@@ -203,7 +219,8 @@ func main() {
     }
 }
     """
-        self.assertTrue(TestCodeGen.test(input,"false",inspect.stack()[0].function))
+        self.assertTrue(TestCodeGen.test(
+            input, "false", inspect.stack()[0].function))
 
 #      def test_113(self):
 #         input = """
@@ -261,10 +278,11 @@ func main() {
     putInt(i)
 }
         """
-        self.assertTrue(TestCodeGen.test(input, "0\n10", inspect.stack()[0].function))
-    
+        self.assertTrue(TestCodeGen.test(
+            input, "0\n10", inspect.stack()[0].function))
+
     def test_137(self):
-      input = """
+        input = """
 const a = 1 + 1
 const c = 5 - a
 func main() {
@@ -274,4 +292,35 @@ func main() {
   putInt(b[0][0]);
 }
       """
-      self.assertTrue(TestCodeGen.test(input, "020", inspect.stack()[0].function))
+        self.assertTrue(TestCodeGen.test(
+            input, "020", inspect.stack()[0].function))
+
+    def test_141(self):
+        input = """
+type Course interface {study();}
+type PPL3 struct {number int;}
+func (p PPL3) study() {putInt(p.number);}
+
+func main(){
+    var a PPL3 = PPL3 {number: 10}
+    putIntLn(a.number)
+    a.study()
+}
+        """
+        self.assertTrue(TestCodeGen.test(
+            input, "10\n10", inspect.stack()[0].function))
+
+    def test_142(self):
+        input = """
+type Course interface {study();}
+type PPL3 struct {number int;}
+func (p PPL3) study() {putInt(p.number);}
+
+func main(){
+    var a Course = nil
+    a := PPL3 {number: 10}
+    a.study()
+}
+        """
+        self.assertTrue(TestCodeGen.test(
+            input, "10", inspect.stack()[0].function))
