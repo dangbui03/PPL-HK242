@@ -6,7 +6,7 @@
 .method public static fvoid()V
 Label0:
 Label2:
-	ldc "VoTien"
+	ldc "dang03"
 	invokestatic io/putStringLn(Ljava/lang/String;)V
 Label3:
 Label1:

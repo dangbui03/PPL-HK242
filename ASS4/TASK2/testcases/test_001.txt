@@ -1,5 +1,5 @@
 
-func fvoid() {putStringLn("VoTien");}
+func fvoid() {putStringLn("dang03");}
 
 var global = fint()
 func main() {

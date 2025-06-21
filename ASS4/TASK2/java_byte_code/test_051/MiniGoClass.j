@@ -24,8 +24,8 @@ Label4:
 Label5:
 	istore_2
 .var 3 is c Ljava/lang/String; from Label2 to Label3
-	ldc "vo"
-	ldc "tien"
+	ldc "da"
+	ldc "ng03"
 	invokevirtual java/lang/String/concat(Ljava/lang/String;)Ljava/lang/String;
 	astore_3
 .var 4 is d Z from Label2 to Label3

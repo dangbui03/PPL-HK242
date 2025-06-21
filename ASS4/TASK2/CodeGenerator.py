@@ -1,3 +1,5 @@
+# 2153289 - Bùi Hồ Hải Đăng
+
 from Utils import *
 # from StaticCheck import *
 # from StaticError import *
@@ -34,7 +36,6 @@ class CodeGenerator(BaseVisitor, Utils):
                    VoidType()), CName("io", True)),
             Symbol("putFloatLn", MType(
                 [FloatType()], VoidType()), CName("io", True)),
-            # TODO implement
             Symbol("putBool", MType([BoolType()],
                                     VoidType()), CName("io", True)),
             Symbol("putBoolLn", MType([BoolType()],
@@ -116,13 +117,13 @@ class CodeGenerator(BaseVisitor, Utils):
         self.emit.printout(self.emit.emitMETHOD("<init>", MType(
             [], VoidType()), False, frame))  # Bắt đầu định nghĩa phương thức <init>
         frame.enterScope(True)
-        self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "this", ClassType(
+        self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "this", Id(
             # Tạo biến "this" trong phương thức <init>
             self.className), frame.getStartLabel(), frame.getEndLabel(), frame))
 
         self.emit.printout(self.emit.emitLABEL(frame.getStartLabel(), frame))
         self.emit.printout(self.emit.emitREADVAR(
-            "this", ClassType(self.className), 0, frame))
+            "this", Id(self.className), 0, frame))
         self.emit.printout(self.emit.emitINVOKESPECIAL(frame))
 
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(), frame))
@@ -154,6 +155,8 @@ class CodeGenerator(BaseVisitor, Utils):
                 item, ConstDecl) else item
             for item in ast.decl if isinstance(item, (VarDecl, ConstDecl))
         ]), env)
+                
+                
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(), frame))
         self.emit.printout(self.emit.emitRETURN(VoidType(), frame))
         self.emit.printout(self.emit.emitENDMETHOD(frame))
@@ -245,7 +248,7 @@ class CodeGenerator(BaseVisitor, Utils):
         #         varInit = IntLiteral(0)
         #     elif type(varType) is FloatType:
         #         varInit = FloatLiteral(0.0)
-        #     # TODO implement
+        # 
         #     elif type(varType) is StringType:
         #         return StringLiteral("\"\"")
         #     elif type(varType) is BoolType:
@@ -282,6 +285,9 @@ class CodeGenerator(BaseVisitor, Utils):
                 # Create the nested initialization value
                 return create_nested_init(varType.dimens, baseInit)
                 # return ArrayType(varType.dimens, varType.eleType)  # Return the type itself for array initialization
+            elif isinstance(varType, (StructType, Id)):
+            # For struct types, return nil literal
+                return NilLiteral()
 
         varInit = ast.varInit  # Giá trị khởi tạo của biến
         varType = ast.varType  # Kiểu của biến
@@ -296,7 +302,7 @@ class CodeGenerator(BaseVisitor, Utils):
             ast.varInit = varInit
 
         env = o.copy()
-        env['frame'] = Frame("<template_VT>", VoidType())
+        env['frame'] = Frame("<template_hd>", VoidType())
         rhsCode, rhsType = self.visit(varInit, env)
         if not varType:
             varType = rhsType
@@ -313,156 +319,110 @@ class CodeGenerator(BaseVisitor, Utils):
             # self.emit.printout(self.emit.emitATTRIBUTE(ast.varName, varType, True, False, None))
             self.emit.printout(self.emit.emitVAR(
                 index, ast.varName, varType, frame.getStartLabel(), frame.getEndLabel(), frame))
-            # TODO implement))
+
             rhsCode, rhsType = self.visit(varInit, o)
             if type(varType) is FloatType and type(rhsType) is IntType:
                 rhsCode = rhsCode + self.emit.emitI2F(frame)
-                # TODO implement
+
             self.emit.printout(rhsCode)
             self.emit.printout(self.emit.emitWRITEVAR(
                 ast.varName, varType, index,  frame))
         return o
 
     def visitStructType(self, ast: StructType, o):
-        # khởi tạo đầu file mô tả tên
-        self.emit.printout(self.emit.emitPROLOG(ast.name, "java.lang.Object"))
-        # VD ở visitProgram: self.emit.printout(self.emit.emitPROLOG(self.className, "java.lang.Object"))
+        self.emit.printout(self.emit.emitPROLOG(ast.name, "java.lang.Object")) # khởi tạo đầu file mô tả tên
 
         # .implements name
-        # VD sau dùng cho đoạn for bên dưới:
-        # INPUT:
-        # type Worker interface {
-        #     study();
-        #     play();
-        # }
-        # type PPL4 struct {number int;}
-        # func (p PPL4) study() { putInt(p.number); }
-        # func (p PPL4) play()  { putInt(p.number + 5); }
-        # CODE OUTPUT:
-        # .source PPL4.java
-        # .class public  PPL4
-        # .super java.lang.Object    ---------------> khúc này trở lên là emitPROLOG
-        # .implements Worker         --------------------> lệnh implement được nằm ở đây nè
-        # .field public number I
-        # .method public <init>(I)V
-        # .......
-        # .method public <init>()V
-        # .......
-        # .method public study()V
-        # .......
-        # .method public play()V
-        # .......
-
-        # ***LƯU Ý***: ..... là còn code ở đó, code VD ở trên nằm trong file PPL4.j (tên struct được khai báo ở trên), tương tự là có file Worker.j
-
-        for item in self.list_type.values():  # Lặp qua các type đc khai báo(interface/struct)
+        for item in self.list_type.values(): # Lặp qua các type đc khai báo(interface/struct)
             # Lệnh if - tìm interface mà struct này đang implement(ast là struct mà mình visit), hàm checkType sẽ check 1 struct implement đc interface
-            if isinstance(item, InterfaceType) and self.checkType(item, ast, [(InterfaceType, StructType)]):
-                # Sinh ra đoạn .implement ___ như ở ví dụ bên trên.
-                self.emit.printout(f".implements {item.name}")
+            if isinstance(item, InterfaceType) and self.checkType(item, ast, [(InterfaceType, StructType)]): 
+                self.emit.printout(f".implements {item.name}") # Sinh ra đoạn .implement ___ như ở ví dụ bên trên.
 
         for item in ast.elements:
-            # **Lưu ý: item có type là Tuple[str,Type] -> nhờ dùng item[0], item[1]
-            # Chỗ này mình tạo code cho attribute cho struct nên mã code VD sẽ là:
-            # .field public name Ljava/lang/String;
-            # .field public age I
-            # với input:
-            #  type Person struct {
-            #     name string;
-            #     age int;
-            # }
-            # từ đó mà điền tham số cho hàm emit cho phù hợp nhé, nhớ đọc hàm này trong Emiter.py
-            # danh sách các thuộc tính cần khởi tạo
-            self.emit.printout(self.emit.emitATTRIBUTE(
-                item[0], item[1], False, False, False))
-
+            self.emit.printout(self.emit.emitATTRIBUTE(item[0], item[1], False, False, False)) # danh sách các thuộc tính cần khởi tạo
+        
         # khởi tạo Method contructor có giá trị parram (khác với constructor rỗng nha)
-        # code VD cho hàm constructor cho class PPL4 ở phía trên:
-            # type PPL4 struct {number int;}
-
-            # .method public <init>(I)V
-            # .var 0 is this LPPL4; from Label0 to Label1  -------------------> param mặc định "this"
-            # Label0:
-            # 	aload_0
-            # 	invokespecial java/lang/Object/<init>()V
-            # .var 1 is number I from Label0 to Label1 --------> param đầu tiên number int;
-            # Label2:    ------------------> Label2 đếm Label3 là khúc Block(..) bên dưới, bên trong là phép gán attribute
-            # 	aload_0
-            # 	iload_1
-            # 	putfield PPL4/number I
-            # Label3:
-            # Label1:
-            # 	return
-            # .limit stack 2
-            # .limit locals 2
-            # .end method
-        self.visit(MethodDecl(None, None, FuncDecl("<init>", [ParamDecl(item[0], item[1]) for item in ast.elements], VoidType(),
-
-                                                   Block([Assign(FieldAccess(Id("this"), item[0]), Id(item[0])) for item in ast.elements]))), o)
-        # Hãy xem bên trong giống như các phép gán this.fieldName = fieldName ứng với mỗi item trong ast.elements => Dùng Assign và FieldAcess
+        self.visit(MethodDecl(None, ast.name, FuncDecl("<init>", [ParamDecl(item[0], None, item[1]) for item in ast.elements], VoidType(),
+                                                   
+                            Block([Assign(FieldAccess(Id("this"), item[0]), Id(item[0])) for item in ast.elements]))), o) 
 
         # khởi tạo Method contructor rỗng
-        # .method public <init>()V
-        # .var 0 is this LPPL4; from Label0 to Label1
-        # Label0:
-        #     aload_0
-        #     invokespecial java/lang/Object/<init>()V
-        # Label2:
-        # Label3:
-        # Label1:
-        #     return
-        # .limit stack 1
-        # .limit locals 1
-        # .end method
-        self.visit(MethodDecl(None, ast.name, FuncDecl(
-            "<init>", [], VoidType(), Block([])), o))
+        self.visit(MethodDecl(None, ast.name, FuncDecl("<init>", [], VoidType(), Block([])), o))
 
         # duyệt qua method
-        for item in ast.methods:
-            self.visit(item, o)
-        # kết thúc khai báo của struct
-        self.emit.printout(self.emit.emitEPILOG())
-
+        for item in ast.methods: self.visit(item, o)
+        self.emit.printout(self.emit.emitEPILOG()) # kết thúc khai báo của struct
+    
     def visitMethodDecl(self, ast: MethodDecl, o):
+        # Store reference to current function being processed
         self.function = ast.fun
         frame = Frame(ast.fun.name, ast.fun.retType)
-        mtype = MType([param.parType for param in ast.fun.params],
-                      ast.fun.retType)  # giống visitFuncDecl thôi
-
+        mtype = MType([x.parType for x in ast.fun.params], ast.fun.retType)
+        
         env = o.copy()
         env['frame'] = frame
-        self.emit.printout(self.emit.emitMETHOD(
-            ast.fun.name, mtype, False, frame))
-        # vào trong thân method giống visitFuncDecl thôi
+        
+        # Create method with appropriate access modifiers
+        self.emit.printout(self.emit.emitMETHOD(ast.fun.name, mtype, False, frame))
         frame.enterScope(True)
-        # biến this
-        self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "this", Id(ast.receiver), frame.getStartLabel(
-            # emitVAR cho biến this với inType là Id(...)
-        ), frame.getEndLabel(), frame))
-
+        
+        # Add "this" reference to the frame
+        self.emit.printout(self.emit.emitVAR(
+            frame.getNewIndex(), "this", Id(ast.receiver), 
+            frame.getStartLabel(), frame.getEndLabel(), frame)
+        )
+        
+        # Start the method body
         self.emit.printout(self.emit.emitLABEL(frame.getStartLabel(), frame))
-        # contructor thì hơi đặt biệt cần gọi đến class cha của nó .super java.lang.Object
+        
+        # For constructors, call superclass constructor
         if ast.fun.name == "<init>":
-            self.emit.printout(self.emit.emitREADVAR(
-                "this", Id(ast.receiver), 0, frame))
+            self.emit.printout(self.emit.emitREADVAR("this", Id(ast.receiver), 0, frame))
             self.emit.printout(self.emit.emitINVOKESPECIAL(frame))
-
-        env['env'] = [[]] + env['env']
-        # cập nhật param và duyệt block
-        for idx, param in enumerate(ast.fun.params):
-            index = frame.getNewIndex()
+        
+        # Create a new scope for method body to contain parameters
+        # Find which global variables are accessible to this method
+        if self.astTree and hasattr(self.astTree, 'decl'):
+            # Find global variables declared before this struct
+            struct_position = -1
+            for i, item in enumerate(self.astTree.decl):
+                if isinstance(item, MethodDecl) and item.struct_name == self.struct.name:
+                    struct_position = i
+                    break
+            
+            # Get global variables declared before this struct
+            global_vars = []
+            if struct_position >= 0:
+                for i in range(struct_position):
+                    if isinstance(self.astTree.decl[i], (VarDecl, ConstDecl)):
+                        # Add to accessible globals
+                        global_vars.append(o['env'][0][i])
+            
+            # Create new environment with only accessible globals
+            env['env'] = [[]] + [global_vars] + env['env'][1:]
+        else:
+            # If we can't determine position, just use a new empty scope
+            env['env'] = [[]] + env['env']
+        
+        # Add parameters to method scope
+        for param in ast.fun.params:
+            idx = frame.getNewIndex()
             self.emit.printout(self.emit.emitVAR(
-                index, param.name, param.parType, frame.getStartLabel(), frame.getEndLabel(), frame))
-            env['env'][0] += [(param.name, param.parType, index)]
-
-        self.visit(ast.fun.body, env)  # duyệt block thân hàm
-
+                idx, param.parName, param.parType, 
+                frame.getStartLabel(), frame.getEndLabel(), frame
+            ))
+            env['env'][0].append(Symbol(param.parName, param.parType, Index(idx)))
+        
+        # Process method body
+        self.visit(ast.fun.body, env)
+        
+        # End the method
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(), frame))
-        if type(ast.fun.retType) is VoidType:
-            # trường hợp void phải có return tránh trường hợp ko có return trong block
+        if isinstance(ast.fun.retType, VoidType):
             self.emit.printout(self.emit.emitRETURN(VoidType(), frame))
         self.emit.printout(self.emit.emitENDMETHOD(frame))
         frame.exitScope()
+        
         return o
 
     def visitInterfaceType(self, ast: InterfaceType, o):
@@ -475,32 +435,50 @@ class CodeGenerator(BaseVisitor, Utils):
         # .method public abstract study()V
         # .end method
 
-        # Giống struct type thôi nhưng đơn giản hơn
-        self.emit.printout(self.emit.emitPROLOG(
-            ast.name, "java.lang.Object", True))
+        #Giống struct type thôi nhưng đơn giản hơn
+        self.emit.printout(self.emit.emitPROLOG(ast.name, "java.lang.Object", True))
         for item in ast.methods:
             # Sinh mã cho các prototype, nhớ này là abstract method
-            mtype = MType([param for param in item.params], item.retType)
-            self.emit.printout(self.emit.emitMETHOD(
-                item.name, mtype, True, None))
-            # End method
-            self.emit.printout(self.emit.emitENDMETHOD(None))
+            mtype = MType([x for x in item.params], item.retType)
+            self.emit.printout(f".method public abstract {item.name}{self.emit.emitMETHODTYPE(mtype)}")
+            self.emit.printout(".end method")
+            
         self.emit.printout(self.emit.emitEPILOG())
 
     def visitFieldAccess(self, ast: FieldAccess, o: dict) -> tuple[str, Type]:
-        # Mình cần biết được code của receiver trả về, và ret type của receiver
+        # Get the code and type of the receiver
         code, typ = self.visit(ast.receiver, o)
-        # Sau đó dùng typ để lấy Type tương ứng trong self.list_type
+        
+        # If typ is an Id, look up the actual type in self.list_type
         if isinstance(typ, Id):
-            typ = self.list_type.get(typ.name)
-        # Sau đó lấy field tương ứng ra (nhớ xài ast.field)
-        fieldType = next(
-            (item[1] for item in typ.elements if item[0] == ast.field), None)
-        # -> tuple[str, Type], trong đó Type là kiểu trả về của field
+            structType = self.lookup(typ.name, self.list_type.values(), lambda x: x.name)
+            if structType:
+                typ = structType
+        
+        # Find the field type in the struct
+        fieldType = None
+        if isinstance(typ, StructType):
+            for element in typ.elements:
+                if element[0] == ast.field:
+                    fieldType = element[1]
+                    break
+        
+        # For interface type, we might need to look for method signatures
+        elif isinstance(typ, InterfaceType):
+            for method in typ.methods:
+                if method.name == ast.field:
+                    fieldType = method.retType
+                    break
+        
+        # Handle case when o['isLeft'] is True (assignment to a field)
+        if o.get('isLeft'):
+            return code, fieldType
+        
+        # Generate code to get the field value
         return code + self.emit.emitGETFIELD(f"{typ.name}/{ast.field}", fieldType, o['frame']), fieldType
 
     def visitMethCall(self, ast: MethCall, o: dict) -> tuple[str, Type]:
-
+    
         # 1. Tạo mã cho receiver (đối tượng mà phương thức được gọi).
         code, typ = self.visit(ast.receiver, o)
 
@@ -513,40 +491,37 @@ class CodeGenerator(BaseVisitor, Utils):
         is_stmt = o.pop("stmt", False)
 
         # 4. Tạo mã cho các đối số của phương thức.
+        param_types = []
         for arg in ast.args:
-            arg_code, _ = self.visit(arg, o)
+            arg_code, arg_type = self.visit(arg, o)
             code += arg_code
+            param_types.append(arg_type)
 
         returnType = None
         # 5. Xử lý trường hợp receiver là một StructType (gọi phương thức thông thường).
         if isinstance(typ, StructType):
             # Tìm kiếm phương thức trong danh sách các phương thức của struct dựa trên tên.
-            method = next(
-                (m for m in typ.methods if m.fun.name == ast.method), None)
-
+            method = next((m for m in typ.methods if m.fun.name == ast.method), None)
+            
             # Tạo MType (Method Type) cho lời gọi phương thức.
             # Lấy kiểu của các tham số và kiểu trả về từ FuncDecl của phương thức.
-            mtype = MType(
-                [param.parType for param in method.fun.params], method.fun.retType)
+            mtype = MType([p.parType for p in method.fun.params], method.fun.retType)
             returnType = method.fun.retType
             # Tạo mã bytecode để gọi phương thức ảo (invokevirtual).
             # invokevirtual được sử dụng cho các phương thức instance.
-            code += self.emit.emitINVOKEVIRTUAL(
-                f"{typ.name}/{ast.method}", mtype, o['frame'])
-
+            code += self.emit.emitINVOKEVIRTUAL(f"{typ.name}/{ast.method}", mtype, o['frame'])
+            
         # 6. Xử lý trường hợp receiver là một InterfaceType (gọi phương thức interface).
         elif isinstance(typ, InterfaceType):
             # Tìm kiếm phương thức trong danh sách các phương thức của interface dựa trên tên.
-            method = next(
-                (m for m in typ.methods if m.name == ast.method), None)
-
+            method = next((m for m in typ.methods if m.name == ast.method), None)
+            
             # Tạo MType cho lời gọi phương thức interface.
-            mtype = MType([param for param in method.params], method.retType)
+            mtype = MType([p for p in method.params], method.retType)
             returnType = method.retType
             # Tạo mã bytecode để gọi phương thức interface (invokeinterface).
-            code += self.emit.emitINVOKEINTERFACE(
-                f"{typ.name}/{ast.method}", mtype, o['frame'])
-
+            code += self.emit.emitINVOKEINTERFACE(f"{typ.name}/{ast.method}", mtype, o['frame'])
+        
         # 7. Nếu lời gọi phương thức là một statement, in mã ra mà không trả về giá trị.
         if is_stmt:
             self.emit.printout(code)
@@ -556,28 +531,43 @@ class CodeGenerator(BaseVisitor, Utils):
         return code, returnType
 
     def visitStructLiteral(self, ast: StructLiteral, o: dict) -> tuple[str, Type]:
-        # Gợi ý:
-        # 1. Sử dụng self.emit.emitNEW để tạo một instance mới của struct (ast.name).
-        # 2. Sử dụng self.emit.emitDUP để nhân đôi tham chiếu đến instance vừa tạo (cho việc gọi constructor).
-        code = self.emit.emitNEW(ast.name, o['frame'])
-        code += self.emit.emitDUP(o['frame'])
-        list_type = []
-        for item in ast.elements:
-            # Xử lý từng thành phần (field và giá trị) của struct literal.
-            # Gợi ý:
-            # 1. Gọi self.visit(item[1], o) để lấy mã và kiểu của giá trị khởi tạo (item[1]).
-            # 2. Thêm mã này vào 'code'.
-            # 3. Thêm kiểu của giá trị khởi tạo vào 'list_type'.
-            c, t = self.visit(item[1], o)
-            code += c
-            list_type += [t]
-
-        # Gọi constructor của struct.
-        # Gợi ý:
-        # 1. Tạo MType cho constructor dựa trên 'list_type' (kiểu của các tham số).
-        # 2. Sử dụng self.emit.emitINVOKESPECIAL để gọi constructor của struct (ast.name/<init>).
-        code += self.emit.emitINVOKESPECIAL(o['frame'], ast.name + "/<init>", MType(
-            list_type, VoidType()) if len(ast.elements) else MType([], VoidType()))
+        frame = o.get('frame')
+        if frame is None:
+            frame = Frame("<static>", VoidType())
+        
+        # Create a new instance of the struct
+        code = self.emit.emitNEW(ast.name, frame)
+        code += self.emit.emitDUP(frame)
+        
+        # Create named parameters if they exist
+        param_types = []
+        param_codes = ""
+        
+        # Find the struct type to get element types
+        struct_type = self.lookup(ast.name, self.list_type.values(), lambda x: x.name)
+        if struct_type:
+            # Handle named initialization if elements have names
+            if all(isinstance(elem, tuple) and len(elem) == 2 for elem in ast.elements):
+                # Map by name
+                name_to_elem = {name: value for name, value in ast.elements}
+                for elem_name, elem_type in struct_type.elements:
+                    if elem_name in name_to_elem:
+                        code_part, type_part = self.visit(name_to_elem[elem_name], o)
+                        param_codes += code_part
+                        param_types.append(type_part)
+            # Handle positional initialization
+            else:
+                for elem in ast.elements:
+                    code_part, type_part = self.visit(elem, o)
+                    param_codes += code_part
+                    param_types.append(type_part)
+        
+        code += param_codes
+        
+        # Call the constructor
+        mtype = MType(param_types, VoidType()) if param_types else MType([], VoidType())
+        code += self.emit.emitINVOKESPECIAL(frame, f"{ast.name}/<init>", mtype)
+        
         return code, Id(ast.name)
 
     def visitNilLiteral(self, ast: NilLiteral, o: dict) -> tuple[str, Type]:
@@ -626,62 +616,97 @@ class CodeGenerator(BaseVisitor, Utils):
         env['env'] = [[]] + env['env']
         env['frame'].enterScope(False)
         self.emit.printout(self.emit.emitLABEL(
-            env['frame'].getStartLabel(), env['frame']))  # TODO implement))
+            env['frame'].getStartLabel(), env['frame']))  
 
         for item in ast.member:
-            if type(item) is FuncCall:
+            if isinstance(item, FuncCall) or isinstance(item, MethCall):
                 env["stmt"] = True
             env = self.visit(item, env)
 
         self.emit.printout(self.emit.emitLABEL(
-            env['frame'].getEndLabel(), env['frame']))  # TODO implement))
+            env['frame'].getEndLabel(), env['frame'])) 
         env['frame'].exitScope()
         return o
 
     def visitId(self, ast: Id, o: dict) -> dict:
         sym = next(filter(lambda x: x.name == ast.name, [
             j for i in o['env'] for j in i]), None)
+        
+        if sym is None and self.struct:
+            if o.get('isLeft'):
+                return self.emit.emitWRITEVAR("this", Id(self.struct.name), 0, o['frame']), Id(self.struct.name)
+            return self.emit.emitREADVAR("this", Id(self.struct.name), 0, o['frame']), Id(self.struct.name)
         if o.get('isLeft'):
             if type(sym.value) is Index:
-                # TODO implement), sym.mtype
+
                 return self.emit.emitWRITEVAR(ast.name, sym.mtype, sym.value.value, o['frame']), sym.mtype
             else:
                 # Use dot notation for static field access
                 return self.emit.emitPUTSTATIC(f"{sym.value.value}/{ast.name}", sym.mtype, o['frame']), sym.mtype
         if type(sym.value) is Index:
-            # TODO implement),sym.mtype
+
             return self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, o['frame']), sym.mtype
         else:
             # Use dot notation for static field access
             return self.emit.emitGETSTATIC(f"{sym.value.value}/{ast.name}", sym.mtype, o['frame']), sym.mtype
 
     def visitAssign(self, ast: Assign, o: dict) -> dict:
-        # TODO implement),None):
+
         if type(ast.lhs) is Id and not next(filter(lambda x: x.name == ast.lhs.name, [j for i in o['env'] for j in i]), None):
-            # return o  # TODO implement
-            rhsCode, rhsType = self.visit(ast.rhs, o)
-            frame = o['frame']
-            index = frame.getNewIndex()
-            o['env'][0].append(Symbol(ast.lhs.name, rhsType, Index(index)))
-            self.emit.printout(self.emit.emitVAR(
-                index, ast.lhs.name, rhsType, frame.getStartLabel(), frame.getEndLabel(), frame))
-            self.emit.printout(rhsCode)
-            self.emit.printout(self.emit.emitWRITEVAR(
-                ast.lhs.name, rhsType, index, frame))
-            return o
+            # return o 
+            # rhsCode, rhsType = self.visit(ast.rhs, o)
+            # frame = o['frame']
+            # index = frame.getNewIndex()
+            # o['env'][0].append(Symbol(ast.lhs.name, rhsType, Index(index)))
+            # self.emit.printout(self.emit.emitVAR(
+            #     index, ast.lhs.name, rhsType, frame.getStartLabel(), frame.getEndLabel(), frame))
+            # self.emit.printout(rhsCode)
+            # self.emit.printout(self.emit.emitWRITEVAR(
+            #     ast.lhs.name, rhsType, index, frame))
+            # return o
+            return self.visit(VarDecl(ast.lhs.name, None, ast.rhs), o)
 
         rhsCode, rhsType = self.visit(ast.rhs, o)
         o['isLeft'] = True
         lhsCode, lhsType = self.visit(ast.lhs, o)
         o['isLeft'] = False
+        
+        if type(ast.lhs) is FieldAccess:
+            # For field access, we need: get the receiver, then set the field
+            o['isLeft'] = False  # We're just accessing the object, not setting it directly
+            receiverCode, receiverType = self.visit(ast.lhs.receiver, o)
+            
+            # Resolve Id type
+            if isinstance(receiverType, Id):
+                receiverType = self.lookup(receiverType.name, self.list_type.values(), lambda x: x.name)
+            
+            # Find field type
+            fieldType = None
+            if isinstance(receiverType, StructType) and hasattr(receiverType, 'elements'):
+                for elem_name, elem_type in receiverType.elements:
+                    if elem_name == ast.lhs.field:
+                        fieldType = elem_type
+                        break
+            
+            # Default to the right-hand side type if field type not found
+            if fieldType is None:
+                fieldType = rhsType
+            
+            # Push receiver reference and RHS value onto the stack
+            self.emit.printout(receiverCode)
+            self.emit.printout(rhsCode)
+            
+            # Convert types if needed
+            if isinstance(fieldType, FloatType) and isinstance(rhsType, IntType):
+                self.emit.printout(self.emit.emitI2F(o['frame']))
+            
+            # Store value in field
+            self.emit.printout(self.emit.emitPUTFIELD(
+                f"{receiverType.name}/{ast.lhs.field}", fieldType, o['frame']))
 
         if type(lhsType) is FloatType and type(rhsType) is IntType:
             rhsCode = rhsCode + self.emit.emitI2F(o['frame'])
-            # TODO implement
-        # self.emit.printout(rhsCode)
-        # self.emit.printout(lhsCode)
-
-        # Increase stack size by 1, as we'll use the stack to store the value of this variable
+            
         o['frame'].push()
         if type(ast.lhs) is ArrayCell:
             if 'frame' in o:
@@ -700,7 +725,6 @@ class CodeGenerator(BaseVisitor, Utils):
     def visitReturn(self, ast: Return, o: dict) -> dict:
         if ast.expr:
             self.emit.printout(self.visit(ast.expr, o)[0])
-        # TODO implement, o['frame']))
         self.emit.printout(self.emit.emitRETURN(
             self.function.retType, o['frame']))
         return o
@@ -720,33 +744,32 @@ class CodeGenerator(BaseVisitor, Utils):
             if type(typeReturn) is FloatType:
                 if type(typeLeft) is IntType:
                     codeLeft += self.emit.emitI2F(frame)
-                # TODO implement
+   
                 if type(typeRight) is IntType:
                     codeRight += self.emit.emitI2F(frame)
-            # TODO implement
+
             return codeLeft + codeRight + self.emit.emitADDOP(op, typeReturn, frame), typeReturn
 
         if op in ['*', '/']:
             typeReturn = IntType() if type(typeLeft) is IntType and type(
-                typeRight) is IntType else FloatType()  # TODO implement
+                typeRight) is IntType else FloatType() 
             if type(typeReturn) is FloatType:
                 if type(typeLeft) is IntType:
                     codeLeft += self.emit.emitI2F(frame)
-                # TODO implement
+
                 if type(typeRight) is IntType:
                     codeRight += self.emit.emitI2F(frame)
-            # TODO implement
+
             return codeLeft + codeRight + self.emit.emitMULOP(op, typeReturn, frame), typeReturn
 
         if op in ['%']:
-            # TODO implement
+           
             return codeLeft + codeRight + self.emit.emitMOD(frame), IntType()
 
         if op in ['==', '!=', '<', '>', '>=', '<='] and type(typeLeft) in [FloatType, IntType]:
-            # TODO implement
+
             return codeLeft + codeRight + self.emit.emitREOP(op, typeLeft, frame), BoolType()
         if op in ['||']:
-            # TODO implement
             return codeLeft + codeRight + self.emit.emitOROP(frame), BoolType()
         if op in ['&&']:
             return codeLeft + codeRight + self.emit.emitANDOP(frame), BoolType()
@@ -760,7 +783,6 @@ class CodeGenerator(BaseVisitor, Utils):
         if op in ['==', '!=', '<', '>', '>=', '<='] and type(typeLeft) in [StringType]:
             code = codeLeft + codeRight + self.emit.emitINVOKEVIRTUAL(
                 "java/lang/String/compareTo", MType([StringType()], IntType()), frame)
-            # TODO implement + self.emit.emitREOP(op, IntType(), frame)
             code = code + \
                 self.emit.emitPUSHICONST(
                     0, frame) + self.emit.emitREOP(op, IntType(), frame)
@@ -771,7 +793,6 @@ class CodeGenerator(BaseVisitor, Utils):
             code, type_return = self.visit(ast.body, o)
             return code + self.emit.emitNOT(BoolType(), o['frame']), BoolType()
 
-        # TODO implement
         code, type_return = self.visit(ast.body, o)
         if ast.op == '-':
             return code + self.emit.emitNEGOP(type_return, o['frame']), type_return
@@ -781,15 +802,12 @@ class CodeGenerator(BaseVisitor, Utils):
         return self.emit.emitPUSHICONST(ast.value, o['frame']), IntType()
 
     def visitFloatLiteral(self, ast: FloatLiteral, o: dict) -> tuple[str, Type]:
-        # TODO implement
         return self.emit.emitPUSHFCONST(ast.value, o['frame']), FloatType()
 
     def visitBooleanLiteral(self, ast: BooleanLiteral, o: dict) -> tuple[str, Type]:
-        # TODO implement
         return self.emit.emitPUSHICONST(ast.value, o['frame']), BoolType()
 
     def visitStringLiteral(self, ast: StringLiteral, o: dict) -> tuple[str, Type]:
-        # TODO implement
         return self.emit.emitPUSHCONST(ast.value, StringType(), o['frame']), StringType()
 
     # TODO END basic expression ------------------------------
@@ -799,7 +817,7 @@ class CodeGenerator(BaseVisitor, Utils):
         newO = o.copy()
         newO['isLeft'] = False
         codeGen, arrType = self.visit(ast.arr, newO)
-        # TODO visit thằng expr của array cell này, nên nhớ arraycell gồm phần expr phía trước và index phía sau.
+
         for idx, item in enumerate(ast.idx):
             codeGen += self.visit(item, newO)[0]
             if idx != len(ast.idx) - 1:
@@ -809,21 +827,20 @@ class CodeGenerator(BaseVisitor, Utils):
         if len(arrType.dimens) == len(ast.idx):
             retType = arrType.eleType
             if not o.get('isLeft'):
-                # TODO: thêm mã cho trường hợp này => dùng emitALOAD để lấy giá trị của phần tử trong mảng ra
+                
                 codeGen += self.emit.emitALOAD(retType, o['frame'])
             else:
-                # TODO: Nếu nó arraycell nằm bên vế trái thì mình gán vào biến này để biết đang duyệt vào arraycell nào, dùng sau này.
+                
                 self.arrayCell = retType
         else:
             retType = ArrayType(arrType.dimens[len(ast.idx):], arrType.eleType)
             if not o.get('isLeft'):
-                # TODO: thêm mã cho trường hợp này => dùng emitALOAD để lấy giá trị của phần tử trong mảng ra
+                
                 codeGen += self.emit.emitALOAD(retType, o['frame'])
             else:
-                # TODO: Nếu nó arraycell nằm bên vế trái thì mình gán vào biến này để biết đang duyệt vào arraycell nào, dùng sau này.
+                
                 self.arrayCell = retType
         return codeGen, retType
-        # TODO trả vè mã nãy giờ tạo để thằng nào gọi thằng đó in và type -> tuple[str, Type]:
 
     def visitArrayLiteral(self, ast: ArrayLiteral, o: dict) -> tuple[str, Type]:
 
